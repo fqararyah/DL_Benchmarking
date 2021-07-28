@@ -19,8 +19,8 @@ class BenchmarkModel:
 
     def set_model(self):
         if self.model_name != '':
-            self.pretrained_model = getattr(tf.keras.applications(input_shape=(32, 32, 3), weights=None, classes=10), \
-            self.model_name)
+            self.pretrained_model = getattr(tf.keras.applications, \
+            self.model_name)(input_shape=(32, 32, 3), weights=None, classes=10)
 
     def get_metrics(self):
         (train_images, train_labels), (test_images,
