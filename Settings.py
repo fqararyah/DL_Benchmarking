@@ -11,7 +11,7 @@ class Settings:
                 elif splits[0] == 'batch_sizes_file':
                     self.batch_sizes_file = splits[1]
                 elif splits[0] == 'delimiter':
-                    self.delimiter = splits[1]
+                    self.delimiter = line[line.index(':') + 1:]
                 elif splits[0] == 'end_of_file':
                     self.end_of_file = splits[1]
                 elif splits[0] == 'global_setting_keyword':
