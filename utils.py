@@ -25,13 +25,13 @@ def raed_benchmarks():
             if ':' in batch_sizes:
                 range_beginning = int(batch_sizes.split(':')[0])
                 range_end = int(batch_sizes.split(':')[1])
-                while range_beginning < range_end:
+                while range_beginning <= range_end:
                     models_batch_sizes_dict[model_name].append(range_beginning)
                     range_beginning *= 2
             else:
                 for split in batch_sizes.split(','):
                     models_batch_sizes_dict[model_name].append(int(split))
-            
+         
     for model in benchmark_models:
         if model.model_name in models_batch_sizes_dict:
             model.batch_sizes = models_batch_sizes_dict[model.model_name]

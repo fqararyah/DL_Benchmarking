@@ -3,3 +3,4 @@ batch_sizes_file: batch_sizes.txt
 delimiter: ::
 end_of_file: EOF
 global_setting_keyword: global
+metrics_file: metrics

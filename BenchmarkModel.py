@@ -1,6 +1,9 @@
 import os
+import datetime
+from tensorflow.python.keras import utils
 import tempfile
 
+import utils as utls
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras.backend as K
@@ -30,26 +33,29 @@ class BenchmarkModel:
                         loss=tf.keras.losses.SparseCategoricalCrossentropy(
                             from_logits=True),
                         metrics=['accuracy'])
-
-        #Throughput
-        t0 = time.time()
+        
         test_images = test_images / 255.0
-        #test_loss, test_acc = pretrained_model.evaluate(test_images,  test_labels)#, verbose=2)
-        tmp = np.argmax(self.pretrained_model.predict(x = test_images, batch_size = 1, verbose = 0))
-        print("Throughput is:", 10000 / (time.time() - t0), "images per second.")
-        #end throughput
+        with open(utls.settings + datetime.datetime.now(), 'w') as f:
+            for batch_size in self.batch_sizes:
+                f.write('----------------\nbatch size: ' + batch_size+ '----------------\n')
+                #Throughput
+                t0 = time.time()
+                #test_loss, test_acc = pretrained_model.evaluate(test_images,  test_labels)#, verbose=2)
+                tmp = np.argmax(self.pretrained_model.predict(x = test_images, batch_size = batch_size, verbose = 0))
+                f.write("Throughput is:", 10000 / (time.time() - t0), "images per second.\n")
+                #end throughput
 
-        #latency
-        avg_time = 0.0
-        counter = 0
-        while counter < 100:
-            image = test_images[counter]
-            t0 = time.time()
-            image = np.expand_dims(image, axis=0).astype(np.float32)
-            tmp = np.argmax(self.pretrained_model.predict(x = image, batch_size = 1, verbose = 0))
-            avg_time += time.time() - t0
-            counter += 1
+                #latency
+                avg_time = 0.0
+                counter = 0
+                while counter < 100:
+                    image = test_images[counter]
+                    t0 = time.time()
+                    image = np.expand_dims(image, axis=0).astype(np.float32)
+                    tmp = np.argmax(self.pretrained_model.predict(x = image, batch_size = batch_size, verbose = 0))
+                    avg_time += time.time() - t0
+                    counter += 1
 
-        avg_time /= counter
-        print("Latency is:", avg_time, " seconds.")
-        #end latency
+                avg_time /= counter
+                f.write("Latency is:", avg_time, " seconds.\n")
+                #end latency
