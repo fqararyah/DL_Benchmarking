@@ -8,7 +8,7 @@ class Settings:
                 splits = line.split(':')
                 if splits[0] == 'networks_file':
                     self.networks_file = splits[1]
-                elif splits[0] == 'settings_file':
+                elif splits[0] == 'batch_sizes_file':
                     self.batch_sizes_file = splits[1]
                 elif splits[0] == 'delimiter':
                     self.delimiter = splits[1]
