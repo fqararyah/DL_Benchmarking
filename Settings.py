@@ -2,7 +2,7 @@
 
 class Settings:
     def __init__(self):
-        with open('settings', 'r') as f:
+        with open('settings.txt', 'r') as f:
             for line in f:
                 line.replace(' ', '')
                 splits = line.split(':')
