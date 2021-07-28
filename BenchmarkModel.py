@@ -37,7 +37,7 @@ class BenchmarkModel:
         test_images = test_images / 255.0
         with open(Settings.Settings().metrics_file + str(datetime.datetime.now()), 'w') as f:
             for batch_size in self.batch_sizes:
-                f.write('----------------\nbatch size: ' + batch_size+ '----------------\n')
+                f.write('----------------\nbatch size: ' + str(batch_size) + '----------------\n')
                 #Throughput
                 t0 = time.time()
                 #test_loss, test_acc = pretrained_model.evaluate(test_images,  test_labels)#, verbose=2)
