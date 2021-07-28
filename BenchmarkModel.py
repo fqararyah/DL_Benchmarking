@@ -35,14 +35,15 @@ class BenchmarkModel:
                         metrics=['accuracy'])
         
         test_images = test_images / 255.0
+        test_images = test_images[0:100]
         with open(Settings.Settings().metrics_file + str(datetime.datetime.now()), 'w') as f:
             for batch_size in self.batch_sizes:
-                f.write('----------------\nbatch size: ' + str(batch_size) + '----------------\n')
+                f.write('\n----------------\nbatch size: ' + str(batch_size) + '\n----------------\n')
                 #Throughput
                 t0 = time.time()
                 #test_loss, test_acc = pretrained_model.evaluate(test_images,  test_labels)#, verbose=2)
                 tmp = np.argmax(self.pretrained_model.predict(x = test_images, batch_size = batch_size, verbose = 0))
-                f.write("Throughput is:", 10000 / (time.time() - t0), "images per second.\n")
+                f.write("Throughput is: " + str(len(test_images) / (time.time() - t0)) + " images per second.\n")
                 #end throughput
 
                 #latency
@@ -57,5 +58,5 @@ class BenchmarkModel:
                     counter += 1
 
                 avg_time /= counter
-                f.write("Latency is:", avg_time, " seconds.\n")
+                f.write("Latency is: " + avg_time + " seconds.\n")
                 #end latency
