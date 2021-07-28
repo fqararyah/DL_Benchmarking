@@ -50,7 +50,7 @@ class BenchmarkModel:
                 avg_time = 0.0
                 counter = 0
                 while counter * batch_size < max(self.batch_sizes) * 10:
-                    image = test_images[counter * batch_size: (counter + 1) * batch_size]
+                    image = test_images[counter * batch_size: (counter + 1) * batch_size + 1]
                     t0 = time.time()
                     tmp = np.argmax(self.pretrained_model.predict(x = image, batch_size = batch_size, verbose = 0))
                     avg_time += time.time() - t0
