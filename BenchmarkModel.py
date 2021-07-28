@@ -36,7 +36,7 @@ class BenchmarkModel:
         
         test_images = test_images / 255.0
         test_images = test_images[0:max(self.batch_sizes * 10)]
-        with open(Settings.Settings().metrics_file + str(datetime.datetime.now()), 'w') as f:
+        with open(Settings.Settings().metrics_file + self.model_name + str(datetime.datetime.now()).split('.')[0], 'w') as f:
             for batch_size in self.batch_sizes:
                 f.write('\n----------------\nbatch size: ' + str(batch_size) + '\n----------------\n')
                 #Throughput
@@ -49,8 +49,8 @@ class BenchmarkModel:
                 #latency
                 avg_time = 0.0
                 counter = 0
-                while counter < max(self.batch_sizes * 10):
-                    image = test_images[counter]
+                while counter * batch_size < max(self.batch_sizes) * 10:
+                    image = test_images[counter * batch_size: counter * (batch_size + 1)]
                     t0 = time.time()
                     image = np.expand_dims(image, axis=0).astype(np.float32)
                     tmp = np.argmax(self.pretrained_model.predict(x = image, batch_size = batch_size, verbose = 0))
