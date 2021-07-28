@@ -58,5 +58,5 @@ class BenchmarkModel:
                     counter += 1
 
                 avg_time /= counter
-                f.write("Latency is: " + avg_time + " seconds.\n")
+                f.write("Latency is: " + str(avg_time) + " seconds.\n")
                 #end latency
