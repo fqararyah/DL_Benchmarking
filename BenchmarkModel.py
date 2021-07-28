@@ -35,7 +35,7 @@ class BenchmarkModel:
                         metrics=['accuracy'])
         
         test_images = test_images / 255.0
-        test_images = test_images[0:max(self.batch_sizes * 10)]
+        test_images = test_images[0:max(self.batch_sizes) * 10]
         with open(Settings.Settings().metrics_file + '_' +self.model_name + '_' +str(datetime.datetime.now()).split('.')[0], 'w') as f:
             for batch_size in self.batch_sizes:
                 f.write('\n----------------\nbatch size: ' + str(batch_size) + '\n----------------\n')
