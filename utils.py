@@ -11,14 +11,14 @@ def raed_benchmarks():
             if line == settings.end_of_file:
                 break
 
-            benchmark_models.append(BenchmarkModel(model_name= line.replace(' ', '')))
+            benchmark_models.append(BenchmarkModel(model_name= line.replace(' ', '').replace('\n', '')))
 
     models_batch_sizes_dict = {}
     with open(settings.batch_sizes_file, 'r') as f:
         for line in f:
             if line == settings.end_of_file:
                 break
-            splits = line.replace(' ', '').split(settings.delimiter)
+            splits = line.replace(' ', '').replace('\n', '').split(settings.delimiter)
             model_name = splits[0]
             models_batch_sizes_dict[model_name] = []
             batch_sizes = splits[1].replace('[', '').replace(']', '')

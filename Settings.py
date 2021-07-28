@@ -4,7 +4,7 @@ class Settings:
     def __init__(self):
         with open('settings.txt', 'r') as f:
             for line in f:
-                line.replace(' ', '')
+                line.replace(' ', '').replace('\n', '')
                 splits = line.split(':')
                 if splits[0] == 'networks_file':
                     self.networks_file = splits[1]
