@@ -35,7 +35,7 @@ class BenchmarkModel:
                         metrics=['accuracy'])
         
         test_images = test_images / 255.0
-        test_images = test_images[0:100]
+        test_images = test_images[0:max(self.batch_sizes * 10)]
         with open(Settings.Settings().metrics_file + str(datetime.datetime.now()), 'w') as f:
             for batch_size in self.batch_sizes:
                 f.write('\n----------------\nbatch size: ' + str(batch_size) + '\n----------------\n')
@@ -49,7 +49,7 @@ class BenchmarkModel:
                 #latency
                 avg_time = 0.0
                 counter = 0
-                while counter < 100:
+                while counter < max(self.batch_sizes * 10):
                     image = test_images[counter]
                     t0 = time.time()
                     image = np.expand_dims(image, axis=0).astype(np.float32)
