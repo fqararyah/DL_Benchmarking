@@ -1,9 +1,9 @@
 import os
 import datetime
+import Settings
 from tensorflow.python.keras import utils
 import tempfile
 
-import utils as utls
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras.backend as K
@@ -35,7 +35,7 @@ class BenchmarkModel:
                         metrics=['accuracy'])
         
         test_images = test_images / 255.0
-        with open(utls.settings + datetime.datetime.now(), 'w') as f:
+        with open(Settings.Settings().metrics_file + datetime.datetime.now(), 'w') as f:
             for batch_size in self.batch_sizes:
                 f.write('----------------\nbatch size: ' + batch_size+ '----------------\n')
                 #Throughput
