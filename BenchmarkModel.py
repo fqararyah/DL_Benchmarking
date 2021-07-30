@@ -62,6 +62,6 @@ class BenchmarkModel:
 
                 avg_time /= counter
                 avg_time_with_preprocessing /= counter
-                f.write("Latency (with processing time) is: " + str(avg_time) + " seconds.\n")
-                f.write("Latency (without processing time) is: " + str(avg_time_with_preprocessing) + " seconds.\n")
+                f.write("Latency (without processing time) is: " + str(avg_time) + " seconds.\n")
+                f.write("Latency (with processing time) is: " + str(avg_time_with_preprocessing) + " seconds.\n")
                 #end latency
