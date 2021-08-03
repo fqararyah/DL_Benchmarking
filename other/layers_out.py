@@ -36,6 +36,6 @@ if np.sum(predictions - intermediate_outputs[-1]) != 0:
     print("Error")
 else:
     np.set_printoptions(threshold=sys.maxsize)
-    with open('/Users/qarayah/WD/python/other/out' + pretrained_model.name + '_' +str(datetime.datetime.now()).split('.')[0], 'w') as f:
+    with open('/Users/qarayah/WD/python/benchmarking/other/out/' + pretrained_model.name + '_' +str(datetime.datetime.now()).split('.')[0], 'w') as f:
         for layer_output in intermediate_outputs:
             f.write(str(layer_output) + '\n')
