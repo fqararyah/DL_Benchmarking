@@ -2,7 +2,7 @@ from BenchmarkModel import BenchmarkModel
 import utils
 import BenchmarkModel
 
-benchmark_model = utils.raed_benchmarks()
+benchmark_models = utils.raed_benchmarks()
 
-for model in benchmark_model:
+for model in benchmark_models:
     model.get_metrics()
