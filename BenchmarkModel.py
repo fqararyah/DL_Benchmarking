@@ -35,8 +35,8 @@ class BenchmarkModel:
                         loss=tf.keras.losses.SparseCategoricalCrossentropy(
                             from_logits=True),
                         metrics=['accuracy'])
-            with open(Settings.Settings().metrics_file + '_' +self.model_name + '_' + \
-                str(datetime.datetime.now()).split('.')[0], 'w') as f:
+            with open(Settings.Settings().metrics_file + '_' +self.model_name + '_' + str(input_dim[0]) + 'x' + \
+                str(input_dim[1]) + '_' + str(datetime.datetime.now()).split('.')[0], 'w') as f:
                 for batch_size in self.batch_sizes:
                     f.write('\n----------------\nbatch size: ' + str(batch_size) + '\n----------------\n')
                     #Throughput
