@@ -15,15 +15,16 @@ import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
 class BenchmarkModel:
-    def __init__(self, model_name = '', batch_sizes = [1]):
+    def __init__(self, model_name = '', batch_sizes = [1], input_dims = []):
         self.model_name = model_name
         self.batch_sizes = batch_sizes
+        self.input_dims = input_dims
         self.set_model()
 
     def set_model(self):
         if self.model_name != '':
             self.pretrained_model = getattr(tf.keras.applications, \
-            self.model_name)(input_shape=(32, 32, 3), weights=None, classes=10)
+            self.model_name)(input_shape=(self.input_dims[0], self.input_dims[1], 3), weights=None, classes=10)
 
     def get_metrics(self):
         (train_images, train_labels), (test_images,
@@ -36,7 +37,8 @@ class BenchmarkModel:
         
         test_images_preprocessed = test_images / 255.0
         test_images_preprocessed = test_images_preprocessed[0:max(self.batch_sizes) * 10]
-        with open(Settings.Settings().metrics_file + '_' +self.model_name + '_' +str(datetime.datetime.now()).split('.')[0], 'w') as f:
+        with open(Settings.Settings().metrics_file + '_' +self.model_name + '_' + \
+            str(datetime.datetime.now()).split('.')[0], 'w') as f:
             for batch_size in self.batch_sizes:
                 f.write('\n----------------\nbatch size: ' + str(batch_size) + '\n----------------\n')
                 #Throughput

@@ -1,2 +1,5 @@
 ResNet50
+EfficientNetB0
+MobileNetV3Small
+MobileNetV3large
 EOF

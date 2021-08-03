@@ -31,12 +31,32 @@ def raed_benchmarks():
             else:
                 for split in batch_sizes.split(','):
                     models_batch_sizes_dict[model_name].append(int(split))
-         
+
+    models_input_dims_dict = {}
+    with open(settings.input_dims_file, 'r') as f:
+        for line in f:
+            if line == settings.end_of_file:
+                break
+            splits = line.replace(' ', '').replace('\n', '').split(settings.delimiter)
+            model_name = splits[0]
+            models_input_dims_dict[model_name] = []
+            input_dims = splits[1].replace('[', '').replace(']', '')
+            for split in input_dims.split(','):
+                dims = split.replace('(', '').replace(')', '').split('x')
+                for dim in dims:
+                    models_input_dims_dict[model_name].append(int(dim))
+
+
     for model in benchmark_models:
         if model.model_name in models_batch_sizes_dict:
             model.batch_sizes = models_batch_sizes_dict[model.model_name]
         else:
             model.batch_sizes = models_batch_sizes_dict[settings.global_setting_keyword]
+
+        if model.model_name in models_input_dims_dict:
+            model.input_dims = models_input_dims_dict[model.model_name]
+        else:
+            model.input_dims = models_input_dims_dict[settings.global_setting_keyword]
     
     return benchmark_models
 

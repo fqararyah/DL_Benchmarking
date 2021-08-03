@@ -18,3 +18,5 @@ class Settings:
                     self.global_setting_keyword = splits[1]
                 elif splits[0] == 'metrics_file':
                     self.metrics_file = splits[1]
+                elif splits[0] == 'input_dims_file':
+                    self.input_dims_file = splits[1]
