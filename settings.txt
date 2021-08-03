@@ -4,4 +4,4 @@ input_dims_file: input dims.txt
 delimiter: ::
 end_of_file: EOF
 global_setting_keyword: global
-metrics_file: metrics
+metrics_file: ./out/metrics
