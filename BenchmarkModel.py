@@ -82,7 +82,7 @@ class BenchmarkModel:
                 #avg_time_with_preprocessing = 0.0
                 counter = 0
                 while counter * batch_size < max(self.batch_sizes) * 10:
-                    image_batch = test_images[counter * batch_size: (counter + 1) * batch_size + 1]
+                    image_batch = test_images[counter * batch_size: (counter + 1) * batch_size]
                     #t0_with_preprocessing = time.time()
                     image_batch = image_batch / 255.0
                     t0 = time.time()
@@ -114,12 +114,12 @@ class BenchmarkModel:
                 while counter * batch_size < max(self.batch_sizes) * 10:
                     image_batch = test_images[counter * batch_size: (counter + 1) * batch_size]
                     interpreter.resize_tensor_input(0,[batch_size, 32, 32, 3])
-                    interpreter.allocate_tensors()
                     #t0_with_preprocessing = time.time()
                     image_batch = image_batch / 255.0
                     t0 = time.time()
-                    interpreter.set_tensor(input_index, image_batch.astype(np.float32))
+                    interpreter.allocate_tensors()
                     t1 = time.time()
+                    interpreter.set_tensor(input_index, image_batch.astype(np.float32))
                     interpreter.invoke()
                     avg_time = time.time() - t1
                     avg_latency += time.time() - t0
