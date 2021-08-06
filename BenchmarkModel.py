@@ -35,7 +35,7 @@ class BenchmarkModel:
         test_images_preprocessed = test_images / 255.0
         test_images_preprocessed = test_images_preprocessed[0:max(self.batch_sizes) * 10]
         for input_dim in self.inputs_dims:
-            if self.model_name == '':
+            if self.model_name == '' or self.model_name == Settings.Settings().end_of_file:
                 break
             
             self.pretrained_model = getattr(tf.keras.applications, \
