@@ -130,7 +130,7 @@ class BenchmarkModel:
                     #avg_time_with_preprocessing += time.time() - t0_with_preprocessing
                     counter += 1
                     predicted = arg_max(predictions, 0)
-                if predicted:
+                if len(predicted) > 0:
                     avg_time /= counter
                     avg_latency /= counter
                 #avg_time_with_preprocessing /= counter
