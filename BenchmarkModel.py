@@ -14,6 +14,15 @@ import ssl
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
+test_images = []
+
+def load_images():
+    global test_images
+    if len(test_images) == 0:
+        (train_images, train_labels), (test_images,
+                                        test_labels) = datasets.cifar10.load_data()
+    return test_images
+
 class BenchmarkModel:
     def __init__(self, model_name = '', batch_sizes = [1], inputs_dims = [[32, 32]], bit_widths = []):
         self.model_name = model_name
@@ -22,9 +31,7 @@ class BenchmarkModel:
         self.bit_widths = bit_widths
 
     def get_metrics(self):
-        (train_images, train_labels), (test_images,
-                                    test_labels) = datasets.cifar10.load_data()
-        
+        load_images()
         test_images_preprocessed = test_images / 255.0
         test_images_preprocessed = test_images_preprocessed[0:max(self.batch_sizes) * 10]
         for input_dim in self.inputs_dims:
@@ -42,6 +49,7 @@ class BenchmarkModel:
                 if bit_width == 32:
                     self.get_metrics_32(input_dim, test_images_preprocessed, test_images)
                 else:
+                    #currently only 16 bit float is supported
                     converter = tf.lite.TFLiteConverter.from_keras_model(self.pretrained_model)
                     tflite_model = converter.convert()
                     converter.optimizations = [tf.lite.Optimize.DEFAULT]
