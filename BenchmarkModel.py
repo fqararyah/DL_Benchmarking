@@ -72,6 +72,7 @@ class BenchmarkModel:
                 f.write('\n----------------\nbatch size: ' + str(batch_size) + '\n----------------\n')
                 #Throughput
                 t0 = time.time()
+                print(len(test_images_preprocessed))
                 #test_loss, test_acc = pretrained_model.evaluate(test_images,  test_labels)#, verbose=2)
                 tmp = np.argmax(self.pretrained_model.predict(x = test_images_preprocessed, batch_size = batch_size, verbose = 0))
                 f.write("Execution time is: " + str((time.time() - t0) / len(test_images_preprocessed)) + "seconds.\n")
@@ -91,7 +92,7 @@ class BenchmarkModel:
                     #avg_time_with_preprocessing += time.time() - t0_with_preprocessing
                     counter += 1
 
-                avg_time /= counter
+                avg_time /= len(test_images_preprocessed)
                 #avg_time_with_preprocessing /= counter
                 f.write("Latency is: " + str(avg_time) + " seconds.\n")
                 #f.write("Latency (with processing time) is: " + str(avg_time_with_preprocessing) + " seconds.\n")
@@ -116,11 +117,12 @@ class BenchmarkModel:
                     interpreter.resize_tensor_input(0,[batch_size, 32, 32, 3])
                     #t0_with_preprocessing = time.time()
                     image_batch = image_batch / 255.0
-                    t0 = time.time()
                     interpreter.allocate_tensors()
-                    t1 = time.time()
+                    t0 = time.time()
                     interpreter.set_tensor(input_index, image_batch.astype(np.float32))
+                    t1 = time.time()
                     interpreter.invoke()
+                    predictions = interpreter.get_tensor(output_index)
                     avg_time = time.time() - t1
                     avg_latency += time.time() - t0
                     #avg_time_with_preprocessing += time.time() - t0_with_preprocessing
