@@ -74,7 +74,7 @@ class BenchmarkModel:
                 t0 = time.time()
                 #test_loss, test_acc = pretrained_model.evaluate(test_images,  test_labels)#, verbose=2)
                 tmp = np.argmax(self.pretrained_model.predict(x = test_images_preprocessed, batch_size = batch_size, verbose = 0))
-                f.write("Throughput is: " + str(len(test_images_preprocessed) / (time.time() - t0)) + " images per second.\n")
+                f.write("Execution time is: " + str((time.time() - t0) / len(test_images_preprocessed)) + "seconds.\n")
                 #end throughput
 
                 #latency
@@ -93,7 +93,7 @@ class BenchmarkModel:
 
                 avg_time /= counter
                 #avg_time_with_preprocessing /= counter
-                f.write("Latency (without processing time) is: " + str(avg_time) + " seconds.\n")
+                f.write("Latency is: " + str(avg_time) + " seconds.\n")
                 #f.write("Latency (with processing time) is: " + str(avg_time_with_preprocessing) + " seconds.\n")
                 #end latency
 
@@ -106,18 +106,9 @@ class BenchmarkModel:
                 as f:
             for batch_size in self.batch_sizes:
                 f.write('\n----------------\nbatch size: ' + str(batch_size) + '\n----------------\n')
-                #Throughput
-                """ t0 = time.time()
-                interpreter.resize_tensor_input(interpreter.get_output_details()[0]['index'],\
-                    [max(self.batch_sizes) * 10, 32, 32, 3])
-                interpreter.set_tensor(input_index, test_images_preprocessed.astype(np.float32))
-                interpreter.invoke()
-                predictions = interpreter.get_tensor(output_index)
-                f.write("Throughput is: " + str(len(test_images_preprocessed) / (time.time() - t0)) + " images per second.\n")
-                #end throughput """
-
                 #latency
                 avg_time = 0.0
+                avg_latency = 0
                 #avg_time_with_preprocessing = 0.0
                 counter = 0
                 while counter * batch_size < max(self.batch_sizes) * 10:
@@ -128,13 +119,17 @@ class BenchmarkModel:
                     image_batch = image_batch / 255.0
                     t0 = time.time()
                     interpreter.set_tensor(input_index, image_batch.astype(np.float32))
+                    t1 = time.time()
                     interpreter.invoke()
-                    avg_time += time.time() - t0
+                    avg_time = time.time() - t1
+                    avg_latency += time.time() - t0
                     #avg_time_with_preprocessing += time.time() - t0_with_preprocessing
                     counter += 1
 
                 avg_time /= counter
+                avg_latency /= counter
                 #avg_time_with_preprocessing /= counter
-                f.write("Latency (without processing time) is: " + str(avg_time) + " seconds.\n")
+                f.write("Execution time is: " + str(avg_time) + " seconds.\n")
+                f.write("Latency is: " + str(avg_latency) + " seconds.\n")
                 #f.write("Latency (with processing time) is: " + str(avg_time_with_preprocessing) + " seconds.\n")
                 #end latency
