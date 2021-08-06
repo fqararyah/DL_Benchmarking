@@ -1,4 +1,4 @@
-from os import system
+import os
 from BenchmarkModel import BenchmarkModel
 import Settings
 import BenchmarkModel
@@ -34,7 +34,6 @@ def raed_benchmarks():
                     models_batch_sizes_dict[model_name].append(int(split))
 
     models_input_dims_dict = {}
-
     with open(settings.input_dims_file, 'r') as f:
         for line in f:
             if line == settings.end_of_file:
@@ -49,6 +48,17 @@ def raed_benchmarks():
                 for dim in dims:
                     models_input_dims_dict[model_name][-1].append(int(dim))
 
+    models_precisions_dict = {}
+    with open(settings.precisions_file, 'r') as f:
+        for line in f:
+            if line == settings.end_of_file:
+                break
+            splits = line.replace(' ', '').replace('\n', '').split(settings.delimiter)
+            model_name = splits[0]
+            models_precisions_dict[model_name] = []
+            model_precisions = splits[1].replace('[', '').replace(']', '')
+            for split in model_precisions.split(','):
+                models_precisions_dict[model_name].append(int(split))
 
     for model in benchmark_models:
         if model.model_name in models_batch_sizes_dict:
@@ -60,6 +70,11 @@ def raed_benchmarks():
             model.inputs_dims = models_input_dims_dict[model.model_name]
         else:
             model.inputs_dims = models_input_dims_dict[settings.global_setting_keyword]
+
+        if model.model_name in models_precisions_dict:
+            model.bit_widths = models_precisions_dict[model.model_name]
+        else:
+            model.bit_widths = models_precisions_dict[settings.global_setting_keyword]
     
     return benchmark_models
 
