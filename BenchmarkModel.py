@@ -1,5 +1,7 @@
 import os
 import datetime
+
+from tensorflow.python.ops.gen_math_ops import arg_max
 import Settings
 from tensorflow.python.keras import utils
 import pathlib
@@ -92,7 +94,7 @@ class BenchmarkModel:
                     #avg_time_with_preprocessing += time.time() - t0_with_preprocessing
                     counter += 1
 
-                avg_time /= len(test_images_preprocessed)
+                avg_time /= counter
                 #avg_time_with_preprocessing /= counter
                 f.write("Latency is: " + str(avg_time) + " seconds.\n")
                 #f.write("Latency (with processing time) is: " + str(avg_time_with_preprocessing) + " seconds.\n")
@@ -127,9 +129,10 @@ class BenchmarkModel:
                     avg_latency += time.time() - t0
                     #avg_time_with_preprocessing += time.time() - t0_with_preprocessing
                     counter += 1
-
-                avg_time /= counter
-                avg_latency /= counter
+                    predicted = arg_max(predictions)
+                if predicted:
+                    avg_time /= counter
+                    avg_latency /= counter
                 #avg_time_with_preprocessing /= counter
                 f.write("Execution time is: " + str(avg_time) + " seconds.\n")
                 f.write("Latency is: " + str(avg_latency) + " seconds.\n")
