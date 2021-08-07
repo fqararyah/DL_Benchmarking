@@ -9,10 +9,11 @@ def raed_benchmarks():
     benchmark_models = []
     with open(settings.networks_file, 'r') as f:
         for line in f:
+            line = line.replace(' ', '').replace('\n', '')
             if line == settings.end_of_file:
                 break
             
-            benchmark_models.append(BenchmarkModel.BenchmarkModel(model_name= line.replace(' ', '').replace('\n', '')))
+            benchmark_models.append(BenchmarkModel.BenchmarkModel(model_name= line))
 
     models_batch_sizes_dict = {}
     with open(settings.batch_sizes_file, 'r') as f:
