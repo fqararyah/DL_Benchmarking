@@ -11,7 +11,7 @@ def raed_benchmarks():
         for line in f:
             if line == settings.end_of_file:
                 break
-
+            
             benchmark_models.append(BenchmarkModel.BenchmarkModel(model_name= line.replace(' ', '').replace('\n', '')))
 
     models_batch_sizes_dict = {}
