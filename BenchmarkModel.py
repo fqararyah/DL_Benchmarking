@@ -48,23 +48,27 @@ class BenchmarkModel:
                             from_logits=True),
                         metrics=['accuracy'])
             for bit_width in self.bit_widths:
-                if bit_width == 32:
-                    self.get_metrics_32(input_dim, test_images_preprocessed, test_images)
-                else:
+                #if bit_width == 32:
+                #    self.get_metrics_32(input_dim, test_images_preprocessed, test_images)
+                #else:
                     #currently only 16 bit float is supported
-                    converter = tf.lite.TFLiteConverter.from_keras_model(self.pretrained_model)
-                    tflite_model = converter.convert()
-                    converter.optimizations = [tf.lite.Optimize.DEFAULT]
+                converter = tf.lite.TFLiteConverter.from_keras_model(self.pretrained_model)
+                tflite_model = converter.convert()
+                converter.optimizations = [tf.lite.Optimize.DEFAULT]
+                if bit_width == 32:
+                    converter.target_spec.supported_types = [tf.float32]
+                elif bit_width == 16:
                     converter.target_spec.supported_types = [tf.float16]
-                    tflite_quantized_model = converter.convert()
-                    tflite_models_dir = pathlib.Path("/tmp/tflite_models/")
-                    tflite_models_dir.mkdir(exist_ok=True, parents=True)
-                    tflite_model_file = tflite_models_dir/"model_quant.tflite"
-                    tflite_model_file.write_bytes(tflite_quantized_model)
-                    interpreter = tf.lite.Interpreter(model_path=str(tflite_model_file))
+                else:
+                    break
+                tflite_quantized_model = converter.convert()
+                tflite_models_dir = pathlib.Path("/tmp/tflite_models/")
+                tflite_models_dir.mkdir(exist_ok=True, parents=True)
+                tflite_model_file = tflite_models_dir/"model_quant.tflite"
+                tflite_model_file.write_bytes(tflite_quantized_model)
+                interpreter = tf.lite.Interpreter(model_path=str(tflite_model_file))
 
-                    test_image = np.expand_dims(test_images[0], axis=0).astype(np.float32)
-                    self.get_metrics_quantized(input_dim, test_images_preprocessed, test_images, bit_width, interpreter)
+                self.get_metrics_quantized(input_dim, test_images_preprocessed, test_images, bit_width, interpreter)
 
 
     def get_metrics_32(self, input_dim, test_images_preprocessed, test_images):
@@ -73,13 +77,13 @@ class BenchmarkModel:
             for batch_size in self.batch_sizes:
                 f.write('\n----------------\nbatch size: ' + str(batch_size) + '\n----------------\n')
                 #this is to load the model
-                tmp = np.argmax(self.pretrained_model.predict(x = test_images[max(self.batch_sizes)*10:max(self.batch_sizes)*20]/255.0, batch_size = \
+                """ tmp = np.argmax(self.pretrained_model.predict(x = test_images[max(self.batch_sizes)*10:max(self.batch_sizes)*20]/255.0, batch_size = \
                     batch_size, verbose = 0))
                 #Throughput
                 t0 = time.time()
                 #test_loss, test_acc = pretrained_model.evaluate(test_images,  test_labels)#, verbose=2)
                 tmp = np.argmax(self.pretrained_model.predict(x = test_images_preprocessed, batch_size = batch_size, verbose = 0), 1)
-                f.write("Execution time is: " + str((time.time() - t0) / len(test_images_preprocessed)) + "seconds.\n")
+                f.write("Execution time is: " + str((time.time() - t0) / len(test_images_preprocessed)) + "seconds.\n") """
                 #end throughput
 
                 #latency
@@ -122,8 +126,8 @@ class BenchmarkModel:
                 interpreter.allocate_tensors()
                 while counter * batch_size < max(self.batch_sizes) * 10:
                     image_batch = test_images[counter * batch_size: (counter + 1) * batch_size]
-                    image_batch = image_batch.astype(np.float32)
                     t0 = time.time()
+                    image_batch = image_batch.astype(np.float32)
                     image_batch = image_batch / 255.0
                     interpreter.set_tensor(input_index, image_batch)
                     t1 = time.time()
