@@ -64,7 +64,10 @@ class BenchmarkModel:
                 tflite_quantized_model = converter.convert()
                 tflite_models_dir = pathlib.Path("/tmp/tflite_models/")
                 tflite_models_dir.mkdir(exist_ok=True, parents=True)
-                tflite_model_file = tflite_models_dir/"model_quant.tflite"
+                if bit_width == 32:
+                    tflite_model_file = tflite_models_dir/"model_quant_32.tflite"
+                elif bit_width == 16:
+                    tflite_model_file = tflite_models_dir/"model_quant_16.tflite"
                 tflite_model_file.write_bytes(tflite_quantized_model)
                 interpreter = tf.lite.Interpreter(model_path=str(tflite_model_file))
 
