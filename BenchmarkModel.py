@@ -1,5 +1,6 @@
 import os
 import datetime
+from tensorflow.python.keras.engine import training
 
 from tensorflow.python.ops.gen_math_ops import arg_max
 import Settings
@@ -47,7 +48,6 @@ class BenchmarkModel:
                             from_logits=True),
                         metrics=['accuracy'])
             for bit_width in self.bit_widths:
-                print(bit_width)
                 if bit_width == 32:
                     self.get_metrics_32(input_dim, test_images_preprocessed, test_images)
                 else:
@@ -78,7 +78,7 @@ class BenchmarkModel:
                 #Throughput
                 t0 = time.time()
                 #test_loss, test_acc = pretrained_model.evaluate(test_images,  test_labels)#, verbose=2)
-                tmp = np.argmax(self.pretrained_model.predict(x = test_images_preprocessed, batch_size = batch_size, verbose = 0))
+                tmp = np.argmax(self.pretrained_model.predict(x = test_images_preprocessed, batch_size = batch_size, verbose = 0), 1)
                 f.write("Execution time is: " + str((time.time() - t0) / len(test_images_preprocessed)) + "seconds.\n")
                 #end throughput
 
@@ -92,7 +92,7 @@ class BenchmarkModel:
                     tmp = -1
                     t0 = time.time()
                     image_batch = image_batch / 255.0
-                    tmp = np.argmax(self.pretrained_model.predict(x = image_batch, batch_size = batch_size, verbose = 0))
+                    tmp = np.argmax(self.pretrained_model(image_batch, training = False))
                     if tmp != -1:
                         avg_time += time.time() - t0
                     #avg_time_with_preprocessing += time.time() - t0_with_preprocessing
