@@ -122,9 +122,10 @@ class BenchmarkModel:
                 interpreter.allocate_tensors()
                 while counter * batch_size < max(self.batch_sizes) * 10:
                     image_batch = test_images[counter * batch_size: (counter + 1) * batch_size]
+                    image_batch = image_batch.astype(np.float32)
                     t0 = time.time()
                     image_batch = image_batch / 255.0
-                    interpreter.set_tensor(input_index, image_batch.astype(np.float32))
+                    interpreter.set_tensor(input_index, image_batch)
                     t1 = time.time()
                     interpreter.invoke()
                     predictions = interpreter.get_tensor(output_index)
