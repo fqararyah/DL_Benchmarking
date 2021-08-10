@@ -54,11 +54,14 @@ class BenchmarkModel:
                     #currently only 16 bit float is supported
                 converter = tf.lite.TFLiteConverter.from_keras_model(self.pretrained_model)
                 tflite_model = converter.convert()
-                converter.optimizations = [tf.lite.Optimize.DEFAULT]
+                
                 if bit_width == 32:
                     converter.target_spec.supported_types = [tf.float32]
+                    print(32)
                 elif bit_width == 16:
+                    converter.optimizations = [tf.lite.Optimize.DEFAULT]
                     converter.target_spec.supported_types = [tf.float16]
+                    print(16)
                 else:
                     break
                 tflite_quantized_model = converter.convert()
