@@ -34,10 +34,12 @@ class BenchmarkModel:
         self.bit_widths = bit_widths
 
     def get_metrics(self):
-        load_images()
-        test_images_preprocessed = test_images / 255.0
-        test_images_preprocessed = test_images_preprocessed[0:max(self.batch_sizes) * 10]
+        #load_images()
         for input_dim in self.inputs_dims:
+            test_images = np.random.randint(low =0, high= 256, size = [1000, input_dim[0], input_dim[1],\
+                 3], dtype=np.uint8)
+            test_images_preprocessed = test_images / 255.0
+            test_images_preprocessed = test_images_preprocessed[0:max(self.batch_sizes) * 10]
             if self.model_name == '' or self.model_name == Settings.Settings().end_of_file:
                 break
             
@@ -48,30 +50,30 @@ class BenchmarkModel:
                             from_logits=True),
                         metrics=['accuracy'])
             for bit_width in self.bit_widths:
-                #if bit_width == 32:
-                #    self.get_metrics_32(input_dim, test_images_preprocessed, test_images)
-                #else:
-                    #currently only 16 bit float is supported
-                converter = tf.lite.TFLiteConverter.from_keras_model(self.pretrained_model)
-                tflite_model = converter.convert()
-                
-                if bit_width == 32:
-                    converter.target_spec.supported_types = [tf.float32]
-                    print(32)
-                elif bit_width == 16:
-                    converter.optimizations = [tf.lite.Optimize.DEFAULT]
-                    converter.target_spec.supported_types = [tf.float16]
-                    print(16)
-                else:
-                    break
-                tflite_quantized_model = converter.convert()
+                #currently only 16 bit float is supported
                 tflite_models_dir = pathlib.Path(Settings.Settings().tflite_folder)
                 tflite_models_dir.mkdir(exist_ok=True, parents=True)
                 if bit_width == 32:
                     tflite_model_file = tflite_models_dir/(self.model_name+"model_quant_32.tflite")
                 elif bit_width == 16:
                     tflite_model_file = tflite_models_dir/(self.model_name+"model_quant_16.tflite")
-                tflite_model_file.write_bytes(tflite_quantized_model)
+                
+                if not tflite_model_file.exists():
+                    converter = tf.lite.TFLiteConverter.from_keras_model(self.pretrained_model)
+                    tflite_model = converter.convert()
+                    
+                    if bit_width == 32:
+                        converter.target_spec.supported_types = [tf.float32]
+                        print(32)
+                    elif bit_width == 16:
+                        converter.optimizations = [tf.lite.Optimize.DEFAULT]
+                        converter.target_spec.supported_types = [tf.float16]
+                        print(16)
+                    else:
+                        break
+                    tflite_quantized_model = converter.convert()
+                    tflite_model_file.write_bytes(tflite_quantized_model)
+
                 interpreter = tf.lite.Interpreter(model_path=str(tflite_model_file))
 
                 self.get_metrics_quantized(input_dim, test_images_preprocessed, test_images, bit_width, interpreter)
