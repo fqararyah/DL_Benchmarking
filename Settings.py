@@ -24,3 +24,5 @@ class Settings:
                     self.input_dims_file = current_folder + splits[1]
                 elif splits[0] == 'precisions_file':
                     self.precisions_file = current_folder + splits[1]
+                elif splits[0] == 'tflite_folder':
+                    self.tflite_folder = current_folder + splits[1]
