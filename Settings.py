@@ -28,4 +28,6 @@ class Settings:
                     self.tflite_folder = current_folder + splits[1]
                 elif splits[0] == 'num_classes_file':
                     self.num_classes_file = current_folder + splits[1]
+                elif splits[0] == 'status_file':
+                    self.status_file_name = current_folder + splits[1]
                     

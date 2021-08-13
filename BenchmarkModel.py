@@ -85,9 +85,14 @@ class BenchmarkModel:
                     self.get_metrics_32(input_dim, test_images_preprocessed, test_images)
 
     def get_metrics_32(self, input_dim, test_images_preprocessed, test_images):
-        with open(Settings.Settings().metrics_file + '_' +self.model_name + '_32_' + str(input_dim[0]) + 'x' + \
+        settings_obj = Settings.Settings()
+        with open(settings_obj.metrics_file + '_' +self.model_name + '_32_' + str(input_dim[0]) + 'x' + \
             str(input_dim[1]) + '_' + str(datetime.datetime.now()).split('.')[0], 'w') as f:
             for batch_size in self.batch_sizes:
+                with open (settings_obj.status_file_name, 'w') as inner_f:
+                    inner_f.write(self.model_name + '_32_' +  str(input_dim[0]) + 'x' + str(input_dim[1]) + '_' + \
+                        str(batch_size))
+
                 f.write('\n----------------\nbatch size: ' + str(batch_size) + '\n----------------\n')
                 #this is to load the model
                 """ tmp = np.argmax(self.pretrained_model.predict(x = test_images[max(self.batch_sizes)*10:max(self.batch_sizes)*20]/255.0, batch_size = \
