@@ -78,7 +78,8 @@ class BenchmarkModel:
 
                 self.get_metrics_quantized(input_dim, test_images_preprocessed, test_images, bit_width, interpreter)
  """
-                self.get_metrics_32(input_dim, test_images_preprocessed, test_images)
+                if bit_width == 32:
+                    self.get_metrics_32(input_dim, test_images_preprocessed, test_images)
 
     def get_metrics_32(self, input_dim, test_images_preprocessed, test_images):
         with open(Settings.Settings().metrics_file + '_' +self.model_name + '_32_' + str(input_dim[0]) + 'x' + \
