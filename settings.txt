@@ -6,4 +6,5 @@ end_of_file: EOF
 global_setting_keyword: global
 metrics_file: metrics
 precisions_file: precisions.txt
-tflite_folder: tflite_models
+tflite_folder: tflite_models_244x244
+num_classes_file: num_classes.txt

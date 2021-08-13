@@ -60,6 +60,16 @@ def raed_benchmarks():
             model_precisions = splits[1].replace('[', '').replace(']', '')
             for split in model_precisions.split(','):
                 models_precisions_dict[model_name].append(int(split))
+    
+    models_num_classes_dict = {}
+    with open(settings.num_classes_file, 'r') as f:
+        for line in f:
+            if line == settings.end_of_file:
+                break
+            splits = line.replace(' ', '').replace('\n', '').split(settings.delimiter)
+            model_name = splits[0]
+            models_precisions_dict[model_name] = []
+            models_num_classes_dict[splits[0]] = int(splits[1])
 
     for model in benchmark_models:
         if model.model_name in models_batch_sizes_dict:
@@ -76,6 +86,11 @@ def raed_benchmarks():
             model.bit_widths = models_precisions_dict[model.model_name]
         else:
             model.bit_widths = models_precisions_dict[settings.global_setting_keyword]
+
+        if model.model_name in models_num_classes_dict:
+            model.num_classes = models_num_classes_dict[model.model_name]
+        else:
+            model.num_classes = models_num_classes_dict[settings.global_setting_keyword]
     
     return benchmark_models
 

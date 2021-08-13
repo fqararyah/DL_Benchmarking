@@ -27,11 +27,12 @@ def load_images():
     return test_images
 
 class BenchmarkModel:
-    def __init__(self, model_name = '', batch_sizes = [1], inputs_dims = [[32, 32]], bit_widths = []):
+    def __init__(self, model_name = '', batch_sizes = [1], inputs_dims = [[32, 32]], bit_widths = [], num_classes = 10):
         self.model_name = model_name
         self.batch_sizes = batch_sizes
         self.inputs_dims = inputs_dims
         self.bit_widths = bit_widths
+        self.num_classes = num_classes
 
     def get_metrics(self):
         #load_images()
@@ -44,7 +45,8 @@ class BenchmarkModel:
                 break
             
             self.pretrained_model = getattr(tf.keras.applications, \
-            self.model_name)(input_shape=(input_dim[0], input_dim[1], 3), weights=None, classes=10)
+            self.model_name)(input_shape=(input_dim[0], input_dim[1], 3), weights=None, classes=self.num_classes)
+
             self.pretrained_model.compile(optimizer='adam',
                         loss=tf.keras.losses.SparseCategoricalCrossentropy(
                             from_logits=True),
