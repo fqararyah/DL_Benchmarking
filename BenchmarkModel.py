@@ -50,7 +50,7 @@ class BenchmarkModel:
                             from_logits=True),
                         metrics=['accuracy'])
             for bit_width in self.bit_widths:
-                #currently only 16 bit float is supported
+                """ #currently only 16 bit float is supported
                 tflite_models_dir = pathlib.Path(Settings.Settings().tflite_folder)
                 tflite_models_dir.mkdir(exist_ok=True, parents=True)
                 if bit_width == 32:
@@ -77,7 +77,8 @@ class BenchmarkModel:
                 interpreter = tf.lite.Interpreter(model_path=str(tflite_model_file))
 
                 self.get_metrics_quantized(input_dim, test_images_preprocessed, test_images, bit_width, interpreter)
-
+ """
+                self.get_metrics_32(input_dim, test_images_preprocessed, test_images)
 
     def get_metrics_32(self, input_dim, test_images_preprocessed, test_images):
         with open(Settings.Settings().metrics_file + '_' +self.model_name + '_32_' + str(input_dim[0]) + 'x' + \
