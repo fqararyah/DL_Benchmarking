@@ -68,7 +68,7 @@ def raed_benchmarks():
                 break
             splits = line.replace(' ', '').replace('\n', '').split(settings.delimiter)
             model_name = splits[0]
-            models_precisions_dict[model_name] = []
+            models_num_classes_dict[model_name] = []
             models_num_classes_dict[splits[0]] = int(splits[1])
 
     for model in benchmark_models:

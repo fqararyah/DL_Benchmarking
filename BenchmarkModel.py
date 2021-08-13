@@ -79,7 +79,8 @@ class BenchmarkModel:
                 interpreter = tf.lite.Interpreter(model_path=str(tflite_model_file))
 
                 self.get_metrics_quantized(input_dim, test_images_preprocessed, test_images, bit_width, interpreter)
- """
+ """            
+                print(bit_width)
                 if bit_width == 32:
                     self.get_metrics_32(input_dim, test_images_preprocessed, test_images)
 
