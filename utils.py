@@ -95,3 +95,8 @@ def raed_benchmarks():
     return benchmark_models
 
 
+def get_status_line(settings_obj):
+    with open (settings_obj.status_file_name, 'r') as f:
+        for line in f:
+            line = line.replace(' ', '').replace('\n', '')
+            return line
