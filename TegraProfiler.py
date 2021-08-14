@@ -1,15 +1,17 @@
+from Settings import Settings
 import subprocess
 from time import sleep
 import utils
+import Settings
 
 class TegraProfiler:
     def __init__(self, settings_obj, device_name):
-        self.settings_obj = settings_obj
+        self.settings_obj = Settings.Settings()
         self.device_name = device_name
         self.profiling_description = utils.get_status_line()
 
     def profile(self):
-        while utils.get_status_line() != 'stop':
+        while utils.get_status_line(self.settings_obj) != 'stop':
             profiling_description = super().get_status_line()
             p = subprocess.Popen(['tegrastats', '--logfile', self.device_name + '_profs.txt', '--interval', '100'])
             sleep(0.5)
