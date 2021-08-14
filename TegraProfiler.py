@@ -16,10 +16,10 @@ class TegraProfiler:
             with open(self.settings_obj.current_folder + self.device_name + '_profs.txt', 'a') as f:
                 f.write('\n*********************\n' + str(profiling_description) + '\n*********************\n')
             p = subprocess.Popen(['tegrastats', '--logfile', self.settings_obj.current_folder + \
-                self.device_name + '_profs.txt', '--interval', '100'])
+                self.device_name + '_profs.txt', '--interval', '200'])
             
         p.terminate()
 
-        subprocess.run( ['mv', self.settings_obj.current_folder + self.device_name + '_profs.txt', \
+        subprocess.run( ['mv', str(self.settings_obj.current_folder + self.device_name + '_profs.txt'), \
             self.settings_obj.current_folder + self.device_name + '_profs_' + \
-                str(datetime.datetime.now()).split('.')[0]] + '.txt')
+                str(datetime.datetime.now()).split('.')[0] + '.txt'])
