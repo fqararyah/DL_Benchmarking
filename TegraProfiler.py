@@ -16,5 +16,5 @@ class TegraProfiler:
             sleep(0.5)
             p.terminate()
             with open(self.settings_obj.current_folder + self.device_name, 'a') as f:
-                f.write('\n*********************\n' + profiling_description + '\n*********************\n')
+                f.write('\n*********************\n' + str(profiling_description) + '\n*********************\n')
         
