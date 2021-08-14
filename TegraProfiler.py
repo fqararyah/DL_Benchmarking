@@ -1,4 +1,4 @@
-import Profiler
+from Profiler import Profiler
 import subprocess
 from time import sleep
 
