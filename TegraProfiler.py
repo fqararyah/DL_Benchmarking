@@ -8,7 +8,6 @@ class TegraProfiler:
     def __init__(self, settings_obj, device_name):
         self.settings_obj = Settings.Settings()
         self.device_name = device_name
-        self.profiling_description = utils.get_status_line()
 
     def profile(self):
         while utils.get_status_line(self.settings_obj) != 'stop':
