@@ -17,5 +17,5 @@ class TegraProfiler:
                 f.write('\n*********************\n' + str(profiling_description) + '\n*********************\n')
             p = subprocess.Popen(['tegrastats', '--logfile', self.settings_obj.current_folder + \
                 self.device_name + '_profs.txt', '--interval', '200'])
-            
-        p.terminate() 
+            sleep(0.4)
+            p.terminate() 
