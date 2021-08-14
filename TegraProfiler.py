@@ -18,8 +18,4 @@ class TegraProfiler:
             p = subprocess.Popen(['tegrastats', '--logfile', self.settings_obj.current_folder + \
                 self.device_name + '_profs.txt', '--interval', '200'])
             
-        p.terminate()
-
-        subprocess.run( ['mv', str(self.settings_obj.current_folder + self.device_name + '_profs.txt'), \
-            self.settings_obj.current_folder + self.device_name + '_profs_' + \
-                str(datetime.datetime.now()).split('.')[0] + '.txt'])
+        p.terminate() 
