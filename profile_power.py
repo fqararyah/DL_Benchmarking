@@ -1,5 +1,5 @@
 import Settings
-import TegraProfiler
+from TegraProfiler import TegraProfiler
 
 settings_obj = Settings.Settings()
 device_name = settings_obj.device_name.lower()
