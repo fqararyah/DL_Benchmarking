@@ -3,6 +3,7 @@ import subprocess
 from time import sleep
 import utils
 import Settings
+import datetime
 
 class TegraProfiler:
     def __init__(self, settings_obj, device_name):
@@ -18,3 +19,7 @@ class TegraProfiler:
                 self.device_name + '_profs.txt', '--interval', '100'])
             
         p.terminate()
+
+        subprocess.run( ['mv', self.settings_obj.current_folder + self.device_name + '_profs.txt', \
+            self.settings_obj.current_folder + self.device_name + '_profs_' + \
+                str(datetime.datetime.now()).split('.')[0]] + '.txt')
