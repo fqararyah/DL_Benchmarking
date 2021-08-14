@@ -89,6 +89,7 @@ class BenchmarkModel:
         with open(settings_obj.metrics_file + '_' +self.model_name + '_32_' + str(input_dim[0]) + 'x' + \
             str(input_dim[1]) + '_' + str(datetime.datetime.now()).split('.')[0], 'w') as f:
             for batch_size in self.batch_sizes:
+                
                 with open (settings_obj.status_file_name, 'w') as inner_f:
                     inner_f.write(self.model_name + '_32_' +  str(input_dim[0]) + 'x' + str(input_dim[1]) + '_' + \
                         str(batch_size))

@@ -3,8 +3,8 @@ import os
 
 class Settings:
     def __init__(self):
-        current_folder = os.path.dirname(__file__) + '/'
-        with open(current_folder + 'settings.txt', 'r') as f:
+        self.current_folder = os.path.dirname(__file__) + '/'
+        with open(self.current_folder + 'settings.txt', 'r') as f:
             for line in f:
                 line = line.replace(' ', '').replace('\n', '')
                 splits = line.split(':')
@@ -15,19 +15,23 @@ class Settings:
                 elif splits[0] == 'global_setting_keyword':
                     self.global_setting_keyword = splits[1]
                 elif splits[0] == 'networks_file':
-                    self.networks_file = current_folder + splits[1]
+                    self.networks_file = self.current_folder + splits[1]
                 elif splits[0] == 'batch_sizes_file':
-                    self.batch_sizes_file = current_folder + splits[1]
+                    self.batch_sizes_file = self.current_folder + splits[1]
                 elif splits[0] == 'metrics_file':
-                    self.metrics_file = current_folder + 'out/' + splits[1]
+                    self.metrics_file = self.current_folder + 'out/' + splits[1]
                 elif splits[0] == 'input_dims_file':
-                    self.input_dims_file = current_folder + splits[1]
+                    self.input_dims_file = self.current_folder + splits[1]
                 elif splits[0] == 'precisions_file':
-                    self.precisions_file = current_folder + splits[1]
+                    self.precisions_file = self.current_folder + splits[1]
                 elif splits[0] == 'tflite_folder':
-                    self.tflite_folder = current_folder + splits[1]
+                    self.tflite_folder = self.current_folder + splits[1]
                 elif splits[0] == 'num_classes_file':
-                    self.num_classes_file = current_folder + splits[1]
+                    self.num_classes_file = self.current_folder + splits[1]
                 elif splits[0] == 'status_file':
-                    self.status_file_name = current_folder + splits[1]
+                    self.status_file_name = self.current_folder + splits[1]
+                elif splits[0] == 'device_name':
+                    self.device_name = splits[1]
+                elif splits[0] == 'power_profile':
+                    self.power_profile = int(splits[1])
                     
