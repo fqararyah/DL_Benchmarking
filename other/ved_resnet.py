@@ -21,7 +21,7 @@ pretrained_model.compile(optimizer='adam',
                       from_logits=True),
                   metrics=['accuracy'])
 
-tf.profiler.experimental.start('./out')
+tf.profiler.experimental.start('./logs')
 test_loss, test_acc = pretrained_model.fit(train_images, train_labels, epochs=10,
                         validation_data=(test_images, test_labels))
 tf.profiler.experimental.stop()
