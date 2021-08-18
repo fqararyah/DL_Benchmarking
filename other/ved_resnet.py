@@ -29,7 +29,7 @@ test_loss, test_acc = pretrained_model.fit(train_images, train_labels, epochs=1,
                         validation_data=(test_images, test_labels))
 tf.profiler.experimental.stop()
 
-t0 = time.time()
+""" t0 = time.time()
 test_loss, test_acc = pretrained_model.evaluate(
     test_images,  test_labels, verbose=2)
-print("The time taken is", time.time() - t0)
+print("The time taken is", time.time() - t0) """
