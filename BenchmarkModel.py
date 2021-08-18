@@ -35,6 +35,12 @@ class BenchmarkModel:
         self.num_classes = num_classes
 
     def get_metrics(self):
+        physical_devices = tf.config.list_physical_devices('GPU')
+        try:
+            tf.config.experimental.set_memory_growth(physical_devices[0], True)
+        except:
+        # Invalid device or cannot modify virtual devices once initialized.
+            pass
         #load_images()
         for input_dim in self.inputs_dims:
             test_images = np.random.randint(low =0, high= 256, size = [1000, input_dim[0], input_dim[1],\
@@ -109,7 +115,7 @@ class BenchmarkModel:
                 avg_time = 0.0
                 #avg_time_with_preprocessing = 0.0
                 counter = 0
-                tf.profiler.experimental.start('./out')
+                #tf.profiler.experimental.start('./out')
                 
                 while counter * batch_size < max(self.batch_sizes) * 10:
                     image_batch = test_images[counter * batch_size: (counter + 1) * batch_size]
@@ -123,7 +129,7 @@ class BenchmarkModel:
                     #avg_time_with_preprocessing += time.time() - t0_with_preprocessing
                     counter += 1
                 
-                tf.profiler.experimental.stop()
+                #tf.profiler.experimental.stop()
 
                 avg_time /= (len(test_images_preprocessed) -1)
                 #avg_time_with_preprocessing /= counter
