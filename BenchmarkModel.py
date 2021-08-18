@@ -109,6 +109,8 @@ class BenchmarkModel:
                 avg_time = 0.0
                 #avg_time_with_preprocessing = 0.0
                 counter = 0
+                tf.profiler.experimental.start('./out')
+                
                 while counter * batch_size < max(self.batch_sizes) * 10:
                     image_batch = test_images[counter * batch_size: (counter + 1) * batch_size]
                     #t0_with_preprocessing = time.time()
@@ -120,6 +122,8 @@ class BenchmarkModel:
                         avg_time += time.time() - t0
                     #avg_time_with_preprocessing += time.time() - t0_with_preprocessing
                     counter += 1
+                
+                tf.profiler.experimental.stop()
 
                 avg_time /= (len(test_images_preprocessed) -1)
                 #avg_time_with_preprocessing /= counter
