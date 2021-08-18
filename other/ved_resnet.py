@@ -24,9 +24,11 @@ pretrained_model.compile(optimizer='adam',
                       from_logits=True),
                   metrics=['accuracy'])
 
-tf.profiler.experimental.start('./logs')
-his = pretrained_model.fit(train_images, train_labels, epochs=1, validation_data=(test_images, test_labels))
-tf.profiler.experimental.stop()
+#tf.profiler.experimental.start('./logs')
+tb_callback = tf.keras.callbacks.TensorBoard(log_dir='./logs',
+                                             profile_batch='10, 15')
+his = pretrained_model.fit(train_images, train_labels, epochs=1, validation_data=(test_images, test_labels), callbacks=[tb_callback])
+#tf.profiler.experimental.stop()
 
 """ t0 = time.time()
 test_loss, test_acc = pretrained_model.evaluate(
