@@ -15,7 +15,8 @@ pretrained_model = tf.keras.applications.ResNet50(input_shape=(32, 32, 3), weigh
 
 # Normalize pixel values to be between 0 and 1
 train_images, test_images = train_images / 255.0, test_images / 255.0
-
+train_images = train_images[0:1000]
+test_images = test_images[0:100]
 pretrained_model.compile(optimizer='adam',
                   loss=tf.keras.losses.SparseCategoricalCrossentropy(
                       from_logits=True),
