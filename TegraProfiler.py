@@ -13,7 +13,7 @@ class TegraProfiler:
     def profile(self):
         while utils.get_status_line(self.settings_obj) != 'stop':
             profiling_description = utils.get_status_line(self.settings_obj)
-            with open(self.settings_obj.current_folder + self.device_name + 'mem_pow_profs.txt', 'a') as f:
+            with open(self.settings_obj.current_folder + self.device_name  +'_mem_pow_profs.txt', 'a') as f:
                 f.write('\n*********************\n' + str(profiling_description) + '\n*********************\n')
             p = subprocess.Popen(['tegrastats', '--logfile', self.settings_obj.current_folder + \
                 self.device_name + '_profs.txt', '--interval', '200'])
