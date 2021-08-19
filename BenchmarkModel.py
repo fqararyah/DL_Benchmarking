@@ -35,12 +35,13 @@ class BenchmarkModel:
         self.num_classes = num_classes
 
     def get_metrics(self):
-        physical_devices = tf.config.list_physical_devices('GPU')
-        try:
-            tf.config.experimental.set_memory_growth(physical_devices[0], True)
-        except:
-        # Invalid device or cannot modify virtual devices once initialized.
-            pass
+        if Settings.Settings().power_profile:
+            physical_devices = tf.config.list_physical_devices('GPU')
+            try:
+                tf.config.experimental.set_memory_growth(physical_devices[0], True)
+            except:
+            # Invalid device or cannot modify virtual devices once initialized.
+                pass
         #load_images()
         for input_dim in self.inputs_dims:
             test_images = np.random.randint(low =0, high= 256, size = [1000, input_dim[0], input_dim[1],\
