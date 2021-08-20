@@ -1,5 +1,7 @@
-EfficientNetB0
-MobileNetV3Small
-MobileNetV3Large
 ResNet50
+EOF
+MobileNetV3Small
+EOF
+EfficientNetB0
+MobileNetV3Large
 EOF
