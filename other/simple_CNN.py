@@ -1,9 +1,12 @@
 import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
-import matplotlib.pyplot as plt
 import pathlib
 import numpy as np
 import time
+
+import ssl
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 (train_images, train_labels), (test_images,
                                test_labels) = datasets.cifar10.load_data()

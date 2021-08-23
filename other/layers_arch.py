@@ -7,7 +7,7 @@ import tensorflow as tf
 import tensorflow.keras.backend as K
 
 
-pretrained_model = tf.keras.applications.ResNet50()
+pretrained_model = tf.keras.applications.MobileNet()
 print("** Model architecture **")
 pretrained_model.summary()
 print(len(pretrained_model.weights))

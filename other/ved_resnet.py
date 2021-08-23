@@ -1,7 +1,6 @@
 import os
 import tempfile
 
-from matplotlib import pyplot as plt
 import numpy as np
 import tensorflow as tf
 import tensorflow.keras.backend as K
@@ -24,11 +23,12 @@ pretrained_model.compile(optimizer='adam',
                       from_logits=True),
                   metrics=['accuracy'])
 
-#tf.profiler.experimental.start('./logs')
-tb_callback = tf.keras.callbacks.TensorBoard(log_dir='./logs',
-                                             profile_batch='10, 15')
-his = pretrained_model.fit(train_images, train_labels, epochs=1, validation_data=(test_images, test_labels), callbacks=[tb_callback])
-#tf.profiler.experimental.stop()
+log_dir = "./logs"
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1, update_freq='batch')
+pretrained_model.fit(x=train_images, 
+          y=train_labels, 
+          epochs=1, 
+          validation_data=(test_images, test_labels), callbacks=[tensorboard_callback])
 
 """ t0 = time.time()
 test_loss, test_acc = pretrained_model.evaluate(
