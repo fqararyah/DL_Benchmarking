@@ -3,8 +3,8 @@ import Settings
 
 settings_obj = Settings.Settings()
 
-in_file = settings_obj.current_folder + 'jetson_tx2_profs_224x224.txt'
-out_file = settings_obj.current_folder + 'pow_jetson_tx2_224x224.txt'
+in_file = settings_obj.current_folder + 'jetson_nano_mem_pow_profs_mixed.txt'
+out_file = settings_obj.current_folder + 'pow_mem_jetson_nano_224x224.txt'
 
 power_dict = {}
 with open(in_file, 'r') as f:
