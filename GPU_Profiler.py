@@ -12,12 +12,16 @@ class GPU_Profiler:
 
     def profile(self):
         while utils.get_status_line(self.settings_obj) != 'stop':
+            if utils.get_status_line(self.settings_obj) == 'start':
+                continue
             profiling_description = utils.get_status_line(self.settings_obj)
-            with open(self.settings_obj.current_folder + self.device_name  +'_mem_pow_profs.txt', 'a') as f:
+            if profiling_description != 'invalid' and profiling_description != None:
+                f = open(self.settings_obj.current_folder + self.device_name + '_' + profiling_description +'_ved_mem_pow_profs.txt', 'a')
                 f.write('\n*********************\n' + str(profiling_description) + '\n*********************\n')
-            f = open(self.settings_obj.current_folder + self.device_name  +'_mem_pow_profs.txt', 'a')
-            p1 = subprocess.Popen(['nvidia-smi', '--query-gpu=power.draw', '--format=csv', '--loop-ms=20'], stdout=f)
-            p2 = subprocess.Popen(['nvidia-smi', '--query-gpu=memory.used', '--format=csv', '--loop-ms=20'], stdout=f)
-            sleep(0.4)
+                p1 = subprocess.Popen(['nvidia-smi', '--query-gpu=power.draw', '--format=csv', '--loop-ms=20'], stdout=f)
+                p2 = subprocess.Popen(['nvidia-smi', '--query-gpu=memory.used', '--format=csv', '--loop-ms=20'], stdout=f)
+            
+            while utils.get_status_line(self.settings_obj) != 'invalid':
+                pass
             p1.terminate() 
             p2.terminate() 
