@@ -1,0 +1,30 @@
+Mean latency is:		0.003840006873011589 seconds.
+Median latency is:		0.003844335675239563 seconds.
+STD latency is:		    2.5946459178539594e-05 seconds.
+Mean exec-time is:		0.0036281111240386963 seconds.
+Median exec-time is:	0.0036299750208854675 seconds.
+STD exec-time is:		2.1050720408512677e-05 seconds.
+
+TensorT:
+Mean latency is:		18.32 ms.
+Median latency is:		18.29 ms.
+STD latency is:		    
+Mean exec-time is:		17.82 ms.
+Median exec-time is:	17.79 ms.
+STD exec-time is:		
+
+TensorT-fp16:
+Mean latency is:		9.880 ms.
+Median latency is:		9.871 ms.
+STD latency is:		    
+Mean exec-time is:		9.383 ms.
+Median exec-time is:	9.374 ms.
+STD exec-time is:	
+
+TensorT-int8:
+Mean latency is:		6.470 ms.
+Median latency is:		6.467 ms.
+STD latency is:		    
+Mean exec-time is:		5.976 ms.
+Median exec-time is:	5.974 ms.
+STD exec-time is:	
