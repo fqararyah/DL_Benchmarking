@@ -13,6 +13,7 @@ import tensorflow.keras.backend as K
 from tensorflow.keras import datasets
 from time import sleep
 import time
+import statistics
 
 import ssl
 
@@ -150,48 +151,34 @@ class BenchmarkModel:
         with open(settings_obj.metrics_file + '_' +self.model_name + '_32_' + str(input_dim[0]) + 'x' + \
             str(input_dim[1]) + '_ved_' + str(datetime.datetime.now()).split('.')[0], 'w') as f:
                                 
-            avg_lat = 0
-            avg_exec = 0
+            avg_lats = []
+            avg_execs = []
             batch_size = 32
-            for i in range(0, 100):
-                avg_lat_tmp = 0
-                avg_exec_tmp = 0
-                counter = 0
-                while counter * batch_size < max(self.batch_sizes) * 10:
-                    t0 = time.time()
-                    image_batch = test_images[counter * batch_size: (counter + 1) * batch_size]
-                    #t0_with_preprocessing = time.time()
-                    tmp = -1
-                    image_batch = image_batch / 255.0
-                    t1 = time.time()
-                    with open (settings_obj.status_file_name, 'w') as inner_f:
-                        inner_f.write(self.model_name + '_32_' +  str(input_dim[0]) + 'x' + str(input_dim[1]) + '_ved')
-                    tmp = np.argmax(self.pretrained_model(image_batch, training = False))
-                    with open (settings_obj.status_file_name, 'w') as inner_f:
-                        #print(settings_obj.status_file_name)
-                        inner_f.write('invalid')
-                        sleep(0.1)
-                    if tmp != -1 and counter > 0:
-                        avg_lat_tmp += time.time() - t0
-                        avg_exec_tmp += time.time() - t1
-
-                    #avg_time_with_preprocessing += time.time() - t0_with_preprocessing
-                    counter += 1
+            for i in range(0, 1005):
+                tmp = -1
+                image_batch = test_images[i%320 : (i + batch_size) % 320]
+                t0 = time.time()
+                image_batch = image_batch / 255.0
+                t1 = time.time()
+                with open (settings_obj.status_file_name, 'w') as inner_f:
+                    inner_f.write(self.model_name + '_32_' +  str(input_dim[0]) + 'x' + str(input_dim[1]) + '_ved')
+                tmp = np.argmax(self.pretrained_model(image_batch, training = False))
                 
-                #tf.profiler.experimental.stop()
-
-                avg_lat += (avg_lat_tmp / (max(self.batch_sizes) * 10 -1) )
-                avg_exec += (avg_exec_tmp / (max(self.batch_sizes) * 10 -1) )
-                #avg_time_with_preprocessing /= counter
-                #f.write("Latency is: " + str(avg_time) + " seconds.\n")
-
-                #avg_time_with_preprocessing /= counter
-                #tmp = np.argmax(self.pretrained_model(test_images[0:max(self.batch_sizes) * 5], training = False), 1)
-                #t0 = time.time()
-                #tmp_res = self.pretrained_model(test_images_preprocessed, training = False)
-                #tmp = np.argmax(tmp_res)
-                #avg_exec += (time.time() - t0) / len(test_images_preprocessed) 
+                with open (settings_obj.status_file_name, 'w') as inner_f:
+                    inner_f.write('invalid')
+                    sleep(0.1)
+                if tmp != -1 and i >= 5:
+                    avg_lats.append(time.time() - t0)
+                    avg_execs.append(time.time() - t1)
             
-            f.write("Latency is: " + str(avg_lat / 100) + " seconds.\n")
-            f.write("Exec time is: " + str(avg_exec/  100) + " seconds.\n")
+            avg_lats.sort()
+            avg_execs.sort()
+            f.write("Mean latency is: " + str(sum(avg_lats) / 1000) + " seconds.\n")
+            f.write("Median latency is: " + str(avg_lats[500]) + " seconds.\n")
+            f.write("STD latency is: " + str(statistics.stdev(avg_lats[500])) + " seconds.\n")
+
+            f.write("Mean exec-time is: " + str(sum(avg_execs) / 1000) + " seconds.\n")
+            f.write("Median exec-time is: " + str(avg_execs[500]) + " seconds.\n")
+            f.write("STD exec-time is: " + str(statistics.stdev(avg_execs)) + " seconds.\n")
+            
 

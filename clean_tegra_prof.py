@@ -27,9 +27,12 @@ for key, val in power_dict.items():
     for part_pow_cons_key, part_pow_cons_val in val[0].items():
         val[0][part_pow_cons_key] /= val[1]
 
+power_cons_avg = 0
 with open(out_file, 'w') as f:
     for key, val in power_dict.items():
         f.write(key + '\n')
         for part_pow_cons_key, part_pow_cons_val in val[0].items():
             f.write(part_pow_cons_key + ' ' + str(int(part_pow_cons_val)) + ' ')
+            power_cons_avg += part_pow_cons_val
         f.write('\n')
+    f.write('************************\nAverage power consumptio is: ' + power_cons_avg / len(power_dict))
