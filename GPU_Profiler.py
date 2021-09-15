@@ -24,4 +24,4 @@ class GPU_Profiler:
             while utils.get_status_line(self.settings_obj) != 'invalid' and utils.get_status_line(self.settings_obj) != 'stop':
                 pass
             p1.terminate() 
-            p2.terminate() 
+            p2.terminate()
