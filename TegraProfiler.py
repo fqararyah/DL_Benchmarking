@@ -21,7 +21,7 @@ class TegraProfiler:
             p = subprocess.Popen(['tegrastats', '--logfile', self.settings_obj.current_folder + self.device_name  + \
                 '_mem_pow_profs.txt', '--interval', '5'])
             
-            while utils.get_status_line(self.settings_obj) != 'invalid':
+            while utils.get_status_line(self.settings_obj) != 'invalid' and utils.get_status_line(self.settings_obj) != 'stop':
                 pass
 
             p.terminate() 

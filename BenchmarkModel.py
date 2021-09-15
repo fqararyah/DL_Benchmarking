@@ -156,29 +156,30 @@ class BenchmarkModel:
             batch_size = 32
             for i in range(0, 1005):
                 tmp = -1
-                image_batch = test_images[i%320 : (i + batch_size) % 320]
+                image_batch = test_images[i%100 : (i%100 + batch_size)]
+                if settings_obj.power_profile:
+                    with open (settings_obj.status_file_name, 'w') as inner_f:
+                        inner_f.write(self.model_name + '_32_' +  str(input_dim[0]) + 'x' + str(input_dim[1]) + '_ved')
                 t0 = time.time()
                 image_batch = image_batch / 255.0
                 t1 = time.time()
-                with open (settings_obj.status_file_name, 'w') as inner_f:
-                    inner_f.write(self.model_name + '_32_' +  str(input_dim[0]) + 'x' + str(input_dim[1]) + '_ved')
                 tmp = np.argmax(self.pretrained_model(image_batch, training = False))
-                
-                with open (settings_obj.status_file_name, 'w') as inner_f:
-                    inner_f.write('invalid')
-                    sleep(0.1)
+                if settings_obj.power_profile:
+                    with open (settings_obj.status_file_name, 'w') as inner_f:
+                        inner_f.write('invalid')
+                        sleep(0.1)
                 if tmp != -1 and i >= 5:
-                    avg_lats.append(time.time() - t0)
-                    avg_execs.append(time.time() - t1)
+                    avg_lats.append((time.time() - t0) / batch_size)
+                    avg_execs.append((time.time() - t1) / batch_size)
             
             avg_lats.sort()
             avg_execs.sort()
-            f.write("Mean latency is: " + str(sum(avg_lats) / 1000) + " seconds.\n")
-            f.write("Median latency is: " + str(avg_lats[500]) + " seconds.\n")
-            f.write("STD latency is: " + str(statistics.stdev(avg_lats[500])) + " seconds.\n")
+            f.write("Mean latency is:\t\t" + str(sum(avg_lats) / 1000) + " seconds.\n")
+            f.write("Median latency is:\t\t" + str(avg_lats[500]) + " seconds.\n")
+            f.write("STD latency is:\t\t" + str(statistics.stdev(avg_lats)) + " seconds.\n")
 
-            f.write("Mean exec-time is: " + str(sum(avg_execs) / 1000) + " seconds.\n")
-            f.write("Median exec-time is: " + str(avg_execs[500]) + " seconds.\n")
-            f.write("STD exec-time is: " + str(statistics.stdev(avg_execs)) + " seconds.\n")
+            f.write("Mean exec-time is:\t\t" + str(sum(avg_execs) / 1000) + " seconds.\n")
+            f.write("Median exec-time is:\t\t" + str(avg_execs[500]) + " seconds.\n")
+            f.write("STD exec-time is:\t\t" + str(statistics.stdev(avg_execs)) + " seconds.\n")
             
 

@@ -21,7 +21,7 @@ class GPU_Profiler:
                 p1 = subprocess.Popen(['nvidia-smi', '--query-gpu=power.draw', '--format=csv', '--loop-ms=5'], stdout=f)
                 p2 = subprocess.Popen(['nvidia-smi', '--query-gpu=memory.used', '--format=csv', '--loop-ms=5'], stdout=f)
             
-            while utils.get_status_line(self.settings_obj) != 'invalid':
+            while utils.get_status_line(self.settings_obj) != 'invalid' and utils.get_status_line(self.settings_obj) != 'stop':
                 pass
             p1.terminate() 
             p2.terminate() 
