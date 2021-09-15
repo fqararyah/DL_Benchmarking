@@ -11,7 +11,7 @@ import time
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-pretrained_model = tf.keras.applications.MobileNetV3Small()
+pretrained_model = tf.keras.applications.EfficientNetB0()
 
 # Normalize pixel values to be between 0 and 1
 test_images = np.random.randint(low =0, high= 256, size = [1, 224, 224,\
