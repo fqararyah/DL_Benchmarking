@@ -8,7 +8,7 @@ out_file = settings_obj.current_folder + 'pow_mem_jetson_nano_224x224.txt'
 
 power_dict = {}
 with open(in_file, 'r') as f:
-    current_key = ''
+    current_key = 'init'
     for line in f:
         line = line.replace('\n', '')
         splits = line.split(' ')
