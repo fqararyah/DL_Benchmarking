@@ -7,7 +7,7 @@ import time
 import statistics
 
 warnings.filterwarnings('ignore') # Ignore all the warning messages in this tutorial
-model = onnx.load('/home/fareed/Downloads/yolov4.onnx') # Load the ONNX file
+model = onnx.load('/home/fqararyah/onnxs/models/yolov4.onnx') # Load the ONNX file
 out_file = './onnx_out/yolov4.txt'
 tf_rep = prepare(model)
 
@@ -22,7 +22,7 @@ test_images = test_images / 255.0
 test_images = tf.cast(test_images, dtype='float32')
 avg_execs = []
 avg_lats = []
-num_iters = 1000
+num_iters = 100
 for i in range(0, num_iters + 5):
     test_images = np.random.randint(low =0, high= 256, size = [16, 416, 416, 3], dtype=np.uint8)
     t0 = time.time()
