@@ -156,10 +156,7 @@ class BenchmarkModel:
             batch_size = 1
             for i in range(0, 1005):
                 tmp = -1
-                image_batch = test_images[i%100 : (i%100 + batch_size)]
-                if settings_obj.power_profile:
-                    with open (settings_obj.status_file_name, 'w') as inner_f:
-                        inner_f.write(self.model_name + '_32_' +  str(input_dim[0]) + 'x' + str(input_dim[1]) + '_ved')
+                image_batch = np.random.randint(low =0, high= 256, size = [batch_size, 224, 224, 3], dtype=np.uint8)
                 t0 = time.time()
                 image_batch = image_batch / 255.0
                 t1 = time.time()
@@ -169,8 +166,8 @@ class BenchmarkModel:
                         inner_f.write('invalid')
                         sleep(0.1)
                 if tmp != -1 and i >= 5:
-                    avg_lats.append(1000 * (time.time() - t0) / batch_size)
                     avg_execs.append(1000 * (time.time() - t1) / batch_size)
+                    avg_lats.append(1000 * (time.time() - t0) / batch_size)
             
             avg_lats.sort()
             avg_execs.sort()
