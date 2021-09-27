@@ -14,22 +14,23 @@ def load_pb(path_to_pb):
 
 #test_images = tf.cast(test_images, dtype='float32')
 
-graph = load_pb('/Users/qarayah/Downloads/MobileNetV3Small.pb')
+graph = load_pb('/Users/qarayah/Downloads/yolov4.pb')
 out_file = './pb_out/yolov4.txt'
 
 #print(graph.get_operations())
-input = graph.get_tensor_by_name('input_1:0')
-output = graph.get_tensor_by_name('Predictions/Softmax:0')
+
+input = graph.get_tensor_by_name('inputs:0')
+output = graph.get_tensor_by_name('output_boxes:0')
 
 sess = tf.compat.v1.Session(graph=graph)
 
 
 avg_execs = []
 avg_lats = []
-num_iters = 1000
+num_iters = 10
 batch_size = 1
 for i in range(0, num_iters + 5):
-    test_images = np.random.randint(low =0, high= 256, size = [16, 416, 416, 3], dtype=np.uint8)
+    test_images = np.random.randint(low =0, high= 256, size = [batch_size, 416, 416, 3], dtype=np.uint8)
     t0 = time.time()
     test_images = test_images / 255.0
     t1 = time.time()
