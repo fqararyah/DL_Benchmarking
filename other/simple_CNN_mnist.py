@@ -78,7 +78,11 @@ for i in range(0, len(model.layers)):
     intermediate_layer_model = keras.Model(inputs=model.input,
                                        outputs=model.get_layer(layer_name).output)
     intermediate_outputs.append(intermediate_layer_model(image).numpy())
-    #print(i, "---------------------------")
+
+print("---------------------------")
+print(len(model.weights))
+print(len(model.layers))
+print("---------------------------")
 
 predictions = model.predict(x = image, batch_size = 1, verbose = 0)
 """ for i in range(0, 26):
