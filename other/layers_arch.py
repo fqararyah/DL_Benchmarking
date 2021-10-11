@@ -6,6 +6,8 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.keras.backend as K
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
 pretrained_model = tf.keras.applications.MobileNet()
 print("** Model architecture **")

@@ -36,17 +36,17 @@ for i in range(0, num_iters + 5):
     t1 = time.time()
     sess.run(output, feed_dict={input: test_images})
     if i >= 5:
-        avg_execs.append((time.time() - t1) /  batch_size)
-        avg_lats.append((time.time() - t0) /batch_size)
+        avg_execs.append(1000 * (time.time() - t1) /  batch_size)
+        avg_lats.append(1000 * (time.time() - t0) /batch_size)
 
 avg_lats.sort()
 avg_execs.sort()
 
 with open(out_file, 'w') as f:
-    f.write("Mean latency is: " + str( 1000 * sum(avg_lats) / num_iters) + " ms.\n")
-    f.write("Median latency is: " + str(1000 * avg_lats[int(num_iters / 2)]) + " ms.\n")
-    f.write("STD latency is: " + str(1000 * statistics.stdev(avg_lats)) + " ms.\n")
+    f.write("Mean latency is: " + str( sum(avg_lats) / num_iters) + " ms.\n")
+    f.write("Median latency is: " + str(avg_lats[int(num_iters / 2)]) + " ms.\n")
+    f.write("STD latency is: " + str(statistics.stdev(avg_lats)) + " ms.\n")
 
-    f.write("Mean exec-time is: " + str(1000 * sum(avg_execs) / num_iters) + " ms.\n")
-    f.write("Median exec-time is: " + str(1000 * avg_execs[int(num_iters / 2)]) + " ms.\n")
-    f.write("STD exec-time is: " + str(1000 * statistics.stdev(avg_execs)) + " ms.\n")
+    f.write("Mean exec-time is: " + str(sum(avg_execs) / num_iters) + " ms.\n")
+    f.write("Median exec-time is: " + str(avg_execs[int(num_iters / 2)]) + " ms.\n")
+    f.write("STD exec-time is: " + str(statistics.stdev(avg_execs)) + " ms.\n")

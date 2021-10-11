@@ -81,7 +81,11 @@ for i in range(0, len(model.layers)):
     #print(i, "---------------------------")
 
 predictions = model.predict(x = image, batch_size = 1, verbose = 0)
-
+""" for i in range(0, 26):
+    strr = ''
+    for j in range(0, 26):
+        strr += ' ' + str(intermediate_outputs[0][0][i][j][0])
+    print(strr) """
 if np.sum(predictions - intermediate_outputs[-1]) != 0:
     print("Error")
 else:
@@ -95,7 +99,7 @@ else:
     with open('/Users/qarayah/WD/python/benchmarking/other/out/simple_mnist_layer1.txt', 'w') as f2:
         for layer in range(0, len(model.weights)):
             layer_weights = model.weights[layer].numpy()
-            f2.write(str(layer_weights.shape).replace('(', '').replace(')', '').replace(',', '') + "\n")
+            #f2.write(str(layer_weights.shape).replace('(', '').replace(')', '').replace(',', '') + "\n")
             for filter in range(0, layer_weights.shape[3]):
                 for depth in range(0, layer_weights.shape[2]):
                     for row in range(0, layer_weights.shape[0]):
@@ -106,7 +110,7 @@ else:
     
     with open('/Users/qarayah/WD/python/benchmarking/other/out/simple_mnist_out1.txt', 'w') as f2:
         for layer_output in intermediate_outputs:
-            f2.write(str(layer_output.shape).replace('(', '').replace(')', '').replace(',', '') + '\n')
+            #f2.write(str(layer_output.shape).replace('(', '').replace(')', '').replace(',', '') + '\n')
             for depth in range(0, layer_output.shape[3]):
                     for row in range(0, layer_output.shape[1]):
                         for col in range(layer_output.shape[2]):
