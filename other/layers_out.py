@@ -10,6 +10,8 @@ import ssl
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
+out_dir_path = os.path.dirname(os.path.realpath(__file__))
+out_dir_path = out_dir_path.replace(out_dir_path.split('/')[-1], 'out')
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -17,27 +19,27 @@ pretrained_model = tf.keras.applications.MobileNet()
 print("** Model architecture **")
 pretrained_model.summary()
 
-# test_images = np.random.randint(low =0, high= 256, size = [10,224, 224, 3], dtype=np.uint8)
+test_images = np.random.randint(low =0, high= 256, size = [10,224, 224, 3], dtype=np.uint8)
 
-# test_images = test_images / 255.0
+test_images = test_images / 255.0
 
-# counter = 0
-# #while counter < 100:
-# image = test_images[counter]
-# print(image[0][0])
-# with open('./out/image.txt', 'w') as f:
-#     for i in range(image.shape[0]):
-#         for j in range(image.shape[1]):
-#             for k in range(image.shape[2]):
-#                 f.write(str(image[i][j][k]) + ' ')
-#             f.write('\n')
-#exit()
+counter = 0
+#while counter < 100:
+if not os.path.isfile(out_dir_path + '/image.txt'):
+    image = test_images[counter]
+    print(image[0][0])
+    with open(out_dir_path + '/image.txt', 'w')as f:
+        for i in range(image.shape[0]):
+            for j in range(image.shape[1]):
+                for k in range(image.shape[2]):
+                    f.write(str(image[i][j][k]) + ' ')
+                f.write('\n')
 #image = np.expand_dims(image, axis=0).astype(np.float32)
 
 image = np.empty([224, 224, 3])
 
 count = 0
-with open('./out/image.txt', 'r') as f:
+with open(out_dir_path + '/image.txt', 'r') as f:
     for line in f:
         splits = line.strip().split(' ')
         for k in range(len(splits)):
@@ -62,13 +64,29 @@ for i in range(0, len(pretrained_model.layers)):
 #if np.sum(predictions - intermediate_outputs[-1]) != 0:
 #    print("Error")
 #else:
+
+try: 
+    os.makedirs(out_dir_path + '/' + pretrained_model.name )
+except OSError as error: 
+    print('already exists') 
+
+
+with open (out_dir_path + '/' + pretrained_model.name + '/layers_output_shapes.txt', 'w') as f:
+    for layer_name, layer_output in intermediate_outputs.items():
+        f.write(str(layer_output.shape) + '\n')
+
 np.set_printoptions(threshold=sys.maxsize)
 for layer_name, layer_output in intermediate_outputs.items():
-    with open('./out/' + pretrained_model.name + '/' + layer_name + '.txt', 'w') as f:
-        f.write(str(layer_output.shape) + '\n')
-        f.write(str(layer_output) + '\n')
-    
-    if layer_name in layers_weights:
-        with open('./out/' + pretrained_model.name + '/weights_' + layer_name + '.txt', 'w') as f:
-            f.write(str(layers_weights[layer_name].shape) + '\n')
-            f.write(str(layers_weights[layer_name]) + '\n')
+    with open( out_dir_path + '/' + pretrained_model.name + '/' + layer_name + '.txt', 'w') as f:
+        if len(layer_output.shape) == 4:
+            layer_output = np.swapaxes(layer_output, 1, 3)
+        f.write(str(layer_output).replace('[', '').replace(']', '') + '\n')
+
+with open (out_dir_path + '/' + pretrained_model.name + '/layers_weights_shapes.txt', 'w') as f:
+    for layer_name, weights in layers_weights.items():
+        f.write(str(weights.shape) + '\n')
+
+for layer_name, weights in layers_weights.items():
+    with open(out_dir_path + '/' + pretrained_model.name + '/weights_' + layer_name + '.txt', 'w') as f:
+        #np.swapaxes(layers_weights, )
+        f.write(str(weights) + '\n')
