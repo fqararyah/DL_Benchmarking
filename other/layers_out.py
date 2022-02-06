@@ -84,9 +84,18 @@ for layer_name, layer_output in intermediate_outputs.items():
 
 with open (out_dir_path + '/' + pretrained_model.name + '/layers_weights_shapes.txt', 'w') as f:
     for layer_name, weights in layers_weights.items():
-        f.write(str(weights.shape) + '\n')
+        f.write(layer_name + ' ' + str(weights.shape) + '\n')
 
 for layer_name, weights in layers_weights.items():
     with open(out_dir_path + '/' + pretrained_model.name + '/weights_' + layer_name + '.txt', 'w') as f:
-        #np.swapaxes(layers_weights, )
-        f.write(str(weights) + '\n')
+        layer_shape = weights.shape
+        if len(layer_shape) == 4:
+            for i in range(layer_shape[3]):
+                for j in range(layer_shape[2]):
+                    for k in range(layer_shape[0]):
+                        for l in range(layer_shape[1]):
+                            f.write(str(weights[k][l][j][i]) + ' ')
+                    f.write('\n')
+                f.write('\n')
+        else:
+            f.write(str(weights).replace('[', '').replace(']', '') + '\n')
