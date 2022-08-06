@@ -25,6 +25,10 @@ test_images = test_images / 255.0
 
 counter = 0
 #while counter < 100:
+
+if not os.path.isdir(out_dir_path):
+    os.mkdir(out_dir_path)
+
 if not os.path.isfile(out_dir_path + '/image.txt'):
     image = test_images[counter]
     print(image[0][0])
