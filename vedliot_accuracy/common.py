@@ -31,6 +31,26 @@ except NameError:
 
 EXPLICIT_BATCH = 1 << (int)(trt.NetworkDefinitionCreationFlag.EXPLICIT_BATCH)
 
+DATASET_PATH = ''
+MODEL_PATH = ''
+LABELS_PATH = ''
+GROUND_TRUTH_PATH = ''
+
+def read_settings():
+    global DATASET_PATH, MODEL_PATH, LABELS_PATH, GROUND_TRUTH_PATH
+    with open('./settings.txt', 'r') as f:
+        for line in f:
+            line = line.replace('\n', '').replace(' ', '')
+            if 'dataset_path' in line.lower():
+                DATASET_PATH = line.split('::')[1]
+            elif 'model_path' in line.lower():
+                MODEL_PATH = line.split('::')[1]
+            elif 'labels_path' in line.lower():
+                LABELS_PATH = line.split('::')[1]
+            elif 'ground_truth_path' in line.lower():
+                GROUND_TRUTH_PATH = line.split('::')[1]
+
+read_settings()
 
 def GiB(val):
     return val * 1 << 30
@@ -118,6 +138,15 @@ def locate_files(data_paths, filenames, err_msg=""):
             )
     return found_files
 
+def locate_images(path):
+    image_list = []
+    # dirs=directories
+    for (root, dirs, file) in os.walk(path):
+        for f in file:
+            if '.JPEG' in f:
+                image_list.append(os.path.abspath(os.path.join(path, f)))
+                #print(image_list[-1])
+    return image_list
 
 # Simple helper data class that's a little nicer to use than a 2-tuple.
 class HostDeviceMem(object):
@@ -182,3 +211,5 @@ def do_inference_v2(context, bindings, inputs, outputs, stream):
     stream.synchronize()
     # Return only the host outputs.
     return [out.host for out in outputs]
+
+

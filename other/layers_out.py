@@ -15,7 +15,7 @@ out_dir_path = out_dir_path.replace(out_dir_path.split('/')[-1], 'out')
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-pretrained_model = tf.keras.applications.MobileNet()
+pretrained_model = tf.keras.applications.MobileNetV2()
 print("** Model architecture **")
 pretrained_model.summary()
 

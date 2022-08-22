@@ -30,6 +30,7 @@ from PIL import Image
 
 import common
 
+import json
 
 class ModelData(object):
     MODEL_PATH = "ResNet50.onnx"
@@ -80,21 +81,23 @@ def load_normalized_test_case(test_image, pagelocked_buffer):
 
 def main():
     # Set the data path to the directory that contains the trained models and test images for inference.
-    _, data_files = common.find_sample_data(
-        description="Runs a ResNet50 network with a TensorRT inference engine.",
-        subfolder="resnet50",
-        find_files=[
-            "binoculars.jpeg",
-            "reflex_camera.jpeg",
-            "tabby_tiger_cat.jpg",
-            ModelData.MODEL_PATH,
-            "class_labels.txt",
-        ],
-    )
+    # _, data_files = common.find_sample_data(
+    #     description="Runs a ResNet50 network with a TensorRT inference engine.",
+    #     subfolder="resnet50",
+    #     find_files=[
+    #         "binoculars.jpeg",
+    #         "reflex_camera.jpeg",
+    #         "tabby_tiger_cat.jpg",
+    #         ModelData.MODEL_PATH,
+    #         "class_labels.txt",
+    #     ],
+    # )
     # Get test images, models and labels.
-    test_images = data_files[0:3]
-    onnx_model_file, labels_file = data_files[3:]
-    labels = open(labels_file, "r").read().split("\n")
+    test_images = common.locate_images(common.DATASET_PATH)
+    #data_files[0:3]
+    onnx_model_file = common.MODEL_PATH
+    #, labels_file = data_files[3:]
+    labels = open(common.LABELS_PATH, "r").read().split("\n")
 
     # Build a TensorRT engine.
     engine = build_engine_onnx(onnx_model_file)
@@ -103,22 +106,42 @@ def main():
     inputs, outputs, bindings, stream = common.allocate_buffers(engine)
     # Contexts are used to perform inference.
     context = engine.create_execution_context()
+  
+    # Opening JSON file
+    #f = open(common.GROUND_TRUTH_PATH)
+    #ground_truth = json.load(f)
 
-    # Load a normalized test case into the host input page-locked buffer.
-    test_image = random.choice(test_images)
-    test_case = load_normalized_test_case(test_image, inputs[0].host)
-    # Run the engine. The output will be a 1D tensor of length 1000, where each value represents the
-    # probability that the image corresponds to that label
-    trt_outputs = common.do_inference_v2(context, bindings=bindings, inputs=inputs, outputs=outputs, stream=stream)
-    # We use the highest probability as our prediction. Its index corresponds to the predicted label.
-    pred = labels[np.argmax(trt_outputs[0])]
-    indices = np.argsort(trt_outputs[0])[-5:]
-    for i in np.flip(indices):
-        print(labels[i])
-    if "_".join(pred.split()) in os.path.splitext(os.path.basename(test_case))[0]:
-        print("Correctly recognized " + test_case + " as " + pred)
-    else:
-        print("Incorrectly recognized " + test_case + " as " + pred)
+    #for entry in ground_truth:
+    #    print(entry[0])
+
+    print(len(test_images))
+    bad_count = 0
+    prediction_dict_list = []
+    for i in range(len(test_images)):
+        # Load a normalized test case into the host input page-locked buffer.
+        test_image = test_images[i]
+        #print(test_image)
+        try:
+            test_case = load_normalized_test_case(test_image, inputs[0].host)
+            # Run the engine. The output will be a 1D tensor of length 1000, where each value represents the
+            # probability that the image corresponds to that label
+            trt_outputs = common.do_inference_v2(context, bindings=bindings, inputs=inputs, outputs=outputs, stream=stream)
+            # We use the highest probability as our prediction. Its index corresponds to the predicted label.
+            #pred = labels[np.argmax(trt_outputs[0])]
+            indices = np.argsort(trt_outputs[0])[-5:]
+            indices = np.flip(indices)
+            prediction_dict = {"dets":indices.tolist(), "image": test_image.split('/')[-1]}
+            prediction_dict_list.append(prediction_dict)
+            if indices[0] - np.argmax(trt_outputs[0]) != 0:
+                print('something is wrong:', i)
+        except:
+            bad_count += 1
+
+    json_object = json.dumps(prediction_dict_list)
+    print('bad images:',bad_count)
+    with open("predictions.json", "w") as outfile:
+        outfile.write(json_object)
+
 
 
 if __name__ == "__main__":
