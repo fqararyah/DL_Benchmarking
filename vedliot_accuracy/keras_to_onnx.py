@@ -1,8 +1,11 @@
+import keras
+keras.__version__
+
 import numpy as np
-from keras.preprocessing import image
-from keras.applications.resnet50 import preprocess_input
-import keras2onnx
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications.resnet50 import preprocess_input
 import onnxruntime
+import keras2onnx
 
 # image preprocessing
 img_path = 'street.jpg'   # make sure the image is in img_path
@@ -13,7 +16,7 @@ x = np.expand_dims(x, axis=0)
 x = preprocess_input(x)
 
 # load keras model
-from keras.applications.resnet50 import ResNet50
+from tensorflow.keras.applications.resnet50 import ResNet50
 model = ResNet50(include_top=True, weights='imagenet')
 
 # convert to onnx model

@@ -32,6 +32,9 @@ import common
 
 import json
 
+from tensorflow.keras.preprocessing import image
+from tensorflow.keras.applications.resnet50 import preprocess_input
+
 class ModelData(object):
     MODEL_PATH = "ResNet50.onnx"
     INPUT_SHAPE = (3, 224, 224)
@@ -62,20 +65,34 @@ def build_engine_onnx(model_file):
 
 def load_normalized_test_case(test_image, pagelocked_buffer):
     # Converts the input image to a CHW Numpy array
-    def normalize_image(image):
+    def normalize_image(test_image):
         # Resize, antialias and transpose the image to CHW.
-        c, h, w = ModelData.INPUT_SHAPE
-        image_arr = (
-            np.asarray(image.resize((w, h), Image.ANTIALIAS))
-            .transpose([2, 0, 1])
-            .astype(trt.nptype(ModelData.DTYPE))
-            .ravel()
-        )
-        # This particular ResNet50 model requires some preprocessing, specifically, mean normalization.
-        return (image_arr / 255.0 - 0.45) / 0.225
+        method = 1
+        if method == 0:
+            c, h, w = ModelData.INPUT_SHAPE
+            resized_image = test_image.resize((w, h), Image.ANTIALIAS)
+            np_array = np.asarray(resized_image)
+            if(np_array.ndim == 2):
+                np_array = np.repeat(np_array[:, :, np.newaxis], 3, axis=2)
+            image_arr = (
+                np_array
+                .transpose([2, 0, 1])
+                .astype(trt.nptype(ModelData.DTYPE))
+                .ravel()
+            )
+            # This particular ResNet50 model requires some preprocessing, specifically, mean normalization.
+            return (image_arr / 255.0 - 0.45) / 0.225
+        else:
+            _test_image = image.load_img(test_image, target_size=(224, 224))
+            x = image.img_to_array(_test_image)
+            x = np.expand_dims(x, axis=0)
+            x = preprocess_input(x)
+            x = np.ravel(x)
+            return x
 
     # Normalize the image and copy to pagelocked memory.
-    np.copyto(pagelocked_buffer, normalize_image(Image.open(test_image)))
+    #np.copyto(pagelocked_buffer, normalize_image(Image.open(test_image)))
+    np.copyto(pagelocked_buffer, normalize_image(test_image))
     return test_image
 
 
@@ -121,21 +138,21 @@ def main():
         # Load a normalized test case into the host input page-locked buffer.
         test_image = test_images[i]
         #print(test_image)
-        try:
-            test_case = load_normalized_test_case(test_image, inputs[0].host)
-            # Run the engine. The output will be a 1D tensor of length 1000, where each value represents the
-            # probability that the image corresponds to that label
-            trt_outputs = common.do_inference_v2(context, bindings=bindings, inputs=inputs, outputs=outputs, stream=stream)
-            # We use the highest probability as our prediction. Its index corresponds to the predicted label.
-            #pred = labels[np.argmax(trt_outputs[0])]
-            indices = np.argsort(trt_outputs[0])[-5:]
-            indices = np.flip(indices)
-            prediction_dict = {"dets":indices.tolist(), "image": test_image.split('/')[-1]}
-            prediction_dict_list.append(prediction_dict)
-            if indices[0] - np.argmax(trt_outputs[0]) != 0:
-                print('something is wrong:', i)
-        except:
-            bad_count += 1
+        #try:
+        test_case = load_normalized_test_case(test_image, inputs[0].host)
+        # Run the engine. The output will be a 1D tensor of length 1000, where each value represents the
+        # probability that the image corresponds to that label
+        trt_outputs = common.do_inference_v2(context, bindings=bindings, inputs=inputs, outputs=outputs, stream=stream)
+        # We use the highest probability as our prediction. Its index corresponds to the predicted label.
+        #pred = labels[np.argmax(trt_outputs[0])]
+        indices = np.argsort(trt_outputs[0])[-5:]
+        indices = np.flip(indices)
+        prediction_dict = {"dets":indices.tolist(), "image": test_image.split('/')[-1]}
+        prediction_dict_list.append(prediction_dict)
+        if indices[0] - np.argmax(trt_outputs[0]) != 0:
+            print('something is wrong:', i)
+        #except:
+        #    bad_count += 1
 
     json_object = json.dumps(prediction_dict_list)
     print('bad images:',bad_count)
