@@ -1,8 +1,5 @@
 dataset_path::/home/fareed/wd/vedliot/D3.3_Accuracy_Evaluation/imagenet/images
-model_path::/home/fareed/Downloads/MobileNetV3Small.onnx
-labels_path::/home/fareed/Downloads/TensorRT-8.4.3.1.Linux.x86_64-gnu.cuda-11.6.cudnn8.4/TensorRT-8.4.3.1/data/resnet50/class_labels.txt
-ground_truth_path::/home/fareed/wd/vedliot/D3.3_Accuracy_Evaluation/imagenet/ground_truth/ILSVRC2012_validation_ground_truth.json
-
+model_path::/home/fareed/Downloads/ResNet50.onnx
 
 ResNet50
 

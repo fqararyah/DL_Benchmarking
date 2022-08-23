@@ -37,7 +37,7 @@ LABELS_PATH = ''
 GROUND_TRUTH_PATH = ''
 
 def read_settings():
-    global DATASET_PATH, MODEL_PATH, LABELS_PATH, GROUND_TRUTH_PATH
+    global DATASET_PATH, MODEL_PATH
     with open('./settings.txt', 'r') as f:
         for line in f:
             line = line.replace('\n', '').replace(' ', '')
@@ -45,10 +45,10 @@ def read_settings():
                 DATASET_PATH = line.split('::')[1]
             elif 'model_path' in line.lower():
                 MODEL_PATH = line.split('::')[1]
-            elif 'labels_path' in line.lower():
-                LABELS_PATH = line.split('::')[1]
-            elif 'ground_truth_path' in line.lower():
-                GROUND_TRUTH_PATH = line.split('::')[1]
+            # elif 'labels_path' in line.lower():
+            #     LABELS_PATH = line.split('::')[1]
+            # elif 'ground_truth_path' in line.lower():
+            #     GROUND_TRUTH_PATH = line.split('::')[1]
 
 read_settings()
 

@@ -120,7 +120,7 @@ def main():
     #data_files[0:3]
     onnx_model_file = common.MODEL_PATH
     #, labels_file = data_files[3:]
-    labels = open(common.LABELS_PATH, "r").read().split("\n")
+    #labels = open(common.LABELS_PATH, "r").read().split("\n")
 
     # Build a TensorRT engine.
     engine = build_engine_onnx(onnx_model_file)
