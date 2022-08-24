@@ -1,0 +1,2 @@
+dataset_path::/home/fareed/wd/vedliot/D3.3_Accuracy_Evaluation/coco/coco_val2017
+model_path::/home/fareed/Downloads/yolov4.onnx
