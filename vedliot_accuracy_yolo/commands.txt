@@ -1,0 +1,6 @@
+
+python3 ./downloader.py -d /home/fareed/wd/vedliot/D3.3_Accuracy_Evaluation -f ./yolov3_onnx/download.yml
+
+python3 ./yolov3_to_onnx.py -d /home/fareed/wd/vedliot/D3.3_Accuracy_Evaluation/samples/python/yolov3_onnx
+
+python3 ./onnx_to_tensorrt.py -d /home/fareed/wd/vedliot/D3.3_Accuracy_Evaluation
