@@ -33,6 +33,8 @@ import common
 
 import json
 
+import resnet_50_calib
+
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.resnet50 import preprocess_input as resnet_preprocess_input
 from tensorflow.keras.applications.mobilenet_v3 import preprocess_input as mobilenet_preprocess_input
@@ -53,6 +55,23 @@ def build_engine_onnx(model_file):
     builder = trt.Builder(TRT_LOGGER)
     network = builder.create_network(common.EXPLICIT_BATCH)
     config = builder.create_builder_config()
+
+    #new
+    if common.PRECISION == '8':
+        print('***************************')
+        print('**********8***************')
+        print('***************************')
+        calibration_cache = "mnist_calibration.cache"
+        calibrator = resnet_50_calib.ResNet50EntropyCalibrator(cache_file=calibration_cache, batch_size=1, total_images=5000)
+        config.set_flag(trt.BuilderFlag.INT8)
+        config.int8_calibrator = calibrator
+    elif common.PRECISION == '16':
+        print('***************************')
+        print('**********16***************')
+        print('***************************')
+        config.set_flag(trt.BuilderFlag.FP16)
+    #end_new
+
     parser = trt.OnnxParser(network, TRT_LOGGER)
 
     config.max_workspace_size = common.GiB(1)
@@ -92,7 +111,7 @@ def load_normalized_test_case(test_image, pagelocked_buffer):
             if 'resnet' in MODEL_NAME:
                 x = resnet_preprocess_input(x)
             elif 'mobilenet' in MODEL_NAME:
-                mobilenet_preprocess_input
+                x = mobilenet_preprocess_input(x)
             x = np.ravel(x)
             return x
 
@@ -155,7 +174,7 @@ def main():
         indices = np.flip(indices)
         prediction_dict = {"dets":indices.tolist(), "image": test_image.split('/')[-1]}
         prediction_dict_list.append(prediction_dict)
-        if indices[0] - np.argmax(trt_outputs[0]) != 0:
+        if indices[0] - np.argmax(trt_outputs[0]) != 0 and trt_outputs[0][np.argmax(trt_outputs[0])] != trt_outputs[0][indices[0]]:
             print('something is wrong:', i)
         #except:
         #    bad_count += 1
@@ -163,7 +182,7 @@ def main():
     json_object = json.dumps(prediction_dict_list)
     print('bad images:',bad_count)
 
-    with open(MODEL_NAME + "_predictions.json", "w") as outfile:
+    with open(MODEL_NAME + '_' + common.PRECISION + "_predictions.json", "w") as outfile:
         outfile.write(json_object)
 
 
