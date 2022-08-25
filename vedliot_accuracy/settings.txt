@@ -1,6 +1,8 @@
 dataset_path::/home/fareed/wd/vedliot/D3.3_Accuracy_Evaluation/imagenet/images
-model_path::/home/fareed/Downloads/ResNet50.onnx
+model_path::/home/fareed/Downloads/MobileNetV3Small.onnx
+precision::8
 
 ResNet50
+MobileNetV3Small
 
 /home/fareed/Downloads/TensorRT-8.4.3.1.Linux.x86_64-gnu.cuda-11.6.cudnn8.4/TensorRT-8.4.3.1/data/resnet50/ResNet50.onnx
