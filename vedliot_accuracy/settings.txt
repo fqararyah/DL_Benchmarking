@@ -1,6 +1,6 @@
 dataset_path::/home/fareed/wd/vedliot/D3.3_Accuracy_Evaluation/imagenet/images
 model_path::/home/fareed/Downloads/MobileNetV3Small.onnx
-precision::8
+precision::16
 
 ResNet50
 MobileNetV3Small

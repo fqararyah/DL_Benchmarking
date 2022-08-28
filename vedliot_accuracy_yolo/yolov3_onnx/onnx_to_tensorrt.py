@@ -192,8 +192,8 @@ def main():
                     (156, 198),
                     (373, 326),
                 ],
-                "obj_threshold": 0.6,  # Threshold for object coverage, float value between 0 and 1
-                "nms_threshold": 0.5,  # Threshold for non-max suppression algorithm, float value between 0 and 1
+                "obj_threshold": 0.00001,  # Threshold for object coverage, float value between 0 and 1 , fareed: it was 0.6
+                "nms_threshold": 0.5,  # Threshold for non-max suppression algorithm, float value between 0 and 1, , fareed: it was 0.5
                 "yolo_input_resolution": input_resolution_yolov3_HW,
             }
             
