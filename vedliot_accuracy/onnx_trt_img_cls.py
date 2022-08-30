@@ -89,8 +89,8 @@ def load_normalized_test_case(test_image, pagelocked_buffer):
     # Converts the input image to a CHW Numpy array
     def normalize_image(test_image):
         # Resize, antialias and transpose the image to CHW.
-        method = 1
-        if method == 0:
+        source = 'EMBDL'
+        if source == 'EMBDL':
             c, h, w = ModelData.INPUT_SHAPE
             resized_image = test_image.resize((w, h), Image.ANTIALIAS)
             np_array = np.asarray(resized_image)
