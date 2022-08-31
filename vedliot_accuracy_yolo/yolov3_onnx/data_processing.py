@@ -98,7 +98,9 @@ class PreprocessYOLO(object):
         # CHW to NCHW format
         image = np.expand_dims(image, axis=0)
         # Convert the image to row-major order, also known as "C order":
+        #image = np.flip(image, 1)
         image = np.array(image, dtype=np.float32, order="C")
+        
         return image
 
 

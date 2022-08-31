@@ -33,7 +33,7 @@ import common
 
 import json
 
-import resnet_50_calib
+import imagenet_calib
 
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.resnet50 import preprocess_input as resnet_preprocess_input
@@ -62,7 +62,7 @@ def build_engine_onnx(model_file):
         print('**********8***************')
         print('***************************')
         calibration_cache = "mnist_calibration.cache"
-        calibrator = resnet_50_calib.ResNet50EntropyCalibrator(cache_file=calibration_cache, batch_size=1, total_images=5000)
+        calibrator = imagenet_calib.ResNet50EntropyCalibrator(cache_file=calibration_cache, batch_size=1, total_images=5000)
         config.set_flag(trt.BuilderFlag.INT8)
         config.int8_calibrator = calibrator
     elif common.PRECISION == '16':
@@ -82,7 +82,22 @@ def build_engine_onnx(model_file):
             for error in range(parser.num_errors):
                 print(parser.get_error(error))
             return None
-    return builder.build_engine(network, config)
+    
+    engine_file_path = engine_file_path =  common.MODEL_PATH.split('/')[-1].split('.')[0].lower() + str(common.PRECISION) + ".trt"
+
+    if os.path.exists(engine_file_path):
+        # If a serialized engine exists, use it instead of building an engine.
+        print("Reading engine from file {}".format(engine_file_path))
+        with open(engine_file_path, "rb") as f, trt.Runtime(TRT_LOGGER) as runtime:
+            engine = runtime.deserialize_cuda_engine(f.read())
+    else:
+        plan = builder.build_serialized_network(network, config)
+        engine = trt.Runtime(TRT_LOGGER).deserialize_cuda_engine(plan)
+        print("Completed creating Engine")
+        with open(engine_file_path, "wb") as f:
+            f.write(plan)
+    
+    return engine
 
 
 def load_normalized_test_case(test_image, pagelocked_buffer):
@@ -90,9 +105,10 @@ def load_normalized_test_case(test_image, pagelocked_buffer):
     def normalize_image(test_image):
         # Resize, antialias and transpose the image to CHW.
         source = 'EMBDL'
-        if source == 'EMBDL':
+        if source != 'EMBDL':
+            _test_image = image.load_img(test_image, target_size=(224, 224))
             c, h, w = ModelData.INPUT_SHAPE
-            resized_image = test_image.resize((w, h), Image.ANTIALIAS)
+            resized_image = _test_image.resize((w, h), Image.ANTIALIAS)
             np_array = np.asarray(resized_image)
             if(np_array.ndim == 2):
                 np_array = np.repeat(np_array[:, :, np.newaxis], 3, axis=2)

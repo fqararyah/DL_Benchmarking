@@ -77,7 +77,12 @@ def get_engine(onnx_file_path, engine_file_path=""):
         ) as parser, trt.Runtime(
             TRT_LOGGER
         ) as runtime:
-            #config.max_workspace_size = 1 << 28  # 256MiB
+            config.max_workspace_size = 1 << 28  # 256MiB
+            if PRECISION == '16':
+                print('***************************')
+                print('**********16***************')
+                print('***************************')
+                config.set_flag(trt.BuilderFlag.FP16)
             #builder.max_batch_size = 1
             # Parse model file
             if not os.path.exists(onnx_file_path):
@@ -126,9 +131,10 @@ DATASET_PATH = ''
 MODEL_PATH = ''
 LABELS_PATH = ''
 GROUND_TRUTH_PATH = ''
+PRECISION = 32
 
 def read_settings():
-    global DATASET_PATH, MODEL_PATH, LABELS_PATH, GROUND_TRUTH_PATH
+    global DATASET_PATH, MODEL_PATH, LABELS_PATH, GROUND_TRUTH_PATH, PRECISION
     with open('./settings.txt', 'r') as f:
         for line in f:
             line = line.replace('\n', '').replace(' ', '')
@@ -140,6 +146,8 @@ def read_settings():
                 LABELS_PATH = line.split('::')[1]
             elif 'ground_truth_path' in line.lower():
                 GROUND_TRUTH_PATH = line.split('::')[1]
+            elif 'precision':
+                PRECISION = line.split('::')[1]
 
 def main():
     """Create a TensorRT engine for ONNX-based YOLOv3-608 and run inference."""
@@ -147,7 +155,7 @@ def main():
     MODEL_NAME = MODEL_PATH.split('/')[-1].split('.')[0].lower()
     # Try to load a previously generated YOLOv3-608 network graph in ONNX format:
     onnx_file_path = "yolov3.onnx"
-    engine_file_path = "yolov3.trt"
+    engine_file_path = "yolov3_" + PRECISION + ".trt"
     # Download a dog image and save it to the following file path:
     image_paths = locate_images(DATASET_PATH)
     prediction_dict_list = []
@@ -215,7 +223,7 @@ def main():
 
     json_object = json.dumps(prediction_dict_list)
 
-    with open(MODEL_NAME + "_predictions.json", "w") as outfile:
+    with open(MODEL_NAME + '_' + str(PRECISION) + "_predictions.json", "w") as outfile:
         outfile.write(json_object)
         # Draw the bounding boxes onto the original input image and save it as a PNG file
         #obj_detected_img = draw_bboxes(image_raw, boxes, scores, classes, ALL_CATEGORIES)
