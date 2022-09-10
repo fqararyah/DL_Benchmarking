@@ -3,4 +3,5 @@
 *.onnx
 *.trt
 out
+*.tflite
 **/out
