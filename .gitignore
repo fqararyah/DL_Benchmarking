@@ -1,4 +1,6 @@
 *.pyc
 *.json
+*.onnx
+*.trt
 out
 **/out
