@@ -31,7 +31,7 @@ from downloader import getFilePath
 
 
 class DarkNetParser(object):
-    """Definition of a parser for DarkNet-based YOLOv3-608 (only tested for this topology)."""
+    """Definition of a parser for DarkNet-based YOLOv4-608 (only tested for this topology)."""
 
     def __init__(self, supported_layers):
         """Initializes a DarkNetParser object.
@@ -41,18 +41,18 @@ class DarkNetParser(object):
         parameters are only added to the class dictionary if a parsed layer is included.
         """
 
-        # A list of YOLOv3 layers containing dictionaries with all layer
+        # A list of YOLOv4 layers containing dictionaries with all layer
         # parameters:
         self.layer_configs = OrderedDict()
         self.supported_layers = supported_layers
         self.layer_counter = 0
 
     def parse_cfg_file(self, cfg_file_path):
-        """Takes the yolov3.cfg file and parses it layer by layer,
+        """Takes the yolov4.cfg file and parses it layer by layer,
         appending each layer's parameters as a dictionary to layer_configs.
 
         Keyword argument:
-        cfg_file_path -- path to the yolov3.cfg file as string
+        cfg_file_path -- path to the yolov4.cfg file as string
         """
         with open(cfg_file_path) as cfg_file:
             remainder = cfg_file.read()
@@ -231,7 +231,7 @@ class WeightLoader(object):
     """
 
     def __init__(self, weights_file_path):
-        """Initialized with a path to the YOLOv3 .weights file.
+        """Initialized with a path to the YOLOv4 .weights file.
 
         Keyword argument:
         weights_file_path -- path to the weights file.
@@ -292,7 +292,7 @@ class WeightLoader(object):
         return initializer, inputs
 
     def _open_weights_file(self, weights_file_path):
-        """Opens a YOLOv3 DarkNet file stream and skips the header.
+        """Opens a YOLOv4 DarkNet file stream and skips the header.
 
         Keyword argument:
         weights_file_path -- path to the weights file.
@@ -346,7 +346,7 @@ class GraphBuilderONNX(object):
     """Class for creating an ONNX graph from a previously generated list of layer dictionaries."""
 
     def __init__(self, output_tensors):
-        """Initialize with all DarkNet default parameters used creating YOLOv3,
+        """Initialize with all DarkNet default parameters used creating YOLOv4,
         and specify the output tensors as an OrderedDict for their output dimensions
         with their names as keys.
 
@@ -367,7 +367,7 @@ class GraphBuilderONNX(object):
 
     def build_onnx_graph(self, layer_configs, weights_file_path, verbose=True):
         """Iterate over all layer configs (parsed from the DarkNet representation
-        of YOLOv3-608), create an ONNX graph, populate it with weights from the weights
+        of YOLOv4-608), create an ONNX graph, populate it with weights from the weights
         file and return the graph definition.
 
         Keyword arguments:
@@ -404,7 +404,7 @@ class GraphBuilderONNX(object):
                 inputs.extend(inputs_layer)
         del weight_loader
         self.graph_def = helper.make_graph(
-            nodes=self._nodes, name="YOLOv3-608", inputs=inputs, outputs=outputs, initializer=initializer
+            nodes=self._nodes, name="YOLOv4-608", inputs=inputs, outputs=outputs, initializer=initializer
         )
         if verbose:
             print(helper.printable_graph(self.graph_def))
@@ -663,8 +663,8 @@ class GraphBuilderONNX(object):
 
 
 def main():
-    """Run the DarkNet-to-ONNX conversion for YOLOv3-608."""
-    cfg_file_path = getFilePath("yolov3.cfg")
+    """Run the DarkNet-to-ONNX conversion for YOLOv4-608."""
+    cfg_file_path = getFilePath("yolov4.cfg")
     # These are the only layers DarkNetParser will extract parameters from. The three layers of
     # type 'yolo' are not parsed in detail because they are included in the post-processing later:
     supported_layers = ["net", "convolutional", "shortcut", "route", "upsample"]
@@ -686,22 +686,22 @@ def main():
     # Create a GraphBuilderONNX object with the known output tensor dimensions:
     builder = GraphBuilderONNX(output_tensor_dims)
 
-    weights_file_path = getFilePath("yolov3.weights")
+    weights_file_path = getFilePath("yolov4.weights")
 
     # Now generate an ONNX graph with weights from the previously parsed layer configurations
     # and the weights file:
-    yolov3_model_def = builder.build_onnx_graph(
+    yolov4_model_def = builder.build_onnx_graph(
         layer_configs=layer_configs, weights_file_path=weights_file_path, verbose=True
     )
     # Once we have the model definition, we do not need the builder anymore:
     del builder
 
     # Perform a sanity check on the ONNX model definition:
-    onnx.checker.check_model(yolov3_model_def)
+    onnx.checker.check_model(yolov4_model_def)
 
     # Serialize the generated ONNX graph to this file:
-    output_file_path = "yolov3.onnx"
-    onnx.save(yolov3_model_def, output_file_path)
+    output_file_path = "yolov4.onnx"
+    onnx.save(yolov4_model_def, output_file_path)
 
 
 if __name__ == "__main__":

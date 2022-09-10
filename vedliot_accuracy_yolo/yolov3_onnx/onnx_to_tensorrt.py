@@ -162,6 +162,8 @@ def main():
     step = 0
     with get_engine(onnx_file_path, engine_file_path) as engine, engine.create_execution_context() as context:
         for input_image_path in image_paths: 
+            #if step == 1000:
+            #    break
             #print(input_image_path)
             # Two-dimensional tuple with the target network's (spatial) input resolution in HW ordered
             input_resolution_yolov3_HW = (608, 608)

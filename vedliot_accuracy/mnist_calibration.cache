@@ -1,0 +1,248 @@
+TRT-8403-EntropyCalibration2
+input_1: 4000890a
+(Unnamed Layer* 19) [Shuffle]_output: 38818ba0
+MobilenetV3small/rescaling/mul:0: 3c810a14
+(Unnamed Layer* 22) [Shuffle]_output: 3c010a14
+MobilenetV3small/rescaling/add:0: 3c010a14
+MobilenetV3small/Conv/Conv2D__6:0: 3c010a14
+MobilenetV3small/Conv/BatchNorm/FusedBatchNormV3:0: 3e0a0ac8
+(Unnamed Layer* 26) [Constant]_output: 3cc18f1e
+MobilenetV3small/tf.__operators__.add/AddV2:0: 3e24d13c
+MobilenetV3small/re_lu/Relu6:0: 3d418f1e
+(Unnamed Layer* 30) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply/Mul:0: 3c010a14
+MobilenetV3small/multiply/mul:0: 3e04f933
+MobilenetV3small/expanded_conv/depthwise/pad/Pad:0: 3e04f933
+MobilenetV3small/expanded_conv/depthwise/BatchNorm/FusedBatchNormV3:0: 3f1e32c3
+MobilenetV3small/re_lu_1/Relu:0: 3ede6db0
+MobilenetV3small/expanded_conv/squeeze_excite/AvgPool/Mean:0: 3e533701
+MobilenetV3small/expanded_conv/squeeze_excite/Conv/BiasAdd__24:0: 3e533701
+MobilenetV3small/expanded_conv/squeeze_excite/Conv/BiasAdd:0: 3dcdc87f
+MobilenetV3small/expanded_conv/squeeze_excite/Relu/Relu:0: 3dcdc87f
+MobilenetV3small/expanded_conv/squeeze_excite/Conv_1/BiasAdd:0: 3cffd087
+MobilenetV3small/tf.__operators__.add_1/AddV2:0: 3d6e0ee6
+MobilenetV3small/re_lu_2/Relu6:0: 3d418f1e
+(Unnamed Layer* 53) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_1/Mul:0: 3c010a14
+MobilenetV3small/expanded_conv/squeeze_excite/Mul/mul:0: 3ede6db0
+MobilenetV3small/expanded_conv/project/BatchNorm/FusedBatchNormV3:0: 3f38a5c4
+MobilenetV3small/expanded_conv_1/expand/BatchNorm/FusedBatchNormV3:0: 3f0ef026
+MobilenetV3small/re_lu_3/Relu:0: 3ee3fe35
+MobilenetV3small/expanded_conv_1/depthwise/pad/Pad:0: 3ee3fe35
+MobilenetV3small/expanded_conv_1/depthwise/BatchNorm/FusedBatchNormV3:0: 3ec0f324
+MobilenetV3small/re_lu_4/Relu:0: 3e888acd
+MobilenetV3small/expanded_conv_1/project/BatchNorm/FusedBatchNormV3:0: 3f03ba35
+MobilenetV3small/expanded_conv_2/expand/BatchNorm/FusedBatchNormV3:0: 3eae0c35
+MobilenetV3small/re_lu_5/Relu:0: 3e506ef6
+MobilenetV3small/expanded_conv_2/depthwise/BatchNorm/FusedBatchNormV3:0: 3e5c8cd2
+MobilenetV3small/re_lu_6/Relu:0: 3e0ca69c
+MobilenetV3small/expanded_conv_2/project/BatchNorm/FusedBatchNormV3:0: 3f01d5b5
+MobilenetV3small/expanded_conv_2/Add/add:0: 3f35a2bf
+MobilenetV3small/expanded_conv_3/expand/BatchNorm/FusedBatchNormV3:0: 3e518b1b
+MobilenetV3small/tf.__operators__.add_2/AddV2:0: 3e6850b2
+MobilenetV3small/re_lu_7/Relu6:0: 3d418f1e
+(Unnamed Layer* 81) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_2/Mul:0: 3c010a14
+MobilenetV3small/multiply_1/mul:0: 3e0b8832
+MobilenetV3small/expanded_conv_3/depthwise/pad/Pad:0: 3e0b8832
+MobilenetV3small/expanded_conv_3/depthwise/BatchNorm/FusedBatchNormV3:0: 3e05a1d5
+MobilenetV3small/tf.__operators__.add_3/AddV2:0: 3e0616dd
+MobilenetV3small/re_lu_8/Relu6:0: 3d418f1e
+(Unnamed Layer* 95) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_3/Mul:0: 3c010a14
+MobilenetV3small/multiply_2/mul:0: 3d9be0b7
+MobilenetV3small/expanded_conv_3/squeeze_excite/AvgPool/Mean:0: 3da97a63
+MobilenetV3small/expanded_conv_3/squeeze_excite/Conv/BiasAdd__88:0: 3da97a63
+MobilenetV3small/expanded_conv_3/squeeze_excite/Conv/BiasAdd:0: 3d337fd3
+MobilenetV3small/expanded_conv_3/squeeze_excite/Relu/Relu:0: 3d41cf7f
+MobilenetV3small/expanded_conv_3/squeeze_excite/Conv_1/BiasAdd:0: 3cc2d477
+MobilenetV3small/tf.__operators__.add_4/AddV2:0: 3d42ef01
+MobilenetV3small/re_lu_9/Relu6:0: 3d418f1e
+(Unnamed Layer* 106) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_4/Mul:0: 3c010a14
+MobilenetV3small/expanded_conv_3/squeeze_excite/Mul/mul:0: 3d9b295a
+MobilenetV3small/expanded_conv_3/project/BatchNorm/FusedBatchNormV3:0: 3e9ca360
+MobilenetV3small/expanded_conv_4/expand/BatchNorm/FusedBatchNormV3:0: 3dbd6068
+MobilenetV3small/tf.__operators__.add_5/AddV2:0: 3dfd4c08
+MobilenetV3small/re_lu_10/Relu6:0: 3d418f1e
+(Unnamed Layer* 114) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_5/Mul:0: 3c010a14
+MobilenetV3small/multiply_3/mul:0: 3da3c3e3
+MobilenetV3small/expanded_conv_4/depthwise/BatchNorm/FusedBatchNormV3:0: 3e38d9ab
+MobilenetV3small/tf.__operators__.add_6/AddV2:0: 3e3f567b
+MobilenetV3small/re_lu_11/Relu6:0: 3d418f1e
+(Unnamed Layer* 120) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_6/Mul:0: 3c010a14
+MobilenetV3small/multiply_4/mul:0: 3da3104d
+MobilenetV3small/expanded_conv_4/squeeze_excite/AvgPool/Mean:0: 3cfa0bf7
+MobilenetV3small/expanded_conv_4/squeeze_excite/Conv/BiasAdd__114:0: 3cfa0bf7
+MobilenetV3small/expanded_conv_4/squeeze_excite/Conv/BiasAdd:0: 3d763283
+MobilenetV3small/expanded_conv_4/squeeze_excite/Relu/Relu:0: 3ccad9de
+MobilenetV3small/expanded_conv_4/squeeze_excite/Conv_1/BiasAdd:0: 3d0898d9
+MobilenetV3small/tf.__operators__.add_7/AddV2:0: 3d6ca004
+MobilenetV3small/re_lu_12/Relu6:0: 3d418f1e
+(Unnamed Layer* 131) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_7/Mul:0: 3c010a14
+MobilenetV3small/expanded_conv_4/squeeze_excite/Mul/mul:0: 3c422bb3
+MobilenetV3small/expanded_conv_4/project/BatchNorm/FusedBatchNormV3:0: 3eb006e5
+MobilenetV3small/expanded_conv_4/Add/add:0: 3ec11918
+MobilenetV3small/expanded_conv_5/expand/BatchNorm/FusedBatchNormV3:0: 3db1e8d2
+MobilenetV3small/tf.__operators__.add_8/AddV2:0: 3de283d7
+MobilenetV3small/re_lu_13/Relu6:0: 3d418f1e
+(Unnamed Layer* 139) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_8/Mul:0: 3c010a14
+MobilenetV3small/multiply_5/mul:0: 3d9ea1c1
+MobilenetV3small/expanded_conv_5/depthwise/BatchNorm/FusedBatchNormV3:0: 3e1e978a
+MobilenetV3small/tf.__operators__.add_9/AddV2:0: 3e27c5cc
+MobilenetV3small/re_lu_14/Relu6:0: 3d418f1e
+(Unnamed Layer* 145) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_9/Mul:0: 3c010a14
+MobilenetV3small/multiply_6/mul:0: 3d44871a
+MobilenetV3small/expanded_conv_5/squeeze_excite/AvgPool/Mean:0: 3c982f26
+MobilenetV3small/expanded_conv_5/squeeze_excite/Conv/BiasAdd__140:0: 3c982f26
+MobilenetV3small/expanded_conv_5/squeeze_excite/Conv/BiasAdd:0: 3d095d0f
+MobilenetV3small/expanded_conv_5/squeeze_excite/Relu/Relu:0: 3cc589ab
+MobilenetV3small/expanded_conv_5/squeeze_excite/Conv_1/BiasAdd:0: 3d0a48c7
+MobilenetV3small/tf.__operators__.add_10/AddV2:0: 3d5a4fca
+MobilenetV3small/re_lu_15/Relu6:0: 3d418f1e
+(Unnamed Layer* 156) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_10/Mul:0: 3c010a14
+MobilenetV3small/expanded_conv_5/squeeze_excite/Mul/mul:0: 3c1e3dd0
+MobilenetV3small/expanded_conv_5/project/BatchNorm/FusedBatchNormV3:0: 3f23ca26
+MobilenetV3small/expanded_conv_5/Add/add:0: 3f57c806
+MobilenetV3small/expanded_conv_6/expand/BatchNorm/FusedBatchNormV3:0: 3e02cb52
+MobilenetV3small/tf.__operators__.add_11/AddV2:0: 3e0753e9
+MobilenetV3small/re_lu_16/Relu6:0: 3d418f1e
+(Unnamed Layer* 164) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_11/Mul:0: 3c010a14
+MobilenetV3small/multiply_7/mul:0: 3dc2090e
+MobilenetV3small/expanded_conv_6/depthwise/BatchNorm/FusedBatchNormV3:0: 3e417a00
+MobilenetV3small/tf.__operators__.add_12/AddV2:0: 3e3b7081
+MobilenetV3small/re_lu_17/Relu6:0: 3d418f1e
+(Unnamed Layer* 170) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_12/Mul:0: 3c010a14
+MobilenetV3small/multiply_8/mul:0: 3dc75dcf
+MobilenetV3small/expanded_conv_6/squeeze_excite/AvgPool/Mean:0: 3da47e87
+MobilenetV3small/expanded_conv_6/squeeze_excite/Conv/BiasAdd__166:0: 3da47e87
+MobilenetV3small/expanded_conv_6/squeeze_excite/Conv/BiasAdd:0: 3b35438f
+MobilenetV3small/expanded_conv_6/squeeze_excite/Relu/Relu:0: 38ea5114
+MobilenetV3small/expanded_conv_6/squeeze_excite/Conv_1/BiasAdd:0: 3cc40557
+MobilenetV3small/tf.__operators__.add_13/AddV2:0: 3d425083
+MobilenetV3small/re_lu_18/Relu6:0: 3d418f1e
+(Unnamed Layer* 181) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_13/Mul:0: 3c010a14
+MobilenetV3small/expanded_conv_6/squeeze_excite/Mul/mul:0: 3d9c7cfe
+MobilenetV3small/expanded_conv_6/project/BatchNorm/FusedBatchNormV3:0: 3e9c60e5
+MobilenetV3small/expanded_conv_7/expand/BatchNorm/FusedBatchNormV3:0: 3dd6e8ff
+MobilenetV3small/tf.__operators__.add_14/AddV2:0: 3dfa937d
+MobilenetV3small/re_lu_19/Relu6:0: 3d418f1e
+(Unnamed Layer* 189) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_14/Mul:0: 3c010a14
+MobilenetV3small/multiply_9/mul:0: 3d9ea225
+MobilenetV3small/expanded_conv_7/depthwise/BatchNorm/FusedBatchNormV3:0: 3e5389ef
+MobilenetV3small/tf.__operators__.add_15/AddV2:0: 3e3fcf30
+MobilenetV3small/re_lu_20/Relu6:0: 3d418f1e
+(Unnamed Layer* 195) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_15/Mul:0: 3c010a14
+MobilenetV3small/multiply_10/mul:0: 3d9da698
+MobilenetV3small/expanded_conv_7/squeeze_excite/AvgPool/Mean:0: 3ca3547d
+MobilenetV3small/expanded_conv_7/squeeze_excite/Conv/BiasAdd__192:0: 3ca3547d
+MobilenetV3small/expanded_conv_7/squeeze_excite/Conv/BiasAdd:0: 3cc249fe
+MobilenetV3small/expanded_conv_7/squeeze_excite/Relu/Relu:0: 3cc249fe
+MobilenetV3small/expanded_conv_7/squeeze_excite/Conv_1/BiasAdd:0: 3cf834c4
+MobilenetV3small/tf.__operators__.add_16/AddV2:0: 3d4c76a5
+MobilenetV3small/re_lu_21/Relu6:0: 3d4e3cd0
+(Unnamed Layer* 206) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_16/Mul:0: 3c097de0
+MobilenetV3small/expanded_conv_7/squeeze_excite/Mul/mul:0: 3c318c37
+MobilenetV3small/expanded_conv_7/project/BatchNorm/FusedBatchNormV3:0: 3e76ca96
+MobilenetV3small/expanded_conv_7/Add/add:0: 3ebeb4e3
+MobilenetV3small/expanded_conv_8/expand/BatchNorm/FusedBatchNormV3:0: 3dbf770a
+MobilenetV3small/tf.__operators__.add_17/AddV2:0: 3e0369bb
+MobilenetV3small/re_lu_22/Relu6:0: 3d418f1e
+(Unnamed Layer* 214) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_17/Mul:0: 3c010a14
+MobilenetV3small/multiply_11/mul:0: 3d67ffe2
+MobilenetV3small/expanded_conv_8/depthwise/pad/Pad:0: 3d67ffe2
+MobilenetV3small/expanded_conv_8/depthwise/BatchNorm/FusedBatchNormV3:0: 3ddcc3a0
+MobilenetV3small/tf.__operators__.add_18/AddV2:0: 3defe499
+MobilenetV3small/re_lu_23/Relu6:0: 3d418f1e
+(Unnamed Layer* 228) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_18/Mul:0: 3c010a14
+MobilenetV3small/multiply_12/mul:0: 3d9db04e
+MobilenetV3small/expanded_conv_8/squeeze_excite/AvgPool/Mean:0: 3cf66d2f
+MobilenetV3small/expanded_conv_8/squeeze_excite/Conv/BiasAdd__222:0: 3cf66d2f
+MobilenetV3small/expanded_conv_8/squeeze_excite/Conv/BiasAdd:0: 3d86df14
+MobilenetV3small/expanded_conv_8/squeeze_excite/Relu/Relu:0: 3d712cff
+MobilenetV3small/expanded_conv_8/squeeze_excite/Conv_1/BiasAdd:0: 3d63f8a1
+MobilenetV3small/tf.__operators__.add_19/AddV2:0: 3d86efdd
+MobilenetV3small/re_lu_24/Relu6:0: 3d418f1e
+(Unnamed Layer* 239) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_19/Mul:0: 3c010a14
+MobilenetV3small/expanded_conv_8/squeeze_excite/Mul/mul:0: 3d0e5801
+MobilenetV3small/expanded_conv_8/project/BatchNorm/FusedBatchNormV3:0: 3e5e5028
+MobilenetV3small/expanded_conv_9/expand/BatchNorm/FusedBatchNormV3:0: 3d9eec41
+MobilenetV3small/tf.__operators__.add_20/AddV2:0: 3dd1f0d9
+MobilenetV3small/re_lu_25/Relu6:0: 3d418f1e
+(Unnamed Layer* 247) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_20/Mul:0: 3c010a14
+MobilenetV3small/multiply_13/mul:0: 3d844230
+MobilenetV3small/expanded_conv_9/depthwise/BatchNorm/FusedBatchNormV3:0: 3e05b316
+MobilenetV3small/tf.__operators__.add_21/AddV2:0: 3e12e9ac
+MobilenetV3small/re_lu_26/Relu6:0: 3d418f1e
+(Unnamed Layer* 253) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_21/Mul:0: 3c010a14
+MobilenetV3small/multiply_14/mul:0: 3d5182c8
+MobilenetV3small/expanded_conv_9/squeeze_excite/AvgPool/Mean:0: 3cd82b5c
+MobilenetV3small/expanded_conv_9/squeeze_excite/Conv/BiasAdd__248:0: 3cd82b5c
+MobilenetV3small/expanded_conv_9/squeeze_excite/Conv/BiasAdd:0: 3d107f63
+MobilenetV3small/expanded_conv_9/squeeze_excite/Relu/Relu:0: 3d1aa27b
+MobilenetV3small/expanded_conv_9/squeeze_excite/Conv_1/BiasAdd:0: 3d464982
+MobilenetV3small/tf.__operators__.add_22/AddV2:0: 3d9261ae
+MobilenetV3small/re_lu_27/Relu6:0: 3d430527
+(Unnamed Layer* 264) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_22/Mul:0: 3c020370
+MobilenetV3small/expanded_conv_9/squeeze_excite/Mul/mul:0: 3c16e20d
+MobilenetV3small/expanded_conv_9/project/BatchNorm/FusedBatchNormV3:0: 3e5e8bb0
+MobilenetV3small/expanded_conv_9/Add/add:0: 3e957381
+MobilenetV3small/expanded_conv_10/expand/BatchNorm/FusedBatchNormV3:0: 3e54ed04
+MobilenetV3small/tf.__operators__.add_23/AddV2:0: 3e570c42
+MobilenetV3small/re_lu_28/Relu6:0: 3d418f1e
+(Unnamed Layer* 272) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_23/Mul:0: 3c010a14
+MobilenetV3small/multiply_15/mul:0: 3d768010
+MobilenetV3small/expanded_conv_10/depthwise/BatchNorm/FusedBatchNormV3:0: 3e8a4882
+MobilenetV3small/tf.__operators__.add_24/AddV2:0: 3e9f90d7
+MobilenetV3small/re_lu_29/Relu6:0: 3d418f1e
+(Unnamed Layer* 278) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_24/Mul:0: 3c010a14
+MobilenetV3small/multiply_16/mul:0: 3e1622d7
+MobilenetV3small/expanded_conv_10/squeeze_excite/AvgPool/Mean:0: 3d62a26e
+MobilenetV3small/expanded_conv_10/squeeze_excite/Conv/BiasAdd__274:0: 3d62a26e
+MobilenetV3small/expanded_conv_10/squeeze_excite/Conv/BiasAdd:0: 3db39a03
+MobilenetV3small/expanded_conv_10/squeeze_excite/Relu/Relu:0: 3db3225f
+MobilenetV3small/expanded_conv_10/squeeze_excite/Conv_1/BiasAdd:0: 3dc9c126
+MobilenetV3small/tf.__operators__.add_25/AddV2:0: 3df7d357
+MobilenetV3small/re_lu_30/Relu6:0: 3d418f1e
+(Unnamed Layer* 289) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_25/Mul:0: 3c010a14
+MobilenetV3small/expanded_conv_10/squeeze_excite/Mul/mul:0: 3d47a879
+MobilenetV3small/expanded_conv_10/project/BatchNorm/FusedBatchNormV3:0: 3ee003a5
+MobilenetV3small/expanded_conv_10/Add/add:0: 3f20183d
+MobilenetV3small/Conv_1/BatchNorm/FusedBatchNormV3:0: 3f14b6e2
+MobilenetV3small/tf.__operators__.add_26/AddV2:0: 3ef430d8
+MobilenetV3small/re_lu_31/Relu6:0: 3d418f1e
+(Unnamed Layer* 297) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_26/Mul:0: 3c010a14
+MobilenetV3small/multiply_17/mul:0: 3e05ccd9
+MobilenetV3small/Conv_2/BiasAdd:0: 3ee055fb
+MobilenetV3small/tf.__operators__.add_27/AddV2:0: 3ed74935
+MobilenetV3small/re_lu_32/Relu6:0: 3d418f1e
+(Unnamed Layer* 303) [Shuffle]_output: 3aac0d71
+MobilenetV3small/tf.math.multiply_27/Mul:0: 3c010a14
+MobilenetV3small/multiply_18/mul:0: 3e05e63f
+MobilenetV3small/global_average_pooling2d/Mean:0: 3d1662c2
+MobilenetV3small/Logits/BiasAdd__295:0: 3d1662c2
+MobilenetV3small/Logits/BiasAdd:0: 3dffade9
+MobilenetV3small/flatten/Reshape:0: 3dffade9
+Predictions: 3adf7adf

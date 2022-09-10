@@ -75,6 +75,9 @@ class PreprocessYOLO(object):
         """
 
         image_raw = Image.open(input_image_path)
+        image_raw = image_raw.convert('RGB')
+        #r, g, b = image_raw.split()
+        #image_raw = Image.merge("RGB", (b, g, r))
         # Expecting yolo_input_resolution in (height, width) format, adjusting to PIL
         # convention (width, height) in PIL:
         new_resolution = (self.yolo_input_resolution[1], self.yolo_input_resolution[0])
@@ -91,8 +94,6 @@ class PreprocessYOLO(object):
         image -- image as three-dimensional NumPy float array, in HWC format
         """
         image /= 255.0
-        if(image.ndim == 2):
-                image = np.repeat(image[:, :, np.newaxis], 3, axis=2)
         # HWC to CHW format:
         image = np.transpose(image, [2, 0, 1])
         # CHW to NCHW format
