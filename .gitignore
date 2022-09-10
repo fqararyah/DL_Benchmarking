@@ -3,5 +3,7 @@
 *.onnx
 *.trt
 out
+*.pb
+variables
 *.tflite
 **/out

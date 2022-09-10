@@ -1,0 +1,4 @@
+init
+VDD_SYS_GPU 1910 VDD_SYS_SOC 765 VDD_IN 6264 VDD_SYS_DDR 1503 RAM 6574 
+************************
+Average power consumptio is: 17017.888665325285

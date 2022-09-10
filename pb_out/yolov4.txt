@@ -1,0 +1,6 @@
+Mean latency is: 340.9454584121704 ms.
+Median latency is: 341.5060043334961 ms.
+STD latency is: 4.690317963466255 ms.
+Mean exec-time is: 340.36505222320557 ms.
+Median exec-time is: 340.76690673828125 ms.
+STD exec-time is: 4.724137118634465 ms.

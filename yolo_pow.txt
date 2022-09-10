@@ -1,0 +1,4 @@
+init
+VDD_SYS_GPU 3496 VDD_SYS_SOC 901 VDD_IN 8634 VDD_SYS_DDR 2175 RAM 7344 
+************************
+Average power consumptio is: 22552.281186783548

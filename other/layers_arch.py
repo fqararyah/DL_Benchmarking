@@ -5,11 +5,10 @@ from time import process_time_ns
 
 import numpy as np
 import tensorflow as tf
-import tensorflow.keras.backend
+import tensorflow.keras.backend as K
 
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
-
 
 pretrained_model = tf.keras.applications.MobileNetV2()
 print("** Model architecture **")
@@ -20,9 +19,9 @@ print(len(pretrained_model.layers))
 for layer in range(0, len(pretrained_model.layers)):
     #print(pretrained_model.layers[layer].get_config())
     current_layer = pretrained_model.layers[layer]
-    print(current_layer.name.lower() )
-    if 'conv' in current_layer.type.lower() and '_bn' not in current_layer.name.lower() and \
-        '_relu' not in current_layer.name.lower() and current_layer.weights:
+
+    if 'conv' in current_layer.name.lower() and not '_bn' in current_layer.name.lower() and \
+        not '_relu' in current_layer.name.lower() and current_layer.weights:
         print('conv: ', current_layer.name, current_layer.weights[0].shape)
     # elif 'bn' in current_layer.name:
     #     print('bn: ')
