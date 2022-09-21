@@ -7,3 +7,6 @@ out
 variables
 *.tflite
 **/out
+*weights*.txt
+**/weights
+**/fms
