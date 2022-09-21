@@ -15,6 +15,7 @@ import pathlib
 
 
 MODEL_NAME = 'slice'
+CREATE_NEW_TFLITE_MODEL_ANYWAY = True
 PRECISION = 8
 
 def representative_dataset():
@@ -26,27 +27,31 @@ model = models.MobileNetV2()
 
 cloned_model = Sequential()
 
-layer = model.layers[0]
-config = layer.get_config()
-weights = layer.get_weights()
-cloned_layer = type(layer).from_config(config)
-cloned_layer.build(layer.input_shape)
-cloned_layer.set_weights(weights)
-cloned_model.add(cloned_layer)
+for i in range(10):
+    layer = model.layers[i]
+    config = layer.get_config()
+    weights = layer.get_weights()
+    cloned_layer = type(layer).from_config(config)
+    cloned_layer.build(layer.input_shape)
+    cloned_layer.set_weights(weights)
+    cloned_model.add(cloned_layer)
 
-layer = model.layers[1]
-config = layer.get_config()
-weights = layer.get_weights()
-cloned_layer = type(layer).from_config(config)
-cloned_layer.build(layer.input_shape)
-cloned_layer.set_weights(weights)
-cloned_model.add(cloned_layer)
+
+# layer = model.layers[4]
+# print('#######################################', layer.name)
+# config = layer.get_config()
+# weights = layer.get_weights()
+# cloned_layer = type(layer).from_config(config)
+# cloned_layer.build(layer.input_shape)
+# cloned_layer.set_weights(weights)
+# cloned_model.add(cloned_layer)
 
 print(cloned_model.summary)
 
 tflite_models_dir = pathlib.Path("./")
 tflite_model_quant_file = tflite_models_dir/(MODEL_NAME + '_' + str(PRECISION) +".tflite")
-if not os.path.exists(tflite_model_quant_file):
+
+if CREATE_NEW_TFLITE_MODEL_ANYWAY or not os.path.exists(tflite_model_quant_file):
     converter = tf.lite.TFLiteConverter.from_keras_model(cloned_model)
     converter.optimizations = [tf.lite.Optimize.DEFAULT]
     converter.representative_dataset = representative_dataset
@@ -61,7 +66,7 @@ if not os.path.exists(tflite_model_quant_file):
     
     tflite_model_quant_file.write_bytes(tflite_model_quant)
 
-interpreter = tf.lite.Interpreter(model_path=str(tflite_model_quant_file))
+interpreter = tf.lite.Interpreter(model_path=str(tflite_model_quant_file), experimental_preserve_all_tensors=True)
 interpreter.allocate_tensors()
 
 input_details = interpreter.get_input_details()[0]
