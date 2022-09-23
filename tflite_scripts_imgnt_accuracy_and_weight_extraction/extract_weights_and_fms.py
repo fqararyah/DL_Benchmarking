@@ -42,21 +42,29 @@ layers_outputs = utils.read_layers_outputs()
 layers_strides = utils.read_layers_strides()
 expansion_projection = utils.read_expansion_projection()
 
+assigned_layers = [0] * len(layers_weights)
+
 def is_it_weights(tensor_shape):
+    global assigned_layers
     for i in range(len(layers_weights)):
+        if assigned_layers[i] == 1:
+            continue
         if len(tensor_shape) == 4:
             if tensor_shape[0] == layers_weights[i].num_of_filters and tensor_shape[1] == layers_weights[i].depth \
                 and tensor_shape[2] == layers_weights[i].height and tensor_shape[3] == layers_weights[i].width:
-                return True
+                assigned_layers[i] = 1
+                return i
         if len(tensor_shape) == 3:
             if tensor_shape[0] == layers_weights[i].num_of_filters and tensor_shape[1] == layers_weights[i].height \
                 and tensor_shape[2] == layers_weights[i].width:
-                return True
+                assigned_layers[i] = 1
+                return i
         if len(tensor_shape) == 2:
             if tensor_shape[0] == layers_weights[i].num_of_filters and tensor_shape[1] == layers_weights[i].depth:
-                return True
+                assigned_layers[i] = 1
+                return i
     
-    return False
+    return -1
 
 def is_it_fms(tensor_shape):
     for i in range(len(layers_inputs)):
@@ -72,8 +80,6 @@ test_image = np.transpose(test_image, (2, 1, 0))
 test_image = np.reshape(test_image, (test_image.size))
 np.savetxt('fms/input_image', test_image, fmt='%i')
 
-
-weights_count = 0
 fms_count = 0
 
 for t in interpreter.get_tensor_details():
@@ -87,12 +93,12 @@ for t in interpreter.get_tensor_details():
         current_tensor = np.transpose(current_tensor, (0, 3, 2, 1))
 
     current_tensor_shape_str_rep = str([i for i in current_tensor.shape]).replace(' ','').replace('[', '').replace(']', '').replace(',','_')
-    
-    if is_it_weights(current_tensor.shape):
+    index_in_weights = is_it_weights(current_tensor.shape)
+    if index_in_weights >= 0:
         current_tensor = np.reshape(current_tensor, (current_tensor.size))
-        np.savetxt('./weights/weights_' + str(weights_count) + '_' + current_tensor_shape_str_rep, current_tensor, fmt='%i')
-        weights_count += 1
+        np.savetxt('./weights/weights_' + str(index_in_weights) + '_' + layers_types[index_in_weights] + '.txt', current_tensor, fmt='%i')
+        
     elif is_it_fms(current_tensor.shape):
         current_tensor = np.reshape(current_tensor, (current_tensor.size))
-        np.savetxt('fms/fms_' + str(fms_count) + '_' + current_tensor_shape_str_rep, current_tensor, fmt='%i')
+        np.savetxt('fms/fms_' + str(fms_count) + '_' + current_tensor_shape_str_rep + '.txt', current_tensor, fmt='%i')
         fms_count += 1
