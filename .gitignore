@@ -10,3 +10,5 @@ variables
 *weights*.txt
 **/weights
 **/fms
+**/scratch_out
+**/non_conv*

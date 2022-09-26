@@ -107,6 +107,8 @@ for t in interpreter.get_tensor_details():
     elif is_it_fms(current_tensor.shape):
         current_tensor = np.reshape(current_tensor, (current_tensor.size))
         np.savetxt('fms/fms_' + str(fms_count) + '_' + current_tensor_shape_str_rep + '.txt', current_tensor, fmt='%i')
+        with open('./fms/fms_' + str(fms_count) + '_' + current_tensor_shape_str_rep + '_specs.txt', 'w') as f:
+            f.write(str(t))
         fms_count += 1
     # elif current_tensor.size < 2048:
     #     #print(current_tensor.shape)
