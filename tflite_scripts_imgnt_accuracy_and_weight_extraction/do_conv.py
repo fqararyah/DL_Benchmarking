@@ -1,17 +1,18 @@
 import numpy as np
 
-layer_index = 4
-layers_weights_shape = {3: (16, 32, 1, 1), 4: (96, 16, 1, 1), 6: (24, 96, 1, 1)}
-layers_ifms_shape = {3: (32, 112, 112), 4: (16, 112, 112), 6: (96, 56, 56)}
-weights_file = './weights/weights_{}_pw.txt'.format(layer_index)
-ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(layer_index, layers_ifms_shape[layer_index][0], layers_ifms_shape[layer_index][1],\
+layer_index = 0
+layers_weights_shape = {0:(32,3,3,3), 3: (16, 32, 1, 1), 4: (96, 16, 1, 1), 6: (24, 96, 1, 1)}
+layers_ifms_shape = {0:(3,224,224), 3: (32, 112, 112), 4: (16, 112, 112), 6: (96, 56, 56)}
+layer_type = 'c'
+weights_file = './weights/weights_{}_{}.txt'.format(layer_index, layer_type)
+ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(layer_index if layer_index > 0 else 1, layers_ifms_shape[layer_index][0], layers_ifms_shape[layer_index][1],\
     layers_ifms_shape[layer_index][2])
 ofms_file = './scratch_out/ofms_{}.txt'.format(layer_index)
 
-layers_zero_point_ifms = {3: 128, 6: 128, 4: 6}
-layers_bias = {3: -2630, 6: 32910, 4: 2650}
+layers_zero_point_ifms = {0: 128, 3: 128, 6: 128, 4: 6}
+layers_bias = {0: 61864, 3: -2630, 6: 32910, 4: 2650}
 
-conv_strides = 1
+conv_strides = 2
 
 weights = np.loadtxt(weights_file).astype(np.int8)
 weights = np.reshape(weights,layers_weights_shape[layer_index])

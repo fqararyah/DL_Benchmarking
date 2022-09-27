@@ -2,16 +2,16 @@ from cv2 import sort
 from dependencies import value
 import numpy as np
 
-layer_indx = 4
-layers_ofms_shape = {3: (16, 112, 112), 6: (24, 56, 56), 4: (96, 112, 112)}
+layer_indx = 0
+layers_ofms_shape = {0: (32, 112, 112), 3: (16, 112, 112), 6: (24, 56, 56), 4: (96, 112, 112)}
 domain_file = './scratch_out/ofms_{}.txt'.format(layer_indx)
-range_file = './fms/fms_{}_{}_{}_{}.txt'.format(layer_indx + 1, layers_ofms_shape[layer_indx][0], layers_ofms_shape[layer_indx][1],\
+range_file = './fms/fms_{}_{}_{}_{}.txt'.format(layer_indx + 1 if layer_indx > 0 else 2, layers_ofms_shape[layer_indx][0], layers_ofms_shape[layer_indx][1],\
     layers_ofms_shape[layer_indx][2])
 
-layers_scale_ifms = {3: 0.0235294122248888, 6: 0.0235294122248888, 4:0.3023846447467804 }
-layers_scale_weights = {3: 0.02902807, 6: 0.01043679, 4: 0.00100364}
-layers_scale_ofms = {3: 0.3023846447467804,  6: 0.1985088586807251, 4:0.0235294122248888} 
-layers_ofms_zero_point = {3: 6, 6: 5, 4: 128}
+layers_scale_ifms = {0: 0.003921568393707275, 3: 0.0235294122248888, 6: 0.0235294122248888, 4:0.3023846447467804 }
+layers_scale_weights = {0: 0.0095633129, 3: 0.02902807, 6: 0.01043679, 4: 0.00100364}
+layers_scale_ofms = {0: 0.0235294122248888, 3: 0.3023846447467804,  6: 0.1985088586807251, 4:0.0235294122248888} 
+layers_ofms_zero_point = {0: 128, 3: 6, 6: 5, 4: 128}
 
 domain = np.loadtxt(domain_file).astype(np.int32)
 range = np.loadtxt(range_file).astype(np.int8)
