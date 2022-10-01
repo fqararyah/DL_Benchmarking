@@ -1,14 +1,17 @@
 import sys
+import pathlib
 
-sys.path.append("/media/fareed/D/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/models_archs/")
 
+current_dir = str(pathlib.Path(__file__).parent.resolve())
+sys.path.append(current_dir)
+print(current_dir)
 import classes
 
 DELIMITER = '::'
 
 NET_PREFIX = 'mob_v2'
 NET_FULL_NAME = 'mobilenet_v2'
-input_folder = '/media/fareed/D/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/models_archs/models/'\
+input_folder = current_dir + '/models/'\
      + NET_FULL_NAME + '/'
 IFMS_FILE = input_folder + 'layers_inputs.txt'
 OFMS_FILE = input_folder + 'layers_outputs.txt'
@@ -37,7 +40,7 @@ def clean_line(line):
     return line.replace(' ', '').replace('\n', '')
 
 
-def read_layers_inputs():
+def read_layers_input_shapes():
     layers_inputs = []
     with open(IFMS_FILE, 'r') as f:
        for line in f:
@@ -50,7 +53,7 @@ def read_layers_inputs():
     return layers_inputs
 
 
-def read_layers_outputs():
+def read_layers_output_shapes():
     layers_outputs = []
     with open(OFMS_FILE, 'r') as f:
         for line in f:
@@ -64,7 +67,7 @@ def read_layers_outputs():
     return layers_outputs
 
 
-def read_layers_weights(layers_types):
+def read_layers_weight_shapes(layers_types):
     layers_weights = []
     count = 0
     with open(LAYERS_WEIGHTS_FILE, 'r') as f:
