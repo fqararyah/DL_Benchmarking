@@ -77,7 +77,7 @@ def read_layers_weight_shapes(layers_types):
             if len(splits) > 0:
                 if layers_types[count] == 'dw':
                    layers_weights.append(classes.weights(int(splits[0]), 1,
-                                                int(splits[1]) if len(splits) > 1 else 1, int(splits[2]) if len(splits) > 1 else 1)) 
+                                                int(splits[1]) if len(splits) > 1 else 1, int(splits[2]) if len(splits) > 2 else 1)) 
                 else:
                     layers_weights.append(classes.weights(int(splits[0]), int(splits[1]),
                                                 int(splits[2]) if len(splits) > 2 else 1, int(splits[3]) if len(splits) > 3 else 1))
