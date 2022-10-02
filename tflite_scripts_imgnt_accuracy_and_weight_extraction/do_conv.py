@@ -3,7 +3,7 @@ import numpy as np
 from models_archs import utils
 
 
-layer_index = 0
+layer_index = 7
 layers_types = utils.read_layers_types()
 layers_weights_shape = utils.read_layers_weight_shapes(layers_types)
 layers_ifms_shape = utils.read_layers_input_shapes()
@@ -61,7 +61,7 @@ def conv():
     for i in range(layers_weights_shape[layer_index].num_of_filters):
         for j in range(ofms_shape[1]):
             for k in range(ofms_shape[2]):
-                tmp = np.sum(weights[i].astype(np.int32)) * layers_ifms_zero_point[layer_index] + \
+                tmp = np.sum(weights[i].astype(np.int32)) * -layers_ifms_zero_point[layer_index] + \
                 np.sum(weights[i].astype(np.int32) * ( ifms[:, j*conv_strides:j*conv_strides + filter_height, \
                      k*conv_strides:k*conv_strides + filter_width]) ) + layers_bias[layer_index][i]
                 

@@ -4,7 +4,7 @@ import numpy as np
 
 from models_archs import utils
 
-layer_indx = 0
+layer_indx = 7
 
 layers_ofms_shape = utils.read_layers_output_shapes()
 
@@ -25,10 +25,6 @@ rng = np.loadtxt(range_file).astype(np.int8)
 # print(sum)
 # print(sum/rng.size)
 
-print(ofms_hw)
-print(rng.size)
-exit()
-
 sum = 0
 cnt1=0
 cnt2=0
@@ -45,7 +41,7 @@ for i in range(rng.size):
     
     if domain[i] == rng[i]:
         cnt1 += 1
-    elif int(domain[i]) - rng[i] > 5 or int(domain[i]) - rng[i] < -5:
+    elif int(domain[i]) - rng[i] !=0:
         cnt2 +=1
         if int(i / ofms_hw) not in diff_locs:
             diff_locs[ int(i / ofms_hw)] =0
