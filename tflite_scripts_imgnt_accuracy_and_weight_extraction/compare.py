@@ -4,7 +4,7 @@ import numpy as np
 
 from models_archs import utils
 
-layer_indx = 7
+layer_indx = 2
 
 layers_ofms_shape = utils.read_layers_output_shapes()
 

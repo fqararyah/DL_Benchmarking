@@ -3,7 +3,7 @@ import numpy as np
 from models_archs import utils
 
 
-layer_index = 7
+layer_index = 2
 layers_types = utils.read_layers_types()
 layers_weights_shape = utils.read_layers_weight_shapes(layers_types)
 layers_ifms_shape = utils.read_layers_input_shapes()
@@ -78,9 +78,18 @@ def dw_conv():
     for i in range(layers_weights_shape[layer_index].num_of_filters):
         for j in range(ofms_shape[1]):
             for k in range(ofms_shape[2]):
-                ofms[i][j][k] = (np.sum(weights[i].astype(np.float32) * ( layers_ifms_zero_point[layer_index] + \
-                    ifms[i, j*conv_strides:j*conv_strides + \
-                        filter_height, k*conv_strides:k*conv_strides + filter_width]) ) + layers_bias[layer_index][i])
+                tmp = np.sum(weights[i].astype(np.float32)) * - layers_ifms_zero_point[layer_index] + \
+                    np.sum(weights[i].astype(np.float32) * ifms[i, j*conv_strides:j*conv_strides + \
+                        filter_height, k*conv_strides:k*conv_strides + filter_width]) + layers_bias[layer_index][i]
+
+                tmp = tmp * layers_scale_ifms[layer_index] * layers_scale_weights[layer_index][i]
+                tmp = min(max(tmp, 0), 6)
+                tmp = tmp / layers_scale_ofms[layer_index] + layers_ofms_zero_point[layer_index]
+                if tmp > 0:
+                    tmp = int(tmp + 0.5)
+                else:
+                    tmp = int(tmp -0.5)
+                ofms[i][j][k] = tmp
 
 if layer_type == 'dw':
     dw_conv()
