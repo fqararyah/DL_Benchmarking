@@ -3,11 +3,12 @@ import numpy as np
 from models_archs import utils
 
 
-layer_index = 2
+layer_index = 0
 layers_types = utils.read_layers_types()
 layers_weights_shape = utils.read_layers_weight_shapes(layers_types)
 layers_ifms_shape = utils.read_layers_input_shapes()
 layers_strides = utils.read_layers_strides()
+layers_relus = utils.read_layers_relus()
 layer_type = layers_types[layer_index]
 weights_file = './weights/weights_{}_{}.txt'.format(layer_index, layer_type)
 ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(layer_index if layer_index > 0 else 1, layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height,\
@@ -15,8 +16,8 @@ ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(layer_index if layer_index > 0 el
 ofms_file = './scratch_out/ofms_{}.txt'.format(layer_index)
 ifms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(layer_index if layer_index > 0 else 1)
 bias_file = './weights/weights_{}_biases.txt'.format(layer_index)
-ifms_scale_file = './fms/fms_{}_scales.txt'.format(layer_index if layer_index > 0 else 1)
 weights_scale_file = './weights/weights_{}_scales.txt'.format(layer_index)
+ifms_scale_file = './fms/fms_{}_scales.txt'.format(layer_index if layer_index > 0 else 1)
 ofms_scale_file = './fms/fms_{}_scales.txt'.format(layer_index + 1 if layer_index > 0 else 2)
 ofms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(layer_index + 1 if layer_index > 0 else 2)
 
@@ -50,7 +51,7 @@ ofms = np.zeros(ofms_shape).astype(np.int8)
 filter_height =layers_weights_shape[layer_index].height
 filter_width =layers_weights_shape[layer_index].width
 padding_val = int( (filter_height - 1) / 2)
-
+#print(layers_ifms_zero_point[layer_index])
 if layer_type != 'pw':
     if conv_strides == 1:
         ifms = np.pad(ifms, ((0,0),(padding_val,padding_val),(padding_val,padding_val)), mode='constant', constant_values = layers_ifms_zero_point[layer_index])
@@ -65,15 +66,25 @@ def conv():
                 np.sum(weights[i].astype(np.int32) * ( ifms[:, j*conv_strides:j*conv_strides + filter_height, \
                      k*conv_strides:k*conv_strides + filter_width]) ) + layers_bias[layer_index][i]
                 
+                if i == 31 and j == 60 and k == 18:
+                    print(tmp)
                 tmp = tmp * layers_scale_ifms[layer_index] * layers_scale_weights[layer_index][i]
-                tmp = min(max(tmp, 0), 6)
+                if i == 31 and j == 60 and k == 18:
+                    print(tmp)
+                if i == 31 and j == 60 and k == 18:
+                    tmp = min(max(tmp, 0), 6)
                 tmp = tmp / layers_scale_ofms[layer_index] + layers_ofms_zero_point[layer_index]
+                if i == 31 and j == 60 and k == 18:
+                    print(tmp)
                 if tmp > 0:
                     tmp = int(tmp + 0.5)
                 else:
                     tmp = int(tmp -0.5)
                 ofms[i][j][k] = tmp
 
+print("%.20f" % layers_scale_ifms[layer_index])
+print("%.20f" % layers_scale_weights[layer_index][31])
+print("%.20f" % layers_scale_ofms[layer_index])
 def dw_conv():
     for i in range(layers_weights_shape[layer_index].num_of_filters):
         for j in range(ofms_shape[1]):
@@ -81,10 +92,16 @@ def dw_conv():
                 tmp = np.sum(weights[i].astype(np.float32)) * - layers_ifms_zero_point[layer_index] + \
                     np.sum(weights[i].astype(np.float32) * ifms[i, j*conv_strides:j*conv_strides + \
                         filter_height, k*conv_strides:k*conv_strides + filter_width]) + layers_bias[layer_index][i]
-
+                if i == 31 and j == 0 and k == 98:
+                    print(tmp)
                 tmp = tmp * layers_scale_ifms[layer_index] * layers_scale_weights[layer_index][i]
-                tmp = min(max(tmp, 0), 6)
+                if i == 31 and j == 0 and k == 98:
+                    print(tmp)
+                if layers_relus[layer_index] == 6:
+                    tmp = min(max(tmp, 0), 6)
                 tmp = tmp / layers_scale_ofms[layer_index] + layers_ofms_zero_point[layer_index]
+                if i == 31 and j == 0 and k == 98:
+                    print(tmp)
                 if tmp > 0:
                     tmp = int(tmp + 0.5)
                 else:

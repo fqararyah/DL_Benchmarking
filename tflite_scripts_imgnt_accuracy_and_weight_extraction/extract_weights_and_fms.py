@@ -15,6 +15,9 @@ import pathlib
 
 from models_archs import utils
 
+# import os
+# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+
 MODEL_NAME = 'mob_v2'
 PRECISION = 8
 np.random.seed(0)

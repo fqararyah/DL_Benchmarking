@@ -4,7 +4,7 @@ import numpy as np
 
 from models_archs import utils
 
-layer_indx = 2
+layer_indx = 7
 
 layers_ofms_shape = utils.read_layers_output_shapes()
 
@@ -14,6 +14,7 @@ range_file = './fms/fms_{}_{}_{}_{}.txt'.format(layer_indx + 1 if layer_indx > 0
     layers_ofms_shape[layer_indx].width)
 
 ofms_hw = layers_ofms_shape[layer_indx].height * layers_ofms_shape[layer_indx].width
+ofms_w = layers_ofms_shape[layer_indx].width
 domain = np.loadtxt(domain_file).astype(np.int8)
 rng = np.loadtxt(range_file).astype(np.int8)
 
@@ -28,6 +29,7 @@ rng = np.loadtxt(range_file).astype(np.int8)
 sum = 0
 cnt1=0
 cnt2=0
+cnt3=0
 diff_map = {}
 diff_locs = {}
 for i in range(rng.size):
@@ -43,21 +45,26 @@ for i in range(rng.size):
         cnt1 += 1
     elif int(domain[i]) - rng[i] !=0:
         cnt2 +=1
-        if int(i / ofms_hw) not in diff_locs:
-            diff_locs[ int(i / ofms_hw)] =0
-        diff_locs[int(i / ofms_hw)] += 1
-        #if int(domain[i]) - rng[i] > 10 or int(domain[i]) - rng[i] < -10:
+        d = int(i / ofms_hw)
+        h = int((i % ofms_hw) / ofms_w)
+        w = int(i % ofms_w) 
+        position = (d, h, w)
+        diff_locs[position] = (domain[i], rng[i])
+        if int(domain[i]) - rng[i] > 5 or int(domain[i]) - rng[i] < -5:
+            print(domain[i], rng[i])
+            cnt3 += 1
         #    print(domain[i], rng[i])
 
-for key, val in diff_map.items():
-    print(key, val)
-    print('***************')
+# for key, val in diff_map.items():
+#     print(key, val)
+#     print('***************')
 
-for key, val in diff_locs.items():
-    print(key, val)
-    print('***************')
+# for key, val in diff_locs.items():
+#     print(key, val)
+#     print('***************')
 
 print(sum)
 print(sum/rng.size)
 print('equal: ', cnt1)
 print('different: ', cnt2)
+print('very different: ', cnt3)

@@ -19,11 +19,11 @@ LAYERS_TYPES_FILE = input_folder + 'layers_types.txt'
 LAYERS_WEIGHTS_FILE = input_folder + 'layers_weights.txt'
 LAYERS_STRIDES_FILE = input_folder + 'layers_strides.txt'
 EXPANSION_PROJECTION_FILE = input_folder + 'expansion_projection.txt'
-
+LAYERS_RELUS_FILE = input_folder + 'layers_relus.txt'
 
 def set_globals(prefix, full_name):
     global NET_PREFIX, NET_FULL_NAME, input_folder, IFMS_FILE, OFMS_FILE, LAYERS_TYPES_FILE, LAYERS_WEIGHTS_FILE, LAYERS_STRIDES_FILE\
-        ,EXPANSION_PROJECTION_FILE
+        ,EXPANSION_PROJECTION_FILE, LAYERS_RELUS_FILE
     NET_PREFIX = prefix
     NET_FULL_NAME = full_name
     input_folder = './models/' + NET_FULL_NAME + '/'
@@ -33,7 +33,7 @@ def set_globals(prefix, full_name):
     LAYERS_WEIGHTS_FILE = input_folder + 'layers_weights.txt'
     LAYERS_STRIDES_FILE = input_folder + 'layers_strides.txt'
     EXPANSION_PROJECTION_FILE = input_folder + 'expansion_projection.txt'
-
+    LAYERS_RELUS_FILE = input_folder + 'layers_relus.txt'
 
 
 def clean_line(line):
@@ -115,3 +115,13 @@ def read_expansion_projection():
             expansion_projection.append(int(line))
 
     return expansion_projection
+
+def read_layers_relus():
+    layers_relus = []
+    with open(LAYERS_RELUS_FILE, 'r') as f:
+        for line in f:
+            line = clean_line(line)
+            line = clean_line(line)
+            layers_relus.append(int(line))
+
+    return layers_relus
