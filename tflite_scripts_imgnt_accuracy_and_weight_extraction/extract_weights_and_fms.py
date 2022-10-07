@@ -76,8 +76,10 @@ def is_it_weights(tensor_shape):
 def is_it_fms(tensor_shape):
     for i in range(len(layers_inputs)):
         if len(tensor_shape) == 3:
-            if tensor_shape[0] == layers_inputs[i].depth and tensor_shape[1] == layers_inputs[i].height \
-                and tensor_shape[2] == layers_inputs[i].width:
+            if (tensor_shape[0] == layers_inputs[i].depth and tensor_shape[1] == layers_inputs[i].height \
+                and tensor_shape[2] == layers_inputs[i].width) or \
+                    (tensor_shape[0] == layers_outputs[i].depth and tensor_shape[1] == layers_outputs[i].height \
+                and tensor_shape[2] == layers_outputs[i].width):
                 return True
     
     return False

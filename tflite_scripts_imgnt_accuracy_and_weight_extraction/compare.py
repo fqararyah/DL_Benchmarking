@@ -4,7 +4,7 @@ import numpy as np
 
 from models_archs import utils
 
-layer_indx = 7
+layer_indx = 9
 
 layers_ofms_shape = utils.read_layers_output_shapes()
 
@@ -50,7 +50,7 @@ for i in range(rng.size):
         w = int(i % ofms_w) 
         position = (d, h, w)
         diff_locs[position] = (domain[i], rng[i])
-        if int(domain[i]) - rng[i] > 5 or int(domain[i]) - rng[i] < -5:
+        if int(domain[i]) - rng[i] > 3 or int(domain[i]) - rng[i] < -3:
             print(domain[i], rng[i])
             cnt3 += 1
         #    print(domain[i], rng[i])
