@@ -52,6 +52,7 @@ filter_height =layers_weights_shape[layer_index].height
 filter_width =layers_weights_shape[layer_index].width
 padding_val = int( (filter_height - 1) / 2)
 #print(layers_ifms_zero_point[layer_index])
+print(layers_scale_ifms[layer_index] * layers_scale_weights[layer_index][0])
 if layer_type != 'pw':
     if conv_strides == 1:
         ifms = np.pad(ifms, ((0,0),(padding_val,padding_val),(padding_val,padding_val)), mode='constant', constant_values = layers_ifms_zero_point[layer_index])
