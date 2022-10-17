@@ -12,7 +12,7 @@ layer_type = layers_types[layer_index]
 weights_file = './weights/weights_{}_{}.txt'.format(layer_index, layer_type)
 ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(layer_index if layer_index > 0 else 1, layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height,\
     layers_ifms_shape[layer_index].width)
-ofms_file = './scratch_out/ofms_{}.txt'.format(layer_index)
+ofms_file = './scratch_out/ofms_{}_un.txt'.format(layer_index)
 ifms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(layer_index if layer_index > 0 else 1)
 bias_file = './weights/weights_{}_biases.txt'.format(layer_index)
 
@@ -29,7 +29,16 @@ weights = np.reshape(weights,(layers_weights_shape[layer_index].num_of_filters, 
 
 ifms = np.loadtxt(ifms_file).astype(np.int8)
 ifms = np.reshape(ifms, (layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height, layers_ifms_shape[layer_index].width) )
-ifms = np.pad(ifms, ((0,0),(0,1),(0,1)), mode='constant')
+
+filter_height =layers_weights_shape[layer_index].height
+filter_width =layers_weights_shape[layer_index].width
+padding_val = int( (filter_height - 1) / 2)
+if layer_type != 'pw':
+    if conv_strides == 1:
+        ifms = np.pad(ifms, ((0,0),(padding_val,padding_val),(padding_val,padding_val)), mode='constant', constant_values = layers_ifms_zero_point[layer_index])
+    elif conv_strides == 2:
+        ifms = np.pad(ifms, ((0,0),(0,padding_val),(0,padding_val)), mode='constant',  constant_values = layers_ifms_zero_point[layer_index])
+
 
 ofms_shape = (layers_weights_shape[layer_index].num_of_filters, int(layers_ifms_shape[layer_index].height /
                                     conv_strides), int(layers_ifms_shape[layer_index].width/conv_strides))
@@ -45,10 +54,29 @@ filter_width =layers_weights_shape[layer_index].width
 for i in range(layers_weights_shape[layer_index].num_of_filters):
     for j in range(ofms_shape[1]):
         for k in range(ofms_shape[2]):
-            ofms[i][j][k] = (np.sum(weights[i].astype(np.float32) * ( -layers_ifms_zero_point[layer_index] + \
-                ifms[:, j*conv_strides:j*conv_strides + \
-                    filter_height, k*conv_strides:k*conv_strides + filter_width]) ) + layers_bias[layer_index][i])
+            # ofms[i][j][k] = (np.sum(weights[i].astype(np.float32) * ( -layers_ifms_zero_point[layer_index] + \
+            #     ifms[:, j*conv_strides:j*conv_strides + \
+            #         filter_height, k*conv_strides:k*conv_strides + filter_width]) ) + layers_bias[layer_index][i])
 
+            ofms[i][j][k] = np.sum(weights[i].astype(np.float32) * \
+                ifms[:, j*conv_strides:j*conv_strides + \
+                    filter_height, k*conv_strides:k*conv_strides + filter_width])
+
+print(weights[0,:, 0, 0])
+print(ifms[:, 0, 0])
+#exit()
+print(np.sum(weights[0,0, 0, 0].astype(np.float32) * \
+                ifms[0, 0, 0]))
+print(np.sum(weights[0,0:2, 0, 0].astype(np.float32) * \
+                ifms[0:2, 0, 0]))
+print(np.sum(weights[0,0:3, 0, 0].astype(np.float32) * \
+                ifms[0:3, 0, 0]))
+
+print(np.sum(weights[0,:, 0, 0].astype(np.float32) * \
+                ifms[:, 0, 0]))
+
+print(np.sum(weights[0].astype(np.float32) * \
+                ifms[:, 0:3, 0:3]))
 # print(np.max(ofms[0]))
 # print(np.max(ofms[1]))
 # print(np.max(ofms[2]))
