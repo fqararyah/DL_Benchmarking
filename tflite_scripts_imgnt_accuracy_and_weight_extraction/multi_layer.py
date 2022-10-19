@@ -11,7 +11,7 @@ expansion_projection = utils.read_expansion_projection()
 
 start_layer = 0
 prev_layer = start_layer
-end_layer = 11
+end_layer = 8
 for layer_index in range(start_layer, end_layer):
     print('layer:', layer_index)
     if layers_types[layer_index] == 'pw' and expansion_projection[layer_index] == 0:

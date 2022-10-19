@@ -3,7 +3,7 @@ import numpy as np
 from models_archs import utils
 
 
-layer_index = 0
+layer_index = 3
 layers_types = utils.read_layers_types()
 layers_weights_shape = utils.read_layers_weight_shapes(layers_types)
 layers_ifms_shape = utils.read_layers_input_shapes()

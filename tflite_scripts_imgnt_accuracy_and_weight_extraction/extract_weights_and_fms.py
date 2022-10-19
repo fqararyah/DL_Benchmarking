@@ -102,10 +102,11 @@ for t in interpreter.get_tensor_details():
     #if t['index'] == 3:
     #    print(t)
     current_tensor = np.squeeze(current_tensor)
+    #print(current_tensor.shape)
     if current_tensor.ndim == 3:
-        current_tensor = np.transpose(current_tensor, (2, 1, 0))
+        current_tensor = np.transpose(current_tensor, (2, 0 ,1))
     elif current_tensor.ndim == 4:
-        current_tensor = np.transpose(current_tensor, (0, 3, 2, 1))
+        current_tensor = np.transpose(current_tensor, (0, 3, 1, 2))
 
     current_tensor_shape_str_rep = str([i for i in current_tensor.shape]).replace(' ','').replace('[', '').replace(']', '').replace(',','_')
     index_in_weights = is_it_weights(current_tensor.shape)
