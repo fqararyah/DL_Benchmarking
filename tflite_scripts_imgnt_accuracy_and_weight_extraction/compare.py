@@ -4,22 +4,32 @@ import numpy as np
 
 from models_archs import utils
 
-layer_indx = 7
+to_compare_layer_index = 7
 
 import sys
 
 if(len(sys.argv) > 1):
-    layer_indx = int(sys.argv[1])
+    to_compare_layer_index = int(sys.argv[1])
 
 layers_ofms_shape = utils.read_layers_output_shapes()
+skip_connections_indices = utils.read_skip_connections_indices()
 
+tf_lite_to_my_cnn_layer_mapping = {0:2}
+skip_connections_so_far = 0
+for layer_index in range(1, len(layers_ofms_shape)):
+    if layer_index + 1 in skip_connections_indices:
+        skip_connections_so_far += 1
+    tf_lite_to_my_cnn_layer_mapping[layer_index] = layer_index + 1 + skip_connections_so_far
+
+#print(tf_lite_to_my_cnn_layer_mapping)
 #layers_ofms_shape = {0: (32, 112, 112), 3: (16, 112, 112), 6: (24, 56, 56), 4: (96, 112, 112), 5: (96, 56, 56)}
-domain_file = './scratch_out/ofms_{}.txt'.format(layer_indx)
-range_file = './fms/fms_{}_{}_{}_{}.txt'.format(layer_indx + 1 if layer_indx > 0 else 2, layers_ofms_shape[layer_indx].depth, layers_ofms_shape[layer_indx].height,\
-    layers_ofms_shape[layer_indx].width)
+domain_file = './scratch_out/ofms_{}.txt'.format(to_compare_layer_index)
+range_file = './fms/fms_{}_{}_{}_{}.txt'.format(tf_lite_to_my_cnn_layer_mapping[to_compare_layer_index],\
+    layers_ofms_shape[to_compare_layer_index].depth, layers_ofms_shape[to_compare_layer_index].height,\
+    layers_ofms_shape[to_compare_layer_index].width)
 
-ofms_hw = layers_ofms_shape[layer_indx].height * layers_ofms_shape[layer_indx].width
-ofms_w = layers_ofms_shape[layer_indx].width
+ofms_hw = layers_ofms_shape[to_compare_layer_index].height * layers_ofms_shape[to_compare_layer_index].width
+ofms_w = layers_ofms_shape[to_compare_layer_index].width
 domain = np.loadtxt(domain_file).astype(np.int8)
 rng = np.loadtxt(range_file).astype(np.int8)
 
@@ -64,13 +74,13 @@ for i in range(rng.size):
 #     print(key, val)
 #     print('***************')
 
-count = 0
-for key, val in diff_locs.items():
-    print(key, val)
-    print('***************')
-    count += 1
-    if count > 100:
-        break
+# count = 0
+# for key, val in diff_locs.items():
+#     print(key, val)
+#     print('***************')
+#     count += 1
+#     if count > 100:
+#         break
 
 print(sum)
 print(sum/rng.size)
