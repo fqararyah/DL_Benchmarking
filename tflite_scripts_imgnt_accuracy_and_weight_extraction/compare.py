@@ -23,6 +23,7 @@ for layer_index in range(1, len(layers_ofms_shape)):
 
 #print(tf_lite_to_my_cnn_layer_mapping)
 #layers_ofms_shape = {0: (32, 112, 112), 3: (16, 112, 112), 6: (24, 56, 56), 4: (96, 112, 112), 5: (96, 56, 56)}
+print(to_compare_layer_index, tf_lite_to_my_cnn_layer_mapping[to_compare_layer_index])
 domain_file = './scratch_out/ofms_{}.txt'.format(to_compare_layer_index)
 range_file = './fms/fms_{}_{}_{}_{}.txt'.format(tf_lite_to_my_cnn_layer_mapping[to_compare_layer_index],\
     layers_ofms_shape[to_compare_layer_index].depth, layers_ofms_shape[to_compare_layer_index].height,\
@@ -64,7 +65,7 @@ for i in range(rng.size):
         h = int((i % ofms_hw) / ofms_w)
         w = int(i % ofms_w) 
         position = (d, h, w)
-        if int(domain[i]) - rng[i] > 1 or int(domain[i]) - rng[i] < -1:
+        if int(domain[i]) - rng[i] > 10 or int(domain[i]) - rng[i] < -10:
             diff_locs[position] = (domain[i], rng[i])
             #print(domain[i], rng[i])
             cnt3 += 1
@@ -74,13 +75,13 @@ for i in range(rng.size):
 #     print(key, val)
 #     print('***************')
 
-# count = 0
-# for key, val in diff_locs.items():
-#     print(key, val)
-#     print('***************')
-#     count += 1
-#     if count > 100:
-#         break
+count = 0
+for key, val in diff_locs.items():
+    print(key, val)
+    print('***************')
+    count += 1
+    if count > 100:
+        break
 
 print(sum)
 print(sum/rng.size)
