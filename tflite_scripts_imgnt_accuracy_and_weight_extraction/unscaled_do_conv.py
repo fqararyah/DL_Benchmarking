@@ -12,7 +12,7 @@ layers_relus = utils.read_layers_relus()
 layers_ofms_shape = utils.read_layers_output_shapes()
 skip_connections_indices = utils.read_skip_connections_indices()
 
-tf_lite_to_my_cnn_layer_mapping = {0:2}
+tf_lite_to_my_cnn_layer_mapping = {0:1}
 skip_connections_so_far = 0
 for layer_index in range(1, len(layers_ofms_shape)):
     if layer_index in skip_connections_indices:
