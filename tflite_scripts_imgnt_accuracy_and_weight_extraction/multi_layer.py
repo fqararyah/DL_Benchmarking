@@ -5,13 +5,22 @@ from models_archs import utils
 layers_types = utils.read_layers_types()
 layers_weights_shape = utils.read_layers_weight_shapes(layers_types)
 layers_ifms_shape = utils.read_layers_input_shapes()
+layers_ofms_shape = utils.read_layers_output_shapes()
 layers_strides = utils.read_layers_strides()
 layers_relus = utils.read_layers_relus()
 expansion_projection = utils.read_expansion_projection()
+skip_connections_indices = utils.read_skip_connections_indices()
+
+tf_lite_to_my_cnn_layer_mapping = {0:2}
+skip_connections_so_far = 0
+for layer_index in range(1, len(layers_ofms_shape)):
+    if layer_index + 1 in skip_connections_indices:
+        skip_connections_so_far += 1
+    tf_lite_to_my_cnn_layer_mapping[layer_index] = layer_index + 1 + skip_connections_so_far
 
 start_layer = 0
 prev_layer = start_layer
-end_layer = 8
+end_layer = 20
 for layer_index in range(start_layer, end_layer):
     print('layer:', layer_index)
     if layers_types[layer_index] == 'pw' and expansion_projection[layer_index] == 0:
@@ -20,17 +29,17 @@ for layer_index in range(start_layer, end_layer):
     layer_type = layers_types[layer_index]
     weights_file = './weights/weights_{}_{}.txt'.format(layer_index, layer_type)
     if layer_index == 0:
-        ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(layer_index if layer_index > 0 else 1, layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height,\
+        ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index] - 1, layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height,\
             layers_ifms_shape[layer_index].width)
     else:
         ifms_file = './scratch_out/ofms_{}.txt'.format(prev_layer)
     ofms_file = './scratch_out/ofms_{}.txt'.format(layer_index)
-    ifms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(layer_index if layer_index > 0 else 1)
+    ifms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index] - 1)
     bias_file = './weights/weights_{}_biases.txt'.format(layer_index)
-    ifms_scale_file = './fms/fms_{}_scales.txt'.format(layer_index if layer_index > 0 else 1)
+    ifms_scale_file = './fms/fms_{}_scales.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index] - 1)
     weights_scale_file = './weights/weights_{}_scales.txt'.format(layer_index)
-    ofms_scale_file = './fms/fms_{}_scales.txt'.format(layer_index + 1 if layer_index > 0 else 2)
-    ofms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(layer_index + 1 if layer_index > 0 else 2)
+    ofms_scale_file = './fms/fms_{}_scales.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index])
+    ofms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index])
 
     layers_ifms_zero_point = {layer_index: np.loadtxt(ifms_zero_points_file).astype(np.int32)}
     layers_bias = {layer_index: np.loadtxt(bias_file).astype(np.int32)}
@@ -109,7 +118,17 @@ for layer_index in range(start_layer, end_layer):
         dw_conv()
     else:
         conv()
+    skip_connection_depth = 3
     ofms = ofms.reshape((ofms_shape[0]* ofms_shape[1]* ofms_shape[2]))
+    if layer_index + 1 in skip_connections_indices:
+        from_skip = np.loadtxt('./scratch_out/ofms_{}.txt'.format(layer_index - skip_connection_depth))
+        ofms = (layers_scale_ofms[layer_index]
+											* (ofms \
+													- layers_ofms_zero_point[layer_index]) \
+											+ layers_scale_ofms[layer_index - skip_connection_depth] \
+													* (from_skip \
+															- layers_ofms_zero_point[layer_index - skip_connection_depth])) / layers_scale_ofms[layer_index + 1] \
+											+ layers_ofms_zero_point[layer_index + 1]
     np.savetxt(ofms_file, ofms, fmt='%i')
 
     prev_layer = layer_index
