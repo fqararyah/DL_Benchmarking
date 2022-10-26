@@ -18,8 +18,8 @@ for layer_index in range(1, len(layers_ofms_shape)):
         skip_connections_so_far += 1
     tf_lite_to_my_cnn_layer_mapping[layer_index] = layer_index + 1 + skip_connections_so_far
 
-start_layer = 0
-prev_layer = start_layer
+start_layer = 12
+prev_layer = tf_lite_to_my_cnn_layer_mapping[start_layer]
 end_layer = 20
 for layer_index in range(start_layer, end_layer):
     print('layer:', layer_index)
@@ -62,7 +62,8 @@ for layer_index in range(start_layer, end_layer):
         layers_weights_shape[layer_index].width))
 
     ifms = np.loadtxt(ifms_file).astype(np.int8)
-    ifms = np.reshape(ifms, (layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height, layers_ifms_shape[layer_index].width) )
+    ifms = np.reshape(ifms, (layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height, \
+         layers_ifms_shape[layer_index].width) )
 
     ofms_shape = (layers_weights_shape[layer_index].num_of_filters, int(layers_ifms_shape[layer_index].height /
                                         conv_strides), int(layers_ifms_shape[layer_index].width/conv_strides))
@@ -131,4 +132,4 @@ for layer_index in range(start_layer, end_layer):
 											+ layers_ofms_zero_point[layer_index + 1]
     np.savetxt(ofms_file, ofms, fmt='%i')
 
-    prev_layer = layer_index
+    prev_layer = tf_lite_to_my_cnn_layer_mapping[layer_index]

@@ -3,23 +3,36 @@ import numpy as np
 from models_archs import utils
 
 
-layer_index = 0
+
+
 layers_types = utils.read_layers_types()
 layers_weights_shape = utils.read_layers_weight_shapes(layers_types)
 layers_ifms_shape = utils.read_layers_input_shapes()
 layers_strides = utils.read_layers_strides()
 layers_relus = utils.read_layers_relus()
+layers_ofms_shape = utils.read_layers_output_shapes()
+skip_connections_indices = utils.read_skip_connections_indices()
+
+tf_lite_to_my_cnn_layer_mapping = {0:1}
+skip_connections_so_far = 0
+for layer_index in range(1, len(layers_ofms_shape)):
+    if layer_index in skip_connections_indices:
+        skip_connections_so_far += 1
+    tf_lite_to_my_cnn_layer_mapping[layer_index] = layer_index + skip_connections_so_far
+
+layer_index = 52
+
 layer_type = layers_types[layer_index]
 weights_file = './weights/weights_{}_{}.txt'.format(layer_index, layer_type)
-ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(layer_index if layer_index > 0 else 1, layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height,\
+ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index], layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height,\
     layers_ifms_shape[layer_index].width)
 ofms_file = './scratch_out/ofms_{}_ref.txt'.format(layer_index)
-ifms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(layer_index if layer_index > 0 else 1)
+ifms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index])
 bias_file = './weights/weights_{}_biases.txt'.format(layer_index)
 weights_scale_file = './weights/weights_{}_scales.txt'.format(layer_index)
-ifms_scale_file = './fms/fms_{}_scales.txt'.format(layer_index if layer_index > 0 else 1)
-ofms_scale_file = './fms/fms_{}_scales.txt'.format(layer_index + 1 if layer_index > 0 else 2)
-ofms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(layer_index + 1 if layer_index > 0 else 2)
+ifms_scale_file = './fms/fms_{}_scales.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index])
+ofms_scale_file = './fms/fms_{}_scales.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index] + 1)
+ofms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index] + 1)
 
 layers_ifms_zero_point = {layer_index: np.loadtxt(ifms_zero_points_file).astype(np.int32)}
 layers_bias = {layer_index: np.loadtxt(bias_file).astype(np.int32)}
@@ -31,6 +44,11 @@ layers_ofms_zero_point = {layer_index: np.loadtxt(ofms_zero_points_file).astype(
 #layers_bias = {0: [61864]*32, 3: [-2630]*32, 6: [32910]*32, 4: [2650]*32}#{layer_index: np.loadtxt(bias_file).astype(np.int32)}
 print(layers_ifms_zero_point[layer_index])
 print(layers_ofms_zero_point[layer_index])
+print(layers_bias[layer_index])
+print(layers_scale_ifms[layer_index])
+print(layers_scale_weights[layer_index])
+print(layers_scale_ofms[layer_index])
+#layers_ofms_zero_point
 conv_strides = layers_strides[layer_index]
 
 weights = np.loadtxt(weights_file).astype(np.int8)
