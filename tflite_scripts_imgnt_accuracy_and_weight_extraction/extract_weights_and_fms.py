@@ -151,8 +151,10 @@ for t in interpreter.get_tensor_details():
         np.savetxt('./weights/weights_' + str(last_assigned_layer) + last_assigned_layer_postfix +
                    '_biases.txt', current_tensor, fmt='%i')
         last_assigned_layer_occurences[last_assigned_layer] += 1
-    elif current_tensor.size < 2048:
+    else:
         # print(current_tensor.shape)
+        print(t)
+        current_tensor = np.reshape(current_tensor, (current_tensor.size))
         np.savetxt('./non_conv_layers/layer_' + str(layer_count) + '_' +
                    current_tensor_shape_str_rep + '.txt', current_tensor, fmt='%i')
         with open('./non_conv_layers/layer_' + str(layer_count) + '_' + current_tensor_shape_str_rep + '_specs.txt', 'w') as f:

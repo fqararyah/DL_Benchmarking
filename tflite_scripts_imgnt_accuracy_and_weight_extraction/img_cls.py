@@ -9,7 +9,7 @@ import tensorflow.keras.applications as models
 
 import pathlib
 
-DATA_PATH = '/home/fareed/wd/vedliot/D3.3_Accuracy_Evaluation/imagenet/images'
+DATA_PATH = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012'
 
 
 def locate_images(path):
@@ -30,9 +30,12 @@ PRECISION = 8
 model = models.MobileNetV2()
 
 def representative_dataset():
-    for _ in range(100):
-      data = np.random.rand(1, 224, 224, 3)
-      yield [data.astype(np.float32)]
+    for i in range(100):
+        a_test_image = load_img(test_images[i], target_size = (224, 224))
+        numpy_image = img_to_array(a_test_image)
+        image_batch = np.expand_dims(numpy_image, axis = 0)
+        processed_image = mob_v2.preprocess_input(image_batch.copy())
+        yield [processed_image.astype(np.float32)]
 
 if PRECISION == 8:
     tflite_models_dir = pathlib.Path("./")
