@@ -66,7 +66,7 @@ for i in range(rng.size):
         h = int((i % ofms_hw) / ofms_w)
         w = int(i % ofms_w) 
         position = (d, h, w)
-        if int(domain[i]) - rng[i] > 10 or int(domain[i]) - rng[i] < -10:
+        if int(domain[i]) - rng[i] > 5 or int(domain[i]) - rng[i] < -5:
             diff_locs[position] = (domain[i], rng[i])
             #print(domain[i], rng[i])
             cnt3 += 1
@@ -84,6 +84,7 @@ for key, val in diff_locs.items():
     if count > 5:
         break
 
+print('max= ', np.max(domain - rng))
 print(sum)
 print(sum/rng.size)
 print('equal: ', cnt1)
