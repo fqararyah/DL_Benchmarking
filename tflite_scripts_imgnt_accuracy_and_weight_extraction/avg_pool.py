@@ -12,6 +12,7 @@ ofms = np.sum(ifms, axis=(1,2))
 quantized_ofms =  ((0.0235294122248888 / 0.020379824563860893 ) * ( 128 + (ofms) / ( 49) )\
     - 128 ).astype(np.int8)
 
+print(ofms.shape,ofms)
 print(quantized_ofms.shape,quantized_ofms)
 
 np.savetxt(ofms_file, quantized_ofms, fmt='%i')

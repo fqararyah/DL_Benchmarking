@@ -20,6 +20,7 @@ from models_archs import utils
 
 MODEL_NAME = 'mob_v2'
 PRECISION = 8
+NUM_OF_CLASSES = 1000
 np.random.seed(0)
 
 tflite_models_dir = pathlib.Path("./")
@@ -100,6 +101,11 @@ def is_it_bias(tensor_details):
         t['index']).size == layers_weights[last_assigned_layer].num_of_filters
     return is_it
 
+def is_it_fc(tensor_shape):
+    return (len(tensor_shape) == 2 and tensor_shape[0] == NUM_OF_CLASSES)
+
+def is_it_fc_bias(tensor):
+    return (tensor.size == NUM_OF_CLASSES and np.max(np.abs(tensor)) > 2^(PRECISION))
 
 test_image = np.transpose(test_image, (2, 1, 0))
 test_image = np.reshape(test_image, (test_image.size))
@@ -107,7 +113,7 @@ np.savetxt('fms/input_image', test_image, fmt='%i')
 
 fms_count = 0
 layer_count = 0
-
+fc_biases_found = False
 for t in interpreter.get_tensor_details():
     # print('*****************************')
     #print(t['index'], t['name'], interpreter.get_tensor(t['index']).shape )
@@ -151,9 +157,19 @@ for t in interpreter.get_tensor_details():
         np.savetxt('./weights/weights_' + str(last_assigned_layer) + last_assigned_layer_postfix +
                    '_biases.txt', current_tensor, fmt='%i')
         last_assigned_layer_occurences[last_assigned_layer] += 1
+    elif is_it_fc(current_tensor.shape):
+        np.savetxt('./weights/fc_weights.txt', current_tensor, fmt='%i')
+        np.savetxt('./weights/fc_weight_scales.txt', t['quantization_parameters']['scales'])
+        np.savetxt('./weights/fc_weight_zero_points.txt', t['quantization_parameters']['zero_points'], fmt='%i')
+    elif is_it_fc_bias(current_tensor) and not fc_biases_found:
+        print('max', np.max(current_tensor))
+        np.savetxt('./weights/fc_biases.txt', current_tensor, fmt='%i')
+        np.savetxt('./weights/fc_biases_scales.txt', t['quantization_parameters']['scales'])
+        np.savetxt('./weights/fc_biases_zero_points.txt', t['quantization_parameters']['zero_points'], fmt='%i')
+        fc_biases_found = True
     else:
         # print(current_tensor.shape)
-        print(t)
+        #print(t)
         current_tensor = np.reshape(current_tensor, (current_tensor.size))
         np.savetxt('./non_conv_layers/layer_' + str(layer_count) + '_' +
                    current_tensor_shape_str_rep + '.txt', current_tensor, fmt='%i')
