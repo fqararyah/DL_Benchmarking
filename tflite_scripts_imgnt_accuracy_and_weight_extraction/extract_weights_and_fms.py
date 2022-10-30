@@ -123,7 +123,7 @@ for t in interpreter.get_tensor_details():
     # if t['index'] == 3:
     #    print(t)
     current_tensor = np.squeeze(current_tensor)
-    # print(current_tensor.shape)
+    #print(current_tensor.shape)
     if current_tensor.ndim == 3:
         current_tensor = np.transpose(current_tensor, (2, 0, 1))
     elif current_tensor.ndim == 4:
