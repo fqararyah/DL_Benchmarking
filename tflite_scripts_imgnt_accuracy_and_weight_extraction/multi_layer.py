@@ -18,9 +18,9 @@ for layer_index in range(1, len(layers_ofms_shape)):
         skip_connections_so_far += 1
     tf_lite_to_my_cnn_layer_mapping[layer_index] = layer_index + 1 + skip_connections_so_far
 
-start_layer = 12
-prev_layer = tf_lite_to_my_cnn_layer_mapping[start_layer]
-end_layer = 20
+start_layer = 49
+prev_layer = start_layer#tf_lite_to_my_cnn_layer_mapping[start_layer]
+end_layer = 53
 for layer_index in range(start_layer, end_layer):
     print('layer:', layer_index)
     if layers_types[layer_index] == 'pw' and expansion_projection[layer_index] == 0:
@@ -28,12 +28,12 @@ for layer_index in range(start_layer, end_layer):
     
     layer_type = layers_types[layer_index]
     weights_file = './weights/weights_{}_{}.txt'.format(layer_index, layer_type)
-    if layer_index == 0:
+    if layer_index == start_layer:
         ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index] - 1, layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height,\
             layers_ifms_shape[layer_index].width)
     else:
-        ifms_file = './scratch_out/ofms_{}.txt'.format(prev_layer)
-    ofms_file = './scratch_out/ofms_{}.txt'.format(layer_index)
+        ifms_file = './scratch_out/ofms_{}_ref.txt'.format(prev_layer)
+    ofms_file = './scratch_out/ofms_{}_ref.txt'.format(layer_index)
     ifms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index] - 1)
     bias_file = './weights/weights_{}_biases.txt'.format(layer_index)
     ifms_scale_file = './fms/fms_{}_scales.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index] - 1)
@@ -122,7 +122,7 @@ for layer_index in range(start_layer, end_layer):
     skip_connection_depth = 3
     ofms = ofms.reshape((ofms_shape[0]* ofms_shape[1]* ofms_shape[2]))
     if layer_index + 1 in skip_connections_indices:
-        from_skip = np.loadtxt('./scratch_out/ofms_{}.txt'.format(layer_index - skip_connection_depth))
+        from_skip = np.loadtxt('./scratch_out/ofms_{}_ref.txt'.format(layer_index - skip_connection_depth))
         ofms = (layers_scale_ofms[layer_index]
 											* (ofms \
 													- layers_ofms_zero_point[layer_index]) \
@@ -132,4 +132,5 @@ for layer_index in range(start_layer, end_layer):
 											+ layers_ofms_zero_point[layer_index + 1]
     np.savetxt(ofms_file, ofms, fmt='%i')
 
-    prev_layer = tf_lite_to_my_cnn_layer_mapping[layer_index]
+    if layer_index > 0:
+        prev_layer = layer_index

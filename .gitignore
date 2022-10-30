@@ -13,3 +13,5 @@ variables
 **/scratch_out
 **/non_conv*
 which_side_is_padded.txt
+preprocessed_tst_images
+preprocessed_tst_images/*

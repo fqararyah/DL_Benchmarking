@@ -19,7 +19,7 @@ for layer_index in range(1, len(layers_ofms_shape)):
         skip_connections_so_far += 1
     tf_lite_to_my_cnn_layer_mapping[layer_index] = layer_index + skip_connections_so_far
 
-layer_index = 52
+layer_index = 0
 
 layer_type = layers_types[layer_index]
 weights_file = './weights/weights_{}_{}.txt'.format(layer_index, layer_type)
@@ -67,12 +67,15 @@ def conv():
                     
                     ofms[i][j][k] = tmp
 
+                    if i == 8 and j == 111 and k == 0:
+                        print(ifms[:, j*conv_strides:j*conv_strides+3, k*conv_strides:k*conv_strides+3]) 
+
 def dw_conv():
     for i in range(layers_weights_shape[layer_index].num_of_filters):
         for j in range(ofms_shape[1]):
             for k in range(ofms_shape[2]):
                 tmp = np.sum(weights[i].astype(np.float32) * ifms[i, j*conv_strides:j*conv_strides + \
-                        filter_height, k*conv_strides:k*conv_strides + filter_width])              
+                        filter_height, k*conv_strides:k*conv_strides + filter_width])            
                 
                 ofms[i][j][k] = tmp
 
