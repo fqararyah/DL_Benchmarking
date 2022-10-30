@@ -1,6 +1,7 @@
 import tensorflow.keras.preprocessing.image as img_proc
 import numpy as np
-import tensorflow.keras.applications.mobilenet_v2 as mob_v2
+from tensorflow.keras.preprocessing.image import img_to_array
+
 
 import os
 
@@ -26,10 +27,8 @@ locate_images(DATA_PATH)
 limit = 1000
 for i in range(limit):
     a_test_image = img_proc.load_img(test_images[i], target_size = (224, 224))
-    numpy_image = img_proc.img_to_array(a_test_image)
+    numpy_image = img_to_array(a_test_image, dtype = np.uint8)
     image_batch = np.expand_dims(numpy_image, axis = 0)
-
-    processed_image = mob_v2.preprocess_input(image_batch.copy())
-    processed_image = np.reshape(processed_image, processed_image.size)
-    np.savetxt(out_path + image_names[i].split('.')[0] + '.txt',processed_image, fmt='%i')
+    image_batch = np.reshape(image_batch, (image_batch.size))
+    np.savetxt(out_path + image_names[i].split('.')[0] + '.txt',image_batch, fmt='%i')
     #print(processed_image.shape)

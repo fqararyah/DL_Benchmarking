@@ -34,9 +34,11 @@ input_details = interpreter.get_input_details()[0]
 output_details = interpreter.get_output_details()[0]
 
 # prepare image
-test_image = np.random.randint(
-    low=32, high=160, size=(224, 224, 3)).astype(np.uint8)
-image_batch = np.expand_dims(test_image, axis=0)
+test_image = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012/ILSVRC2012_val_00003599.JPEG'
+a_test_image = load_img(test_image, target_size = (224, 224))
+numpy_image = img_to_array(a_test_image, dtype = np.uint8)
+image_batch = np.expand_dims(numpy_image, axis = 0)
+
 # invoke mode
 interpreter.set_tensor(input_details["index"], image_batch)
 interpreter.invoke()
@@ -107,9 +109,9 @@ def is_it_fc(tensor_shape):
 def is_it_fc_bias(tensor):
     return (tensor.size == NUM_OF_CLASSES and np.max(np.abs(tensor)) > 2^(PRECISION))
 
-test_image = np.transpose(test_image, (2, 1, 0))
-test_image = np.reshape(test_image, (test_image.size))
-np.savetxt('fms/input_image', test_image, fmt='%i')
+# test_image = np.transpose(test_image, (2, 1, 0))
+# test_image = np.reshape(test_image, (test_image.size))
+# np.savetxt('fms/input_image', test_image, fmt='%i')
 
 fms_count = 0
 layer_count = 0
