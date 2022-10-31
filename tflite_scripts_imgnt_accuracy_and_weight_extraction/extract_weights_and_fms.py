@@ -34,7 +34,7 @@ input_details = interpreter.get_input_details()[0]
 output_details = interpreter.get_output_details()[0]
 
 # prepare image
-test_image = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012/ILSVRC2012_val_00003599.JPEG'
+test_image = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012/ILSVRC2012_val_00018455.JPEG'
 a_test_image = load_img(test_image, target_size = (224, 224))
 numpy_image = img_to_array(a_test_image, dtype = np.uint8)
 image_batch = np.expand_dims(numpy_image, axis = 0)

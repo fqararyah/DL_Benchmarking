@@ -16,7 +16,7 @@ def locate_images(path):
     # dirs=directories
     for (root, dirs, file) in os.walk(path):
         for f in file:
-            if 'ILSVRC2012_val_00003599.JPEG' in f:
+            if '.JPEG' in f:
                 test_images.append(os.path.abspath(os.path.join(path, f)))
                 image_names.append(f)
                 #print(image_list[-1])
