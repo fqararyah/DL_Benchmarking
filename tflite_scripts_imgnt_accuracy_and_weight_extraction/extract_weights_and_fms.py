@@ -118,7 +118,7 @@ layer_count = 0
 fc_biases_found = False
 for t in interpreter.get_tensor_details():
     # print('*****************************')
-    #print(t['index'], t['name'], interpreter.get_tensor(t['index']).shape )
+    print(t['index'], t['name'], interpreter.get_tensor(t['index']).shape )
     current_tensor = interpreter.get_tensor(t['index'])  # .astype(np.int8)
     # if t['index'] == 3:
     #    print(t)

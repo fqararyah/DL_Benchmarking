@@ -19,7 +19,7 @@ for layer_index in range(1, len(layers_ofms_shape)):
         skip_connections_so_far += 1
     tf_lite_to_my_cnn_layer_mapping[layer_index] = layer_index + skip_connections_so_far
 
-layer_index = 0
+layer_index = 3
 
 layer_type = layers_types[layer_index]
 weights_file = './weights/weights_{}_{}.txt'.format(layer_index, layer_type)
