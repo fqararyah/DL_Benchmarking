@@ -62,6 +62,10 @@ if PRECISION == 8:
         converter.inference_input_type = tf.uint8
         converter.inference_output_type = tf.uint8
 
+        if MODEL_NAME == 'eff_b0':
+            converter.experimental_new_quantizer = True #//enables MLIR operator  quantization
+            converter.allow_custom_ops = True
+
         tflite_model_quant = converter.convert()
 
         tflite_model_quant_file.write_bytes(tflite_model_quant)
