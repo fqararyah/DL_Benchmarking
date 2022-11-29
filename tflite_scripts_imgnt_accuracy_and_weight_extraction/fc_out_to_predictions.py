@@ -25,7 +25,7 @@ for i in range(len(fc_out_files)):
     current_fc_out = np.loadtxt(fc_out_files[i])
     indices = np.argsort(current_fc_out)[-5:]
     indices = np.flip(indices)
-    prediction_dict = {"dets": indices.tolist(), "image": file_names[i]}
+    prediction_dict = {"dets": indices.tolist(), "image": file_names[i].replace('.txt', '.JPEG')}
     prediction_dict_list.append(prediction_dict)
 
 json_object = json.dumps(prediction_dict_list)

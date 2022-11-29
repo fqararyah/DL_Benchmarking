@@ -29,7 +29,7 @@ def set_globals(prefix, full_name):
         ,EXPANSION_PROJECTION_FILE, LAYERS_RELUS_FILE, LAYERS_SKIP_CONNECTIONS_FILE
     NET_PREFIX = prefix
     NET_FULL_NAME = full_name
-    input_folder = './models/' + NET_FULL_NAME + '/'
+    input_folder = current_dir + '/models/' + NET_FULL_NAME + '/'
     IFMS_FILE = input_folder + 'layers_inputs.txt'
     OFMS_FILE = input_folder + 'layers_outputs.txt'
     LAYERS_TYPES_FILE = input_folder + 'layers_types.txt'

@@ -5,8 +5,9 @@ import os
 import numpy as np
 from tensorflow.keras.preprocessing.image import img_to_array
 import tensorflow.keras.applications.mobilenet_v2 as mob_v2
+import tensorflow.keras.applications.efficientnet as eff_b0
 import tensorflow.keras.applications as models
-
+import time
 import pathlib
 
 DATA_PATH = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012'
@@ -19,40 +20,50 @@ def locate_images(path):
         for f in file:
             if '.JPEG' in f:
                 image_list.append(os.path.abspath(os.path.join(path, f)))
-                #print(image_list[-1])
+                # print(image_list[-1])
     return image_list
+
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'mob_v2'
+MODEL_NAME = 'eff_b0'
 PRECISION = 8
 
-model = models.MobileNetV2()
+if MODEL_NAME == 'mob_v2':
+    model = models.MobileNetV2()
+elif MODEL_NAME == 'eff_b0':
+    model = models.EfficientNetB0()
+
 
 def representative_dataset():
     for i in range(100):
-        a_test_image = load_img(test_images[i], target_size = (224, 224))
+        a_test_image = load_img(test_images[i], target_size=(224, 224))
         numpy_image = img_to_array(a_test_image)
-        image_batch = np.expand_dims(numpy_image, axis = 0)
-        processed_image = mob_v2.preprocess_input(image_batch.copy())
+        image_batch = np.expand_dims(numpy_image, axis=0)
+        if MODEL_NAME == 'mob_v2':
+            processed_image = mob_v2.preprocess_input(image_batch.copy())
+        elif MODEL_NAME == 'eff_b0':
+            processed_image = eff_b0.preprocess_input(image_batch.copy())
         yield [processed_image.astype(np.float32)]
+
 
 if PRECISION == 8:
     tflite_models_dir = pathlib.Path("./")
-    tflite_model_quant_file = tflite_models_dir/(MODEL_NAME + '_' + str(PRECISION) +".tflite")
+    tflite_model_quant_file = tflite_models_dir / \
+        (MODEL_NAME + '_' + str(PRECISION) + ".tflite")
     if not os.path.exists(tflite_model_quant_file):
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
         converter.representative_dataset = representative_dataset
         # Ensure that if any ops can't be quantized, the converter throws an error
-        converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+        converter.target_spec.supported_ops = [
+            tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
         # Set the input and output tensors to uint8 (APIs added in r2.3)
         converter.inference_input_type = tf.uint8
         converter.inference_output_type = tf.uint8
 
         tflite_model_quant = converter.convert()
 
-        
         tflite_model_quant_file.write_bytes(tflite_model_quant)
 
     interpreter = tf.lite.Interpreter(model_path=str(tflite_model_quant_file))
@@ -60,14 +71,17 @@ if PRECISION == 8:
 
 prediction_dict_list = []
 
-#limit = len(test_images)
+# limit = len(test_images)
 limit = 1000
 for i in range(limit):
-    a_test_image = load_img(test_images[i], target_size = (224, 224))
+    a_test_image = load_img(test_images[i], target_size=(224, 224))
     numpy_image = img_to_array(a_test_image)
-    image_batch = np.expand_dims(numpy_image, axis = 0)
+    image_batch = np.expand_dims(numpy_image, axis=0)
 
-    processed_image = mob_v2.preprocess_input(image_batch.copy())
+    if MODEL_NAME == 'mob_v2':
+            processed_image = mob_v2.preprocess_input(image_batch.copy())
+    elif MODEL_NAME == 'eff_b0':
+        processed_image = eff_b0.preprocess_input(image_batch.copy())
 
     if PRECISION == 32:
         predictions = model.predict(processed_image)[0]
@@ -77,12 +91,15 @@ for i in range(limit):
         if input_details['dtype'] == np.uint8:
             numpy_image = img_to_array(a_test_image, dtype = np.uint8)
             image_batch = np.expand_dims(numpy_image, axis = 0)
-            #input_scale, input_zero_point = input_details["quantization"]
-            #image_batch = image_batch / input_scale + input_zero_point
-            #image_batch = image_batch.astype(np.uint8)
+            # input_scale, input_zero_point = input_details["quantization"]
+            # image_batch = image_batch / input_scale + input_zero_point
+            # image_batch = image_batch.astype(np.uint8)
 
         interpreter.set_tensor(input_details["index"], image_batch)
+        t1 = time.time()
         interpreter.invoke()
+        t2 = time.time()
+        print('one infer per', t2 - t1, ' seconds')
         predictions = interpreter.get_tensor(output_details["index"])[0]
         
     top5 = np.argsort(predictions)[-5:]
