@@ -4,6 +4,8 @@ keras.__version__
 import numpy as np
 from tensorflow.keras.preprocessing import image
 from tensorflow.keras.applications.resnet50 import preprocess_input
+import tensorflow.keras.applications as models
+
 import onnxruntime
 import keras2onnx
 
@@ -17,7 +19,7 @@ x = preprocess_input(x)
 
 # load keras model
 from tensorflow.keras.applications.resnet50 import ResNet50
-model = ResNet50(include_top=True, weights='imagenet')
+model = models.MobileNetV2(include_top=True, weights='imagenet')
 
 # convert to onnx model
 onnx_model = keras2onnx.convert_keras(model, model.name)
@@ -29,4 +31,4 @@ x = x if isinstance(x, list) else [x]
 feed = dict([(input.name, x[n]) for n, input in enumerate(sess.get_inputs())])
 pred_onnx = sess.run(None, feed)
 
-keras2onnx.save_model(onnx_model, 'keras_ResNet50.onnx')
+keras2onnx.save_model(onnx_model, 'Mob_v2.onnx')

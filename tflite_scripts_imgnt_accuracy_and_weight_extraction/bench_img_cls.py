@@ -78,45 +78,27 @@ if PRECISION == 8:
 prediction_dict_list = []
 
 # limit = len(test_images)
-limit = 1000
-for i in range(limit):
+limit = 64
+image_batch = img_to_array(load_img(test_images[0], target_size=(224, 224)), dtype = np.uint8)
+image_batch = np.expand_dims(image_batch, axis=0)
+for i in range(1, limit):
     a_test_image = load_img(test_images[i], target_size=(224, 224))
-    numpy_image = img_to_array(a_test_image)
-    image_batch = np.expand_dims(numpy_image, axis=0)
+    numpy_image = img_to_array(a_test_image, dtype = np.uint8)
+    numpy_image = np.expand_dims(numpy_image, axis=0)
+    image_batch = np.concatenate( (image_batch, numpy_image))
 
-    if MODEL_NAME == 'mob_v2':
-        processed_image = mob_v2.preprocess_input(image_batch.copy())
-    elif MODEL_NAME == 'eff_b0':
-        processed_image = eff_b0.preprocess_input(image_batch.copy())
+#
 
-    if PRECISION == 32:
-        t1 = time.time()
-        predictions = model.predict(processed_image)[0]
-        t2 = time.time()
-        print('one infer per', t2 - t1, ' seconds')
-    else:
-        input_details = interpreter.get_input_details()[0]
-        output_details = interpreter.get_output_details()[0]
-        if input_details['dtype'] == np.uint8:
-            numpy_image = img_to_array(a_test_image, dtype = np.uint8)
-            image_batch = np.expand_dims(numpy_image, axis = 0)
-            # input_scale, input_zero_point = input_details["quantization"]
-            # image_batch = image_batch / input_scale + input_zero_point
-            # image_batch = image_batch.astype(np.uint8)
 
-        interpreter.set_tensor(input_details["index"], image_batch)
-        t1 = time.time()
-        interpreter.invoke()
-        t2 = time.time()
-        print('one infer per', t2 - t1, ' seconds')
-        predictions = interpreter.get_tensor(output_details["index"])[0]
-        
-    top5 = np.argsort(predictions)[-5:]
-    top5 = np.flip(top5)
-    prediction_dict = {"dets":top5.tolist(), "image": test_images[i].split('/')[-1]}
-    prediction_dict_list.append(prediction_dict)
+input_details = interpreter.get_input_details()[0]
+output_details = interpreter.get_output_details()[0]
+interpreter.resize_tensor_input(input_details['index'],[limit,224,224,3])
+interpreter.allocate_tensors()
 
-json_object = json.dumps(prediction_dict_list)
-
-with open(MODEL_NAME + '_' + str(PRECISION) + '_' + str(limit) + "_predictions.json", "w") as outfile:
-    outfile.write(json_object)
+print(image_batch.shape)
+interpreter.set_tensor(input_details["index"], image_batch)
+t1 = time.time()
+interpreter.invoke()
+predictions = interpreter.get_tensor(output_details["index"])[0]
+t2 = time.time()
+print('one infer per', (t2 - t1 ) / limit, ' seconds')

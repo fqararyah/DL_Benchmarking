@@ -10,7 +10,7 @@ import classes
 DELIMITER = '::'
 
 NET_PREFIX = 'mob_v2'
-NET_FULL_NAME = 'mobilenet_v2'
+NET_FULL_NAME = 'mob_v2'
 input_folder = current_dir + '/models/'\
      + NET_FULL_NAME + '/'
 IFMS_FILE = input_folder + 'layers_inputs.txt'

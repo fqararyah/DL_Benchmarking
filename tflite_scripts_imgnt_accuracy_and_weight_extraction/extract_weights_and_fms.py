@@ -18,7 +18,7 @@ from models_archs import utils
 # import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-MODEL_NAME = 'eff_b0'
+MODEL_NAME = 'mob_v2'
 PRECISION = 8
 NUM_OF_CLASSES = 1000
 np.random.seed(0)
