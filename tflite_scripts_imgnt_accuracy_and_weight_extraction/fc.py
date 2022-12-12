@@ -23,25 +23,32 @@ def locate_ifms(path):
                 ifms_files.append(os.path.abspath(os.path.join(path, f)))
                 image_names.append(f.split('.')[0])
 
+
 locate_ifms(ifms_folder)
 
+fc_ifm_scale = 0.020379824563860893
+fc_ifm_zero_point = -128
+#fc_ofm_scale = 0.07442259788513184
+#fc_ofm_zero_point = -59
 i = 0
-for ifms_file in ifms_files:
-    print(ifms_file)
-    ifms = np.loadtxt(ifms_file).astype(np.int8)
-    scaled_ifms = 0.020379824563860893 * (ifms + 128)
-    # print(scaled_ifms)
-    weights = np.loadtxt(weights_file).astype(np.int8)
-    biases = np.loadtxt(biases_file).astype(np.int32)
 
-    scaled_weights = np.loadtxt(weights_scales_file) * weights
-    # print(weights[0])
-    scaled_weights = np.reshape(scaled_weights, (1000, 1280))
-    # print(scaled_weights.shape)
-    # print(ifms.shape)
-    ofms = -59 + (np.dot(scaled_weights, scaled_ifms) + biases *
-                  np.loadtxt(biases_scales_file)) / 0.07442259788513184
-    ofms = ofms.astype(np.int8)
-    np.savetxt(ofms_file.format(image_names[i]), ofms, fmt='%i')
+weights = np.loadtxt(weights_file).astype(np.int64)
+weight_scales = np.loadtxt(weights_scales_file)
+weights = np.reshape(weights, (1000, 1280))
+weight_sums = np.sum(weights, axis=1)
+biases = np.loadtxt(biases_file).astype(np.int32)
+scaled_biases = biases * np.loadtxt(biases_scales_file)
+
+
+for ifms_file in ifms_files:
+    #print(ifms_file)
+    ifms = np.loadtxt(ifms_file).astype(np.int64)
+    scaled_ifms = (ifms - fc_ifm_zero_point)
+
+    ofms = np.dot(weights, ifms) + \
+        (- weight_sums * fc_ifm_zero_point) + scaled_biases / (weight_scales * fc_ifm_scale) 
+    #ofms = fc_ofm_zero_point + ( (np.dot(weights, ifms) - weight_sums * fc_ifm_zero_point ) * 
+    # (weight_scales *fc_ifm_scale) + scaled_biases) / fc_ofm_scale
+
+    np.savetxt(ofms_file.format(image_names[i]), ofms)
     i += 1
-    #print(ofms.shape, ofms[0:10])

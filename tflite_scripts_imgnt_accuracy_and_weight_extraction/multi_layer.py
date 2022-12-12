@@ -18,9 +18,9 @@ for layer_index in range(1, len(layers_ofms_shape)):
         skip_connections_so_far += 1
     tf_lite_to_my_cnn_layer_mapping[layer_index] = layer_index + 1 + skip_connections_so_far
 
-start_layer = 49
+start_layer = 2
 prev_layer = start_layer#tf_lite_to_my_cnn_layer_mapping[start_layer]
-end_layer = 53
+end_layer = 9
 for layer_index in range(start_layer, end_layer):
     print('layer:', layer_index)
     if layers_types[layer_index] == 'pw' and expansion_projection[layer_index] == 0:
