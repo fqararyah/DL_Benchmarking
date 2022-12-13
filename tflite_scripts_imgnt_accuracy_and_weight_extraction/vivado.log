@@ -89,3 +89,7 @@ Resolution: To review and fix problems, please run Power Constraints Advisor in 
 0 Infos, 1 Warnings, 0 Critical Warnings and 0 Errors encountered.
 report_power completed successfully
 report_power: Time (s): cpu = 00:11:38 ; elapsed = 00:02:06 . Memory (MB): peak = 15476.391 ; gain = 2312.949 ; free physical = 229 ; free virtual = 7801
+report_utilization -name utilization_1
+report_utilization: Time (s): cpu = 00:01:12 ; elapsed = 00:00:41 . Memory (MB): peak = 15680.090 ; gain = 203.699 ; free physical = 262 ; free virtual = 7969
+exit
+INFO: [Common 17-206] Exiting Vivado at Thu Dec  8 11:38:25 2022...

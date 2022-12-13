@@ -15,3 +15,4 @@ open_project /media/SSD2TB/wd/vitis_ide_projects/fibha_v1_system_hw_link/Hardwar
 update_compile_order -fileset sources_1
 open_run impl_1
 report_power -name {power_1}
+report_utilization -name utilization_1

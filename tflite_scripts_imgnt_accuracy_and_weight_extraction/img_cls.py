@@ -26,8 +26,9 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'mob_v2'
-PRECISION = 32
+MODEL_NAME = 'eff_b0_no_sig'
+MODEL_PATH = '/media/SSD2TB/wd/models/efficientnet_b0_no_sigmoid.h5'
+PRECISION = 8
 
 if MODEL_NAME == 'mob_v2':
     model = models.MobileNetV2()
@@ -35,6 +36,8 @@ elif MODEL_NAME == 'eff_b0':
     model = models.EfficientNetB0()
 elif MODEL_NAME == 'nas':
     model = models.NASNetMobile()
+elif MODEL_NAME in ['eff_b0_ns_ns', 'eff_b0_no_sig', 'eff_b0_ns']:
+    model = tf.keras.models.load_model(MODEL_PATH)
 
 
 def representative_dataset():
@@ -44,7 +47,7 @@ def representative_dataset():
         image_batch = np.expand_dims(numpy_image, axis=0)
         if MODEL_NAME == 'mob_v2':
             processed_image = mob_v2.preprocess_input(image_batch.copy())
-        elif MODEL_NAME == 'eff_b0':
+        elif 'eff_b0' in MODEL_NAME:
             processed_image = eff_b0.preprocess_input(image_batch.copy())
         yield [processed_image.astype(np.float32)]
 
@@ -86,7 +89,7 @@ for i in range(limit):
 
     if MODEL_NAME == 'mob_v2':
         processed_image = mob_v2.preprocess_input(image_batch.copy())
-    elif MODEL_NAME == 'eff_b0':
+    elif 'eff_b0' in MODEL_NAME:
         processed_image = eff_b0.preprocess_input(image_batch.copy())
 
     if PRECISION == 32:

@@ -1,67 +1,32 @@
-/******************************************************************************
-* Copyright (c) 2021 Xilinx, Inc.  All rights reserved.
-* SPDX-License-Identifier: MIT
- ******************************************************************************/
+void fill_weights_tile_from_weight_groups_tile(
+		weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
+		weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
+		int starting_filter, const int layer_depth,
+		const int num_of_weight_groups, const int layer_weights_offset) {
+#pragma HLS INLINE off
 
-#include "xparameters.h"
-#include "xil_cache.h"
+//assumes pw_parallelism_out * filter depth is divisable by weight group number
 
-#include "platform_config.h"
-
-#ifdef STDOUT_IS_16550
-#include "xuartns550_l.h"
-#endif
-
-void
-enable_caches()
-{
-#ifdef __PPC__
-    Xil_ICacheEnableRegion(XPAR_CACHEABLE_REGION_MASK);
-    // Do not enable caches for memory tests, this has pros and cons
-    // Pros - If caches are enabled, under certain configurations, there will be very few 
-    //        transactions to external memory
-    // Con  - This might not generate a burst cacheline request
-    // Xil_DCacheEnableRegion(CACHEABLE_REGION_MASK);
-#elif __MICROBLAZE__
-#ifdef XPAR_MICROBLAZE_USE_ICACHE 
-    Xil_ICacheEnable();
-#endif
-#ifdef XPAR_MICROBLAZE_USE_DCACHE 
-    // See reason above for not enabling D Cache
-    // Xil_DCacheEnable();
-#endif
-#elif __arm__
-    // For ARM, BSP enables caches by default.
-#endif
-}
-
-void
-disable_caches()
-{
-    Xil_DCacheDisable();
-    Xil_ICacheDisable();
-}
-
-void
-init_platform()
-{
-    enable_caches();
-
-#ifdef __arm__
-    // For ARM, BSP enables caches by default. Disable them here.
-    // See reason above for disabling D Cache
-    Xil_DCacheDisable();
-#endif
-
-    /* if we have a uart 16550, then that needs to be initialized */
-#ifdef STDOUT_IS_16550
-    XUartNs550_SetBaud(STDOUT_BASEADDR, XPAR_XUARTNS550_CLOCK_HZ, 9600);
-    XUartNs550_SetLineControlReg(STDOUT_BASEADDR, XUN_LCR_8_DATA_BITS);
-#endif
-}
-
-void
-cleanup_platform()
-{
-    disable_caches();
+	fill_weights_loop: for (int weight_grp_index = 0;
+			weight_grp_index < num_of_weight_groups; weight_grp_index++) {
+		weights_grp_dt chunck = weight_groups_buffer[weight_grp_index];
+		for (int within_filter_index = 0;
+				within_filter_index
+						< num_of_weights_in_the_same_filter_and_group;
+				within_filter_index++) {
+#pragma HLS UNROLL
+			for (int filter_index = 0; filter_index < pw_conv_parallelism_out;
+					filter_index++) {
+#pragma HLS UNROLL
+				weights_tile[filter_index][weight_grp_index
+						* num_of_weights_in_the_same_filter_and_group
+						+ within_filter_index] = (weights_dt) chunck(
+						(within_filter_index * pw_conv_parallelism_out
+								+ filter_index) * weights_dt_width
+								+ weights_dt_offset,
+						(within_filter_index * pw_conv_parallelism_out
+								+ filter_index) * weights_dt_width);
+			}
+		}
+	}
 }

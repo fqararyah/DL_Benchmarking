@@ -2,14 +2,15 @@ import numpy as np
 import os
 
 ifms_folder = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/fpga_out_1'
+
 weights_file = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_weights.txt'
+weight_sums_file = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_weight_sums.txt'
 weights_scales_file = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/' +\
     'weights/fc_weight_scales.txt'
 biases_file = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_biases.txt'
 biases_scales_file = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/' +\
     'weights/fc_biases_scales.txt'
-fc_biases_scales_file = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/' +\
-    'tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_biases_scales.txt'
+
 ofms_file = './fc_out/{}.txt'
 
 image_names = []
@@ -35,7 +36,8 @@ i = 0
 weights = np.loadtxt(weights_file).astype(np.int64)
 weight_scales = np.loadtxt(weights_scales_file)
 weights = np.reshape(weights, (1000, 1280))
-weight_sums = np.sum(weights, axis=1)
+weight_sums = np.loadtxt(weight_sums_file).astype(np.int32)
+#np.savetxt(weight_sums_file,weight_sums, '%i')
 biases = np.loadtxt(biases_file).astype(np.int32)
 scaled_biases = biases * np.loadtxt(biases_scales_file)
 
