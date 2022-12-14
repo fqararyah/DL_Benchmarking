@@ -96,42 +96,33 @@ string top_5_to_predictions_dict(int top5[5], string image_name)
 
 void fc_layer(int8_t in_vector[], int8_t weights[], int weight_sums[], int top5[5], int biases[])
 {
-
-    int64_t pss = 0;
     double scaled_pss;
-    double top_5_pss[5];
+    double pss_vector[num_classes];
+    top5[0] = -1;
+    top5[1] = -1;
+    top5[2] = -1;
+    top5[3] = -1;
+    top5[4] = -1;
     for (int i = 0; i < num_classes; i++)
     {
+        int64_t pss = 0;
         const int row_start_index = i * fc_layer_input_size;
+        for (int j = 0; j < fc_layer_input_size; j++)
+        {
+            pss += (int64_t)weights[row_start_index + j] * in_vector[j];
+        }
+        // if(i==999)cout << pss <<" "<<weight_sums[i]<<" "<<biases[i]<<"\n";
+        pss_vector[i] = pss + (-weight_sums[i] * ifm_zero_point) + biases_scale * biases[i] / (weights_scale * ifms_scale);
+    }
+    for (int i = 0; i < 5; i++)
+    {
+        double max = - 1000000;
         for (int j = 0; j < num_classes; j++)
         {
-            pss += weights[row_start_index + j] * in_vector[j];
-        }
-        scaled_pss = pss + (-weight_sums[i] * ifm_zero_point) + biases_scale * biases[i] / (weights_scale * ifms_scale);
-        if (scaled_pss > top_5_pss[0])
-        {
-            top_5_pss[0] = scaled_pss;
-            top5[0] = i + 1;
-        }
-        else if (scaled_pss > top_5_pss[1])
-        {
-            top_5_pss[1] = scaled_pss;
-            top5[1] = i + 1;
-        }
-        else if (scaled_pss > top_5_pss[2])
-        {
-            top_5_pss[2] = scaled_pss;
-            top5[2] = i + 1;
-        }
-        else if (scaled_pss > top_5_pss[3])
-        {
-            top_5_pss[3] = scaled_pss;
-            top5[3] = i + 1;
-        }
-        else if (scaled_pss > top_5_pss[4])
-        {
-            top_5_pss[4] = scaled_pss;
-            top5[4] = i + 1;
+            if(pss_vector[j] > max && top5[0] != j && top5[1] != j && top5[2] != j && top5[3] != j && top5[4] != j){
+                max = pss_vector[j];
+                top5[i] = j;
+            }
         }
     }
 }
@@ -143,7 +134,7 @@ int main()
     string weight_sums_file =
         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_weight_sums.txt";
     string biases_file =
-        "biases_file = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_biases.txt";
+        "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_biases.txt";
 
     int8_t fc_weights[num_classes * fc_layer_input_size];
     int weight_sums[num_classes];
@@ -195,6 +186,6 @@ int main()
     {
         return EXIT_FAILURE;
     }
-    predictions_file_content = predictions_file_content.substr(0,predictions_file_content.length()-1) + ']';
+    predictions_file_content = predictions_file_content.substr(0, predictions_file_content.length() - 1) + ']';
     save_predictions(predictions_file, predictions_file_content);
 }

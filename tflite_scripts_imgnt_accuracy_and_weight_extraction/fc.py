@@ -39,7 +39,11 @@ weights = np.reshape(weights, (1000, 1280))
 weight_sums = np.loadtxt(weight_sums_file).astype(np.int32)
 #np.savetxt(weight_sums_file,weight_sums, '%i')
 biases = np.loadtxt(biases_file).astype(np.int32)
-scaled_biases = biases * np.loadtxt(biases_scales_file)
+baises_scale = np.loadtxt(biases_scales_file)
+scaled_biases = biases * baises_scale
+
+print(weight_scales)
+print(baises_scale)
 
 
 for ifms_file in ifms_files:
