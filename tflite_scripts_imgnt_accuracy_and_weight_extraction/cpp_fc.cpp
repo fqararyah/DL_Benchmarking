@@ -2,7 +2,9 @@
 #include <iostream>
 #include <fstream>
 #include <dirent.h>
+#include <chrono>
 
+using namespace std::chrono;
 using namespace std;
 
 const int num_classes = 1000;
@@ -175,8 +177,13 @@ int main()
             {
                 break;
             }
-
+            
+            auto start = high_resolution_clock::now();
             fc_layer(ifms, fc_weights, weight_sums, top5, biases);
+            auto stop = high_resolution_clock::now();
+            auto duration = duration_cast<microseconds>(stop - start);
+            cout << duration.count() << endl;
+
             string formatted_file_name = file_name.substr(0, file_name.find(".", 0) + 1) + "JPEG";
             predictions_file_content += top_5_to_predictions_dict(top5, formatted_file_name);
         }

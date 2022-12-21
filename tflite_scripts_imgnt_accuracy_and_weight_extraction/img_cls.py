@@ -26,7 +26,7 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'eff_b0_no_sig'
+MODEL_NAME = 'eff_b0_ns'
 MODEL_PATH = '/media/SSD2TB/wd/models/efficientnet_b0_no_sigmoid.h5'
 PRECISION = 8
 
@@ -41,7 +41,7 @@ elif MODEL_NAME in ['eff_b0_ns_ns', 'eff_b0_no_sig', 'eff_b0_ns']:
 
 
 def representative_dataset():
-    for i in range(100):
+    for i in range(200):
         a_test_image = load_img(test_images[i], target_size=(224, 224))
         numpy_image = img_to_array(a_test_image)
         image_batch = np.expand_dims(numpy_image, axis=0)
@@ -81,7 +81,7 @@ if PRECISION == 8:
 prediction_dict_list = []
 
 # limit = len(test_images)
-limit = 1000
+limit = 500
 for i in range(limit):
     a_test_image = load_img(test_images[i], target_size=(224, 224))
     numpy_image = img_to_array(a_test_image)
