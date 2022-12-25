@@ -138,6 +138,7 @@ for t in interpreter.get_tensor_details():
             np.savetxt('./'+weights_fms_dir+'/weights/' + file_name + '_zero_points.txt',
                     t['quantization_parameters']['zero_points'], fmt='%i')
     else:
+        print(tensor_name_postfix, original_shape)
         if 'conv2d;' in tensor_name:
             tensor_name_postfix += 'conv2d'
         for key, val in fms_counts.items():
