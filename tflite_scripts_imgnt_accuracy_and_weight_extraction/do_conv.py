@@ -3,7 +3,8 @@ import numpy as np
 from models_archs import utils
 
 
-
+utils.NET_PREFIX = 'mob_v2'
+utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
 layers_types = utils.read_layers_types()
 layers_weights_shape = utils.read_layers_weight_shapes(layers_types)
@@ -13,26 +14,19 @@ layers_relus = utils.read_layers_relus()
 layers_ofms_shape = utils.read_layers_output_shapes()
 skip_connections_indices = utils.read_skip_connections_indices()
 
-tf_lite_to_my_cnn_layer_mapping = {0:1}
-skip_connections_so_far = 0
-for layer_index in range(1, len(layers_ofms_shape)):
-    if layer_index in skip_connections_indices:
-        skip_connections_so_far += 1
-    tf_lite_to_my_cnn_layer_mapping[layer_index] = layer_index + skip_connections_so_far
-
-layer_index = 3
+layer_index = 9
 
 layer_type = layers_types[layer_index]
-weights_file = './weights/weights_{}_{}.txt'.format(layer_index, layer_type)
-ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index], layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height,\
+weights_file = './{}/weights/conv2d_{}_{}_weights.txt'.format(utils.NET_PREFIX, layer_index, layer_type)
+ifms_file = './{}/fms/fms_conv2d_{}_{}_{}_{}.txt'.format(utils.NET_PREFIX,layer_index, layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height,\
     layers_ifms_shape[layer_index].width)
 ofms_file = './scratch_out/ofms_{}_ref.txt'.format(layer_index)
-ifms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index])
-bias_file = './weights/weights_{}_biases.txt'.format(layer_index)
-weights_scale_file = './weights/weights_{}_scales.txt'.format(layer_index)
-ifms_scale_file = './fms/fms_{}_scales.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index])
-ofms_scale_file = './fms/fms_{}_scales.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index] + 1)
-ofms_zero_points_file = './fms/fms_{}_zero_points.txt'.format(tf_lite_to_my_cnn_layer_mapping[layer_index] + 1)
+ifms_zero_points_file = './{}/fms/fms_conv2d_{}_zero_points.txt'.format(utils.NET_PREFIX, layer_index)
+bias_file = './{}/biases/conv2d_{}_biases.txt'.format(utils.NET_PREFIX, layer_index)
+weights_scale_file = './{}/weights/conv2d_{}_scales.txt'.format(utils.NET_PREFIX, layer_index)
+ifms_scale_file = './{}/fms/fms_conv2d_{}_scales.txt'.format(utils.NET_PREFIX, layer_index)
+ofms_scale_file = './{}/fms/fms_conv2d_{}_scales.txt'.format(utils.NET_PREFIX, layer_index + 1)
+ofms_zero_points_file = './{}/fms/fms_conv2d_{}_zero_points.txt'.format(utils.NET_PREFIX, layer_index + 1)
 
 layers_ifms_zero_point = {layer_index: np.loadtxt(ifms_zero_points_file).astype(np.int32)}
 layers_bias = {layer_index: np.loadtxt(bias_file).astype(np.int32)}

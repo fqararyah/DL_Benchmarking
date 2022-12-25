@@ -18,8 +18,8 @@ from models_archs import utils
 # import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-MODEL_NAME = 'eff_b0'
-ACTIVATION_FUNCTION = 'sigmoid'
+MODEL_NAME = 'mob_v2'
+ACTIVATION_FUNCTION = 'relu6'
 PRECISION = 8
 NUM_OF_CLASSES = 1000
 np.random.seed(0)
@@ -51,7 +51,9 @@ tensor_details = interpreter.get_tensor_details()
 splitting_layer_name = 'tfl.quantize'
 current_tensors_type = 'weights'
 weights_counts = {'conv2d': 0, 'matmul': 0}
-fms_counts = {'conv2d': 0, 'matmul': 0}
+fms_counts = {'conv2d': 1, 'matmul': 0}
+skip_connection_layers_types = ['mul', 'add']
+skip_connection_indices = []
 last_tensor_key = ''
 layers_weights_dims = []
 layers_inputs_dims = [[3, 224, 224]]
@@ -59,10 +61,13 @@ layers_outputs_dims = []
 layers_types = []
 layers_activations = []
 layers_strides = []
+secondary_layers_types = []
+layers_execution_sequence = []
 fms_count = 0
 layer_count = 0
-internal_layers_count = 0
+internal_layers_count = 1
 fc_biases_found = False
+initial_ifms_file_name = 'conv2d_0'
 for t in interpreter.get_tensor_details():
     tensor_name = t['name'].lower()
     tensor_name = tensor_name.replace('depthwise', 'conv2d')
@@ -88,9 +93,7 @@ for t in interpreter.get_tensor_details():
         if original_tensor.ndim == 1:
             if last_tensor_key == '':
                 continue
-            file_name = 'biases_' + \
-                str(weights_counts[last_tensor_key] - 1)
-            
+            file_name = last_tensor_key + '_' + str(weights_counts[last_tensor_key] - 1) + '_biases'
             np.savetxt('./'+weights_fms_dir+'/biases/' +
                     file_name + '.txt', current_tensor, fmt='%i')
             np.savetxt('./'+weights_fms_dir+'/biases/' + file_name +
@@ -142,29 +145,35 @@ for t in interpreter.get_tensor_details():
                 fms_counts[key] += 1
                 last_tensor_key = key
                 break
-
+        
         file_name = last_tensor_key + '_' + str(fms_counts[last_tensor_key] - 1)
-        main_file_name = file_name
         if last_tensor_key not in tensor_name_postfix:
-            main_file_name += '_a' + str(internal_layers_count)
-            file_name += '_' + tensor_name_postfix
-            main_file_name += '_' + tensor_name_postfix
+            file_name += '_' + tensor_name_postfix + '_' + str(internal_layers_count)
+            layers_execution_sequence.append(tensor_name_postfix + '_' + str(internal_layers_count))
             internal_layers_count += 1
+            if tensor_name_postfix in skip_connection_layers_types:
+                skip_connection_indices.append(fms_counts[last_tensor_key] - 2)
+            if tensor_name_postfix not in secondary_layers_types and tensor_name_postfix.isidentifier():
+                secondary_layers_types.append(tensor_name_postfix)
         else:
-            internal_layers_count = 0
+            layers_execution_sequence.append('conv2d')
+            internal_layers_count = 1
             layers_inputs_dims.append(current_tensor_dims)
             layers_outputs_dims.append(current_tensor_dims)
             if len(layers_inputs_dims[-1]) == 3 and len(layers_inputs_dims[-2]) == 3 \
                 and  layers_inputs_dims[-1][2] != layers_inputs_dims[-2][2]:
-                layers_strides[fms_counts[last_tensor_key] - 1] = 2
+                layers_strides[fms_counts[last_tensor_key] - 2] = 2
 
-        np.savetxt('./'+weights_fms_dir+'/fms/fms_' + main_file_name + '_' +
+        if fms_counts['conv2d'] == 1:
+            file_name = initial_ifms_file_name
+        
+        #print(fms_counts['conv2d'], file_name + '_' + current_tensor_shape_str_rep)
+        np.savetxt('./'+weights_fms_dir+'/fms/fms_' + file_name + '_' +
                    current_tensor_shape_str_rep + '.txt', current_tensor, fmt='%i')
         np.savetxt('./'+weights_fms_dir+'/fms/fms_' + file_name + '_scales.txt',
                    t['quantization_parameters']['scales'])
         np.savetxt('./'+weights_fms_dir+'/fms/fms_' + file_name + '_zero_points.txt',
                    t['quantization_parameters']['zero_points'], fmt='%i')
-        fms_count += 1
 
 with open(model_arch_dir + 'layers_weights.txt', 'w') as f:
     for shape in layers_weights_dims:
@@ -174,6 +183,10 @@ with open(model_arch_dir + 'layers_weights.txt', 'w') as f:
 
 with open(model_arch_dir + 'layers_types.txt', 'w') as f:
     for layer_type in layers_types:
+        f.write(layer_type + '\n')
+
+with open(model_arch_dir + 'secondary_layers_types.txt', 'w') as f:
+    for layer_type in secondary_layers_types:
         f.write(layer_type + '\n')
 
 with open(model_arch_dir + 'layers_inputs.txt', 'w') as f:
@@ -195,3 +208,11 @@ with open(model_arch_dir + 'layers_activations.txt', 'w') as f:
 with open(model_arch_dir + 'layers_strides.txt', 'w') as f:
     for layer_strides in layers_strides:
         f.write(str(layer_strides) + '\n')
+
+with open(model_arch_dir + 'skip_connections_indices.txt', 'w') as f:
+    for skip_connection_index in skip_connection_indices:
+        f.write(str(skip_connection_index) + '\n')
+
+with open(model_arch_dir + 'layers_execution_sequence.txt', 'w') as f:
+    for layer in layers_execution_sequence:
+        f.write(layer + '\n')
