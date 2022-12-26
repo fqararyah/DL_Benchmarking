@@ -1,3 +1,4 @@
+from multiprocessing.dummy import active_children
 import sys
 import pathlib
 
@@ -10,34 +11,41 @@ import classes
 DELIMITER = '::'
 
 NET_PREFIX = 'mob_v2'
-NET_FULL_NAME = 'mob_v2'
-input_folder = current_dir + '/models/'\
+NET_FULL_NAME = 'mobilenet_v2'
+input_folder = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/models_archs/models/'\
      + NET_FULL_NAME + '/'
 IFMS_FILE = input_folder + 'layers_inputs.txt'
 OFMS_FILE = input_folder + 'layers_outputs.txt'
 LAYERS_TYPES_FILE = input_folder + 'layers_types.txt'
+SECONDARY_LAYERS_TYPES_FILE = input_folder + 'secondary_layers_types.txt'
 LAYERS_WEIGHTS_FILE = input_folder + 'layers_weights.txt'
 LAYERS_STRIDES_FILE = input_folder + 'layers_strides.txt'
 EXPANSION_PROJECTION_FILE = input_folder + 'expansion_projection.txt'
 LAYERS_RELUS_FILE = input_folder + 'layers_relus.txt'
 LAYERS_SKIP_CONNECTIONS_FILE = input_folder + 'skip_connections_indices.txt'
+LAYERS_ACTIVATIONS_FILE = input_folder + 'layers_activations.txt'
+LAYERS_EXECUTION_SEQUENCE = input_folder + 'layers_execution_sequence.txt'
 
-START_CODE_GENERATION_SIGNAL = 'begin_code_generation'
-END_CODE_GENERATION_SIGNAL = 'end_code_generation'
+
 def set_globals(prefix, full_name):
     global NET_PREFIX, NET_FULL_NAME, input_folder, IFMS_FILE, OFMS_FILE, LAYERS_TYPES_FILE, LAYERS_WEIGHTS_FILE, LAYERS_STRIDES_FILE\
-        ,EXPANSION_PROJECTION_FILE, LAYERS_RELUS_FILE, LAYERS_SKIP_CONNECTIONS_FILE
+        ,EXPANSION_PROJECTION_FILE, LAYERS_RELUS_FILE, LAYERS_SKIP_CONNECTIONS_FILE, SECONDARY_LAYERS_TYPES_FILE, LAYERS_ACTIVATIONS_FILE,\
+        LAYERS_EXECUTION_SEQUENCE
     NET_PREFIX = prefix
     NET_FULL_NAME = full_name
-    input_folder = current_dir + '/models/' + NET_FULL_NAME + '/'
+    input_folder = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/models_archs/models/'\
+        + NET_FULL_NAME + '/'
     IFMS_FILE = input_folder + 'layers_inputs.txt'
     OFMS_FILE = input_folder + 'layers_outputs.txt'
     LAYERS_TYPES_FILE = input_folder + 'layers_types.txt'
+    SECONDARY_LAYERS_TYPES_FILE = input_folder + 'secondary_layers_types.txt'
     LAYERS_WEIGHTS_FILE = input_folder + 'layers_weights.txt'
     LAYERS_STRIDES_FILE = input_folder + 'layers_strides.txt'
     EXPANSION_PROJECTION_FILE = input_folder + 'expansion_projection.txt'
     LAYERS_RELUS_FILE = input_folder + 'layers_relus.txt'
+    LAYERS_ACTIVATIONS_FILE = input_folder + 'layers_activations.txt'
     LAYERS_SKIP_CONNECTIONS_FILE = input_folder + 'skip_connections_indices.txt'
+    LAYERS_EXECUTION_SEQUENCE = input_folder + 'layers_execution_sequence.txt'
 
 def clean_line(line):
     return line.replace(' ', '').replace('\n', '')
@@ -109,6 +117,16 @@ def read_layers_types():
 
     return layers_types
 
+def read_secondary_layers_types():
+    layers_types = []
+    with open(SECONDARY_LAYERS_TYPES_FILE, 'r') as f:
+        for line in f:
+            line = clean_line(line)
+            line = clean_line(line)
+            layers_types.append(line)
+
+    return layers_types
+
 def read_expansion_projection():
     expansion_projection = []
     with open(EXPANSION_PROJECTION_FILE, 'r') as f:
@@ -129,6 +147,16 @@ def read_layers_relus():
 
     return layers_relus
 
+def read_layers_activations():
+    layers_activations = []
+    with open(LAYERS_ACTIVATIONS_FILE, 'r') as f:
+        for line in f:
+            line = clean_line(line)
+            line = clean_line(line)
+            layers_activations.append(line.replace('\n', '').replace(' ', ''))
+
+    return layers_activations
+
 def read_skip_connections_indices():
     skip_connections_indices = {}
     with open(LAYERS_SKIP_CONNECTIONS_FILE, 'r') as f:
@@ -138,3 +166,11 @@ def read_skip_connections_indices():
             skip_connections_indices[int(line)] = 1
     
     return skip_connections_indices
+
+def read_layers_execution_sequence():
+    layers_execution_sequence = []
+    with open(LAYERS_EXECUTION_SEQUENCE, 'r') as f:
+        for line in f:
+            layers_execution_sequence.append(line.replace('\n', '').replace(' ', ''))
+
+    return layers_execution_sequence

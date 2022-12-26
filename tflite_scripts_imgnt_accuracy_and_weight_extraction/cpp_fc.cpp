@@ -149,7 +149,7 @@ int main()
     read_biases(biases_file, biases);
 
     string ifms_folder =
-        "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/fpga_out_1/";
+        "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/cpu_out/";
 
     string predictions_file = "./predictions.json";
 

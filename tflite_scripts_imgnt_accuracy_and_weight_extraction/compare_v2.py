@@ -17,6 +17,7 @@ if(len(sys.argv) > 2):
 
 layers_ofms_shape = utils.read_layers_output_shapes()
 skip_connections_indices = utils.read_skip_connections_indices()
+layers_execution_sequence = utils.read_layers_execution_sequence()
 
 #print(tf_lite_to_my_cnn_layer_mapping)
 #layers_ofms_shape = {0: (32, 112, 112), 3: (16, 112, 112), 6: (24, 56, 56), 4: (96, 112, 112), 5: (96, 56, 56)}
@@ -27,9 +28,27 @@ else:
     domain_file += '.txt'
 
 #range_file = './scratch_out/ofms_{}_ref.txt'.format(to_compare_layer_index)
-range_file = './{}/fms/fms_conv2d_{}_{}_{}_{}.txt'.format(utils.NET_PREFIX ,to_compare_layer_index + 1,\
+to_compare_fms = str(to_compare_layer_index + 1)
+conv_count = 0
+layer_index = 0
+non_standard = False
+while conv_count < (to_compare_layer_index + 1) + 1 and to_compare_layer_index != len(layers_ofms_shape) - 1:
+    non_standard = True
+    if layers_execution_sequence[layer_index] == 'conv2d':
+        conv_count += 1
+    layer_index += 1
+
+print(layer_index, layers_execution_sequence[layer_index - 1])
+if non_standard and layers_execution_sequence[layer_index - 2] != 'conv2d' and 'pad' not in layers_execution_sequence[layer_index - 2]:
+    to_compare_fms += '_' + layers_execution_sequence[layer_index - 2]
+
+
+
+range_file = './{}/fms/fms_conv2d_{}_{}_{}_{}.txt'.format(utils.NET_PREFIX ,to_compare_fms,\
      layers_ofms_shape[to_compare_layer_index].depth, layers_ofms_shape[to_compare_layer_index].height,\
      layers_ofms_shape[to_compare_layer_index].width)
+
+print(range_file)
 
 ofms_hw = layers_ofms_shape[to_compare_layer_index].height * layers_ofms_shape[to_compare_layer_index].width
 ofms_w = layers_ofms_shape[to_compare_layer_index].width
@@ -67,7 +86,7 @@ for i in range(rng.size):
         h = int((i % ofms_hw) / ofms_w)
         w = int(i % ofms_w) 
         position = (d, h, w)
-        if int(domain[i]) - rng[i] > 2 or int(domain[i]) - rng[i] < -2:
+        if int(domain[i]) - rng[i] > 0 or int(domain[i]) - rng[i] < 0:
             diff_locs[position] = (domain[i], rng[i])
             #print(domain[i], rng[i])
             cnt3 += 1

@@ -20,16 +20,11 @@ if(len(sys.argv) > 2):
 layers_ofms_shape = utils.read_layers_output_shapes()
 skip_connections_indices = utils.read_skip_connections_indices()
 
-tf_lite_to_my_cnn_layer_mapping = {0:2}
-skip_connections_so_far = 0
-for layer_index in range(1, len(layers_ofms_shape)):
-    if layer_index + 1 in skip_connections_indices:
-        skip_connections_so_far += 1
-    tf_lite_to_my_cnn_layer_mapping[layer_index] = layer_index + 1 + skip_connections_so_far
-
-ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(tf_lite_to_my_cnn_layer_mapping[to_print_layer_index],\
+ifms_file = './{}/fms/fms_conv2d_{}_{}_{}_{}.txt'.format(utils.NET_PREFIX, to_print_layer_index + 1,\
      layers_ofms_shape[to_print_layer_index].depth, layers_ofms_shape[to_print_layer_index].height,\
      layers_ofms_shape[to_print_layer_index].width)
+
+print(ifms_file)
 
 slice_file = './scratch_out/layer_{}_slice_{}_{}.txt'.format(to_print_layer_index, slice_index, directions_map[slice_direction])
 
