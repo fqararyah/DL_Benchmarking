@@ -1,15 +1,19 @@
-projection_block = "//****************************\n \
-const int layer_*i*_pw_num_fils = *LNF* / alpha;\n \
-const int layer_*i*_pw_depth = layer_*i-1*_dw_depth;\n \
-const int layer_*i*_pw_ifm_height = layer_*i-1*_dw_ofm_height;\n \
-const int layer_*i*_pw_ifm_width = layer_*i-1*_dw_ofm_width;\n \
-const int layer_*i*_pw_ofm_height = layer_*i*_pw_ifm_height;\n \
-const int layer_*i*_pw_ofm_width = layer_*i*_pw_ifm_width;\n \
-const int layer_*i*_pw_num_of_tiles_in_d = (int)(0.99 + (float)layer_*i*_pw_depth / pw_tile_d);\n \
-const int layer_*i*_pw_num_of_tiles_out_d = (int)(0.99 + (float)layer_*i*_pw_num_fils / pw_conv_parallelism_out);\n \
-const int layer_*i*_pw_num_of_tiles_w = (int)(0.99 + (float)layer_*i*_pw_ofm_width / pw_tile_w); \n \
-const int layer_*i*_pw_num_of_tiles_h = (int)(0.99 + (float)layer_*i*_pw_ofm_height / pw_tile_h); \n \
-const int layer_*i*_pw_num_of_weight_groups_for_one_pass = layer_*i*_pw_depth * pw_conv_parallelism_out / weights_group_items; \n \
-const int layer_*i*_pw_weights_offset = *LWOF*; \n \
-const int layer_*i*_relu = 0;\n\
-//****************************\n"
+const int starting_fill_h_offset = tile_index_in_h * dw_tile_h;
+	const int starting_fill_w_offset = tile_index_in_w * dw_tile_w;
+	for (int h = 0; h < max_filter_hw_dim - 1; h++)
+	{
+		for (int w = 0; w < dw_tile_w; w++)
+		{
+#pragma HLS UNROLL
+			if (h + starting_fill_h_offset < ifms_height &&
+				w + starting_fill_w_offset < ifms_width)
+			{
+				rows[h][w] =
+					channels[absolute_offset + h * dw_tile_w + w];
+			}
+			else
+			{
+				rows[h][w] = zero_point;
+			}
+		}
+	}

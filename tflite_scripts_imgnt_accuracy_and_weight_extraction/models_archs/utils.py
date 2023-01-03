@@ -10,8 +10,8 @@ import classes
 
 DELIMITER = '::'
 
-NET_PREFIX = 'mob_v2'
-NET_FULL_NAME = 'mobilenet_v2'
+NET_PREFIX = 'eff_b0'
+NET_FULL_NAME = 'eff_b0'
 input_folder = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/models_archs/models/'\
      + NET_FULL_NAME + '/'
 IFMS_FILE = input_folder + 'layers_inputs.txt'
@@ -64,6 +64,23 @@ def read_layers_input_shapes():
     return layers_inputs
 
 
+def read_layers_input_shapes():
+    layers_inputs = []
+    with open(IFMS_FILE, 'r') as f:
+        for line in f:
+            line = clean_line(line)
+            splits = line.split('x')
+            if len(splits) > 0:
+                if len(splits) == 3:
+                    layers_inputs.append(classes.feature_map(
+                        int(splits[0]), int(splits[1]), int(splits[2])))
+                elif len(splits) == 1:
+                    layers_inputs.append(classes.feature_map(
+                        int(splits[0]), 1, 1))
+
+    return layers_inputs
+
+
 def read_layers_output_shapes():
     layers_outputs = []
     with open(OFMS_FILE, 'r') as f:
@@ -72,11 +89,14 @@ def read_layers_output_shapes():
             splits = line.split('x')
             if len(splits) > 0:
                 splits = line.split('x')
-                layers_outputs.append(classes.feature_map(
-                    int(splits[0]), int(splits[1]), int(splits[2]) ))
+                if len(splits) == 3:
+                    layers_outputs.append(classes.feature_map(
+                        int(splits[0]), int(splits[1]), int(splits[2])))
+                elif len(splits) == 1:
+                    layers_outputs.append(classes.feature_map(
+                        int(splits[0]), 1, 1))
 
     return layers_outputs
-
 
 def read_layers_weight_shapes(layers_types):
     layers_weights = []

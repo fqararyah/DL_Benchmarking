@@ -14,7 +14,7 @@ layers_relus = utils.read_layers_relus()
 layers_ofms_shape = utils.read_layers_output_shapes()
 skip_connections_indices = utils.read_skip_connections_indices()
 
-layer_index = 0
+layer_index = 7
 
 layer_type = layers_types[layer_index]
 weights_file = './{}/weights/conv2d_{}_{}_weights.txt'.format(utils.NET_PREFIX, layer_index, layer_type)

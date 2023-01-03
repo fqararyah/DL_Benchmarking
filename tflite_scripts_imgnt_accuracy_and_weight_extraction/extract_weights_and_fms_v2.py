@@ -18,8 +18,8 @@ from models_archs import utils
 # import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-MODEL_NAME = 'mob_v2'
-ACTIVATION_FUNCTION = 'relu6'
+MODEL_NAME = 'eff_b0'
+ACTIVATION_FUNCTION = {'mob_v2': 'relu6', 'eff_b0': 'sigm'}
 PRECISION = 8
 NUM_OF_CLASSES = 1000
 np.random.seed(0)
@@ -115,7 +115,7 @@ for t in interpreter.get_tensor_details():
                 str(weights_counts[last_tensor_key] - 1)
 
             if last_tensor_key == 'conv2d' and 'conv2d' in tensor_name_postfix:
-                layers_activations.append(ACTIVATION_FUNCTION)
+                layers_activations.append(ACTIVATION_FUNCTION[MODEL_NAME])
                 layers_strides.append(1)
                 if original_shape[0] == 1:
                     conv_type = 'dw'
@@ -203,8 +203,12 @@ with open(model_arch_dir + 'layers_outputs.txt', 'w') as f:
         f.write(str(layer_output_dims[-1]) + '\n')
 
 with open(model_arch_dir + 'layers_activations.txt', 'w') as f:
+    i = 0
     for layer_activation in layers_activations:
+        if len(layers_outputs_dims[i]) == 1:
+            layer_activation = ACTIVATION_FUNCTION[MODEL_NAME]
         f.write(layer_activation + '\n')
+        i += 1
 
 with open(model_arch_dir + 'layers_strides.txt', 'w') as f:
     for layer_strides in layers_strides:
