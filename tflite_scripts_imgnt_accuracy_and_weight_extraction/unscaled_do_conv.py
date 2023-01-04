@@ -20,16 +20,15 @@ layer_index = 1
 layer_type = layers_types[layer_index]
 weights_file = './{}/weights/conv2d_{}_{}_weights.txt'.format(
     utils.NET_PREFIX, layer_index, layer_type)
-# ifms_file = './{}/fms/fms_conv2d_{}_{}_{}_{}.txt'.format(utils.NET_PREFIX, layer_index, layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height,
-#                                                layers_ifms_shape[layer_index].width)
-ifms_file = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/eff_b0/fms/fms_conv2d_1_mul_1_2_32_112_112.txt'
+ifms_file = './{}/fms/fms_conv2d_{}_{}_{}_{}.txt'.format(utils.NET_PREFIX, layer_index, layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height,
+                                                layers_ifms_shape[layer_index].width)
+#ifms_file = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/eff_b0/fms/fms_conv2d_1_mul_1_2_32_112_112.txt'
 ofms_file = './scratch_out/ofms_{}_un.txt'.format(layer_index)
 
 ifms_zero_points_file = './{}/fms/fms_conv2d_{}_zero_points.txt'.format(utils.NET_PREFIX,
-    layer_index if layer_index > 0 else 1)
+                                                                        layer_index if layer_index > 0 else 1)
 
-layers_ifms_zero_point = {layer_index: np.loadtxt(
-    ifms_zero_points_file).astype(np.int32)}
+layers_ifms_zero_point = {layer_index: -127}
 
 conv_strides = layers_strides[layer_index]
 
@@ -80,6 +79,9 @@ def dw_conv():
     for i in range(layers_weights_shape[layer_index].num_of_filters):
         for j in range(ofms_shape[1]):
             for k in range(ofms_shape[2]):
+                if i == 0 and j == 0 and k==0:
+                    print(weights[i].astype(np.float32), ifms[i, j*conv_strides:j*conv_strides +
+                                                               filter_height, k*conv_strides:k*conv_strides + filter_width])
                 tmp = np.sum(weights[i].astype(np.float32) * ifms[i, j*conv_strides:j*conv_strides +
                                                                   filter_height, k*conv_strides:k*conv_strides + filter_width])
 

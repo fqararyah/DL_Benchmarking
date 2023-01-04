@@ -21,11 +21,13 @@ layers_execution_sequence = utils.read_layers_execution_sequence()
 
 #print(tf_lite_to_my_cnn_layer_mapping)
 #layers_ofms_shape = {0: (32, 112, 112), 3: (16, 112, 112), 6: (24, 56, 56), 4: (96, 112, 112), 5: (96, 56, 56)}
-domain_file = './scratch_out/ofms_{}'.format(to_compare_layer_index)
-if len(ref)>0:
-    domain_file += '_' + ref + '.txt'
-else:
-    domain_file += '.txt'
+# domain_file = './scratch_out/ofms_{}'.format(to_compare_layer_index)
+# if len(ref)>0:
+#     domain_file += '_' + ref + '.txt'
+# else:
+#     domain_file += '.txt'
+
+domain_file = './scratch_out/ofms_1.txt'
 
 #range_file = './scratch_out/ofms_{}_ref.txt'.format(to_compare_layer_index)
 to_compare_fms = str(to_compare_layer_index + 1)
@@ -44,10 +46,11 @@ if non_standard and layers_execution_sequence[layer_index - 2] != 'conv2d' and '
 
 
 
-range_file = './{}/fms/fms_conv2d_{}_{}_{}_{}.txt'.format(utils.NET_PREFIX ,to_compare_fms,\
-     layers_ofms_shape[to_compare_layer_index].depth, layers_ofms_shape[to_compare_layer_index].height,\
-     layers_ofms_shape[to_compare_layer_index].width)
+# range_file = './{}/fms/fms_conv2d_{}_{}_{}_{}.txt'.format(utils.NET_PREFIX ,to_compare_fms,\
+#      layers_ofms_shape[to_compare_layer_index].depth, layers_ofms_shape[to_compare_layer_index].height,\
+#      layers_ofms_shape[to_compare_layer_index].width)
 
+range_file = './eff_b0/fms/fms_conv2d_2_mul_1_2_32_112_112.txt'
 print(range_file)
 
 ofms_hw = layers_ofms_shape[to_compare_layer_index].height * layers_ofms_shape[to_compare_layer_index].width
