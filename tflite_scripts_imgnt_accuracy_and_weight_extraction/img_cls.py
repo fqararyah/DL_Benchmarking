@@ -4,9 +4,12 @@ from tensorflow.keras.preprocessing.image import load_img
 import os
 import numpy as np
 from tensorflow.keras.preprocessing.image import img_to_array
+import tensorflow.keras.applications.mobilenet as mob_v1
 import tensorflow.keras.applications.mobilenet_v2 as mob_v2
 import tensorflow.keras.applications.efficientnet as eff_b0
+import tensorflow.keras.applications.resnet50 as resnet
 import tensorflow.keras.applications as models
+from MnasNet_models.MnasNet_models import Build_MnasNet
 import time
 import pathlib
 
@@ -26,18 +29,24 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'eff_b0_ns'
+MODEL_NAME = 'mnas'
 MODEL_PATH = '/media/SSD2TB/wd/models/efficientnet_b0_no_sigmoid.h5'
 PRECISION = 8
 
-if MODEL_NAME == 'mob_v2':
+if MODEL_NAME == 'mob_v1':
+    model = models.MobileNet()
+elif MODEL_NAME == 'mob_v2':
     model = models.MobileNetV2()
 elif MODEL_NAME == 'eff_b0':
     model = models.EfficientNetB0()
 elif MODEL_NAME == 'nas':
     model = models.NASNetMobile()
+elif MODEL_NAME == 'mnas':
+    model = Build_MnasNet('b1')
 elif MODEL_NAME in ['eff_b0_ns_ns', 'eff_b0_no_sig', 'eff_b0_ns']:
     model = tf.keras.models.load_model(MODEL_PATH)
+else:
+    model = models.ResNet50()
 
 
 def representative_dataset():
@@ -45,10 +54,14 @@ def representative_dataset():
         a_test_image = load_img(test_images[i], target_size=(224, 224))
         numpy_image = img_to_array(a_test_image)
         image_batch = np.expand_dims(numpy_image, axis=0)
-        if MODEL_NAME == 'mob_v2':
+        if MODEL_NAME == 'mob_v1':
+            processed_image = mob_v1.preprocess_input(image_batch.copy())
+        elif MODEL_NAME == 'mob_v2':
             processed_image = mob_v2.preprocess_input(image_batch.copy())
         elif 'eff_b0' in MODEL_NAME:
             processed_image = eff_b0.preprocess_input(image_batch.copy())
+        else:
+            processed_image = resnet.preprocess_input(image_batch.copy()) 
         yield [processed_image.astype(np.float32)]
 
 
@@ -87,10 +100,14 @@ for i in range(limit):
     numpy_image = img_to_array(a_test_image)
     image_batch = np.expand_dims(numpy_image, axis=0)
 
-    if MODEL_NAME == 'mob_v2':
+    if MODEL_NAME == 'mob_v1':
+        processed_image = mob_v1.preprocess_input(image_batch.copy())
+    elif MODEL_NAME == 'mob_v2':
         processed_image = mob_v2.preprocess_input(image_batch.copy())
     elif 'eff_b0' in MODEL_NAME:
         processed_image = eff_b0.preprocess_input(image_batch.copy())
+    else:
+       processed_image = resnet.preprocess_input(image_batch.copy()) 
 
     if PRECISION == 32:
         t1 = time.time()

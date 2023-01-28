@@ -8,6 +8,7 @@ import os
 import numpy as np
 from tensorflow.keras.preprocessing.image import img_to_array
 import tensorflow.keras.applications.mobilenet_v2 as mob_v2
+import tensorflow.keras.applications.mobilenet as mob_v1
 import tensorflow.keras.applications as models
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Flatten
@@ -18,8 +19,8 @@ from models_archs import utils
 # import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-MODEL_NAME = 'eff_b0'
-ACTIVATION_FUNCTION = {'mob_v2': 'relu6', 'eff_b0': 'sigm'}
+MODEL_NAME = 'mob_v1'
+ACTIVATION_FUNCTION = {'mob_v1': 'relu6','mob_v2': 'relu6', 'eff_b0': 'sigm'}
 PRECISION = 8
 NUM_OF_CLASSES = 1000
 np.random.seed(0)

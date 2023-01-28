@@ -2,7 +2,7 @@ from ctypes import util
 import numpy as np
 from models_archs import utils
 
-utils.NET_PREFIX = 'eff_b0'
+utils.NET_PREFIX = 'mob_v2'
 utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
 layers_types = utils.read_layers_types()
@@ -15,7 +15,7 @@ layers_ofms_shape = utils.read_layers_output_shapes()
 skip_connections_indices = utils.read_skip_connections_indices()
 
 
-layer_index = 1
+layer_index = 0
 
 layer_type = layers_types[layer_index]
 weights_file = './{}/weights/conv2d_{}_{}_weights.txt'.format(
@@ -25,14 +25,14 @@ ifms_file = './{}/fms/fms_conv2d_{}_{}_{}_{}.txt'.format(utils.NET_PREFIX, layer
 #ifms_file = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/eff_b0/fms/fms_conv2d_1_mul_1_2_32_112_112.txt'
 ofms_file = './scratch_out/ofms_{}_un.txt'.format(layer_index)
 
-ifms_zero_points_file = './{}/fms/fms_conv2d_{}_zero_points.txt'.format(utils.NET_PREFIX,
-                                                                        layer_index if layer_index > 0 else 1)
 
 layers_ifms_zero_point = {layer_index: -127}
 
 conv_strides = layers_strides[layer_index]
 
 weights = np.loadtxt(weights_file).astype(np.int8)
+
+print(weights[0:10])
 if layer_type == 'dw':
     weights = np.reshape(weights, (layers_weights_shape[layer_index].num_of_filters, layers_weights_shape[layer_index].depth, layers_weights_shape[layer_index].height,
                                    layers_weights_shape[layer_index].width))

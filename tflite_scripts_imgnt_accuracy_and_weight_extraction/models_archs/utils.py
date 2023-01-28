@@ -11,7 +11,7 @@ import classes
 DELIMITER = '::'
 
 NET_PREFIX = 'mob_v2'
-NET_FULL_NAME = 'eff_b0'
+NET_FULL_NAME = 'mob_v2'
 input_folder = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/models_archs/models/'\
      + NET_FULL_NAME + '/'
 IFMS_FILE = input_folder + 'layers_inputs.txt'
