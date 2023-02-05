@@ -13,6 +13,13 @@ from MnasNet_models.MnasNet_models import Build_MnasNet
 import time
 import pathlib
 
+import sys
+
+proxylessnas_dir = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/proxylessnas'
+sys.path.append(proxylessnas_dir)
+
+from proxyless_nas_tensorflow import proxyless_cpu
+
 DATA_PATH = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012'
 
 
@@ -29,7 +36,7 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'mnas'
+MODEL_NAME = 'prox'
 MODEL_PATH = '/media/SSD2TB/wd/models/efficientnet_b0_no_sigmoid.h5'
 PRECISION = 8
 
@@ -43,6 +50,8 @@ elif MODEL_NAME == 'nas':
     model = models.NASNetMobile()
 elif MODEL_NAME == 'mnas':
     model = Build_MnasNet('b1')
+elif MODEL_NAME == 'prox':
+     model = Build_MnasNet('prox')
 elif MODEL_NAME in ['eff_b0_ns_ns', 'eff_b0_no_sig', 'eff_b0_ns']:
     model = tf.keras.models.load_model(MODEL_PATH)
 else:
@@ -65,6 +74,8 @@ def representative_dataset():
         yield [processed_image.astype(np.float32)]
 
 
+if PRECISION == 32:
+    model.save("trt_inout")
 if PRECISION == 8:
     tflite_models_dir = pathlib.Path("./")
     tflite_model_quant_file = tflite_models_dir / \

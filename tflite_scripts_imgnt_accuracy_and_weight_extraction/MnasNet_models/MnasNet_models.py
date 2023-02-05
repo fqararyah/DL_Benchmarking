@@ -106,6 +106,22 @@ def Build_MnasNet(model_name, override_params=None):
             "r4_k5_s22_e6_i96_o192",
             "r1_k3_s11_e6_i192_o320_noskip",
         ]
+    
+    elif model_name == "prox":
+        blocks_args = [
+            "r1_k3_s11_e1_i40_o24_noskip",
+            "r1_k3_s22_e3_i24_o32",
+            "r3_k5_s11_e3_i32_o32",
+            "r3_k5_s22_e6_i32_o48",
+            "r3_k3_s11_e3_i48_o48",
+            "r1_k5_s22_e6_i48_o88",
+            "r1_k5_s11_e3_i88_o88",
+            "r1_k5_s11_e6_i88_o104",
+            "r3_k5_s11_e6_i104_o104",
+            "r1_k5_s11_e6_i104_o216",
+            "r1_k5_s11_e3_i216_o216",
+            "r1_k3_s11_e6_i216_o306_noskip",
+        ]
 
     elif model_name == "a1":
         blocks_args = [

@@ -1,7 +1,6 @@
 from inspect import currentframe
 import json
 from operator import mod
-from sklearn import utils
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import load_img
 import os
@@ -19,8 +18,8 @@ from models_archs import utils
 # import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-MODEL_NAME = 'mob_v1'
-ACTIVATION_FUNCTION = {'mob_v1': 'relu6','mob_v2': 'relu6', 'eff_b0': 'sigm'}
+MODEL_NAME = 'prox'
+ACTIVATION_FUNCTION = {'mob_v1': 'relu6','mob_v2': 'relu6', 'eff_b0': 'sigm', 'mnas': 'relu6', 'prox': 'relu6'}
 PRECISION = 8
 NUM_OF_CLASSES = 1000
 np.random.seed(0)
@@ -71,6 +70,7 @@ fc_biases_found = False
 initial_ifms_file_name = 'conv2d_0'
 for t in interpreter.get_tensor_details():
     tensor_name = t['name'].lower()
+    #print(tensor_name, interpreter.get_tensor(t['index']).shape)
     tensor_name = tensor_name.replace('depthwise', 'conv2d')
     tensor_name_postfix = tensor_name.split('/')[-1]
     if tensor_name == splitting_layer_name:
@@ -91,10 +91,16 @@ for t in interpreter.get_tensor_details():
     current_tensor = np.reshape(current_tensor, (current_tensor.size))
 
     if current_tensors_type == 'weights':
+        if last_tensor_key in weights_counts and weights_counts[last_tensor_key] > 0:
+            print(weights_counts[last_tensor_key], original_shape)
         if original_tensor.ndim == 1:
             if last_tensor_key == '':
                 continue
+            
             file_name = last_tensor_key + '_' + str(weights_counts[last_tensor_key] - 1) + '_biases'
+            # if MODEL_NAME == 'mnas' and os.path.exists('./'+weights_fms_dir+'/biases/' +
+            #         file_name + '.txt'):
+            #     file_name = last_tensor_key + '_' + str(weights_counts[last_tensor_key]) + '_biases'
             np.savetxt('./'+weights_fms_dir+'/biases/' +
                     file_name + '.txt', current_tensor, fmt='%i')
             np.savetxt('./'+weights_fms_dir+'/biases/' + file_name +
@@ -102,6 +108,8 @@ for t in interpreter.get_tensor_details():
             np.savetxt('./'+weights_fms_dir+'/biases/' + file_name + '_zero_points.txt',
                     t['quantization_parameters']['zero_points'], fmt='%i')
         else:
+            if 'conv2d;' in tensor_name:
+                tensor_name_postfix += 'conv2d'
             for key, val in weights_counts.items():
                 if key in tensor_name_postfix:
                     weights_counts[key] += 1
@@ -139,7 +147,6 @@ for t in interpreter.get_tensor_details():
             np.savetxt('./'+weights_fms_dir+'/weights/' + file_name + '_zero_points.txt',
                     t['quantization_parameters']['zero_points'], fmt='%i')
     else:
-        print(tensor_name_postfix, original_shape)
         if 'conv2d;' in tensor_name:
             tensor_name_postfix += 'conv2d'
         for key, val in fms_counts.items():

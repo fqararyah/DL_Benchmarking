@@ -1,6 +1,6 @@
 import numpy as np
 
-ifms_file = './fms/fms_{}_{}_{}_{}.txt'.format(63, 1280, 7, 7)
+ifms_file = './mob_v2/fms/fms_conv2d_{}_{}_{}_{}.txt'.format(52, 1280, 7, 7)
 ofms_file = './scratch_out/ofms_avgpool_{}_ref.txt'.format(1)
 
 
