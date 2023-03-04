@@ -14,7 +14,7 @@ layers_relus = utils.read_layers_relus()
 layers_ofms_shape = utils.read_layers_output_shapes()
 skip_connections_indices = utils.read_skip_connections_indices()
 
-layer_index = 7
+layer_index = 23
 
 layer_type = layers_types[layer_index]
 weights_file = './{}/weights/conv2d_{}_{}_weights.txt'.format(utils.NET_PREFIX, layer_index, layer_type)
@@ -97,14 +97,19 @@ def dw_conv():
                     np.sum(weights[i].astype(np.float32) * ifms[i, j*conv_strides:j*conv_strides + \
                         filter_height, k*conv_strides:k*conv_strides + filter_width]) + layers_bias[layer_index][i]
 
-                tmp = tmp * layers_scale_ifms[layer_index] * layers_scale_weights[layer_index][i]
-                if layers_relus[layer_index] == 6:
-                    tmp = min(max(tmp, 0), 6)
-                tmp = tmp / layers_scale_ofms[layer_index] + layers_ofms_zero_point[layer_index]
-                if tmp > 0:
-                    tmp = int(tmp + 0.5)
+                if layer_index == 7 and i ==11 and j == 3:
+                    scale_w_i_o = int(0.017232311889529228 * (2**32))
+                    tmp = ( (int(tmp * scale_w_i_o + (2**32)) >> 32 ) - 128)
+                    print(tmp)
                 else:
-                    tmp = int(tmp -0.5)
+                    tmp = tmp * layers_scale_ifms[layer_index] * layers_scale_weights[layer_index][i]
+                    if layers_relus[layer_index] == 6:
+                        tmp = min(max(tmp, 0), 6)
+                    tmp = tmp / layers_scale_ofms[layer_index] + layers_ofms_zero_point[layer_index]
+                    if tmp > 0:
+                        tmp = int(tmp + 0.5)
+                    else:
+                        tmp = int(tmp -0.5)
                 ofms[i][j][k] = tmp
 
 if layer_type == 'dw':

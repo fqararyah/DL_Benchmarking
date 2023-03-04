@@ -18,10 +18,11 @@ from models_archs import utils
 # import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-MODEL_NAME = 'prox'
-ACTIVATION_FUNCTION = {'mob_v1': 'relu6','mob_v2': 'relu6', 'eff_b0': 'sigm', 'mnas': 'relu6', 'prox': 'relu6'}
+#################################################################################################################
+MODEL_NAME = 'embdl_mob_v2'
+ACTIVATION_FUNCTION = {'mob_v1': 'relu6','mob_v2': 'relu6', 'eff_b0': 'sigm', 'mnas': 'relu6', 'prox': 'relu6',\
+     'mob_v1_0_5': 'relu6', 'mob_v2_0_5': 'relu6', 'embdl_mob_v2': 'relu6'}
 PRECISION = 8
-NUM_OF_CLASSES = 1000
 np.random.seed(0)
 
 weights_fms_dir = MODEL_NAME
@@ -29,26 +30,27 @@ model_arch_dir = './models_archs/models/' + MODEL_NAME + '/'
 tflite_models_dir = pathlib.Path("./")
 tflite_model_quant_file = tflite_models_dir / \
     (MODEL_NAME + '_' + str(PRECISION) + ".tflite")
-
+#################################################################################################################
 interpreter = tf.lite.Interpreter(model_path=str(
     tflite_model_quant_file), experimental_preserve_all_tensors=True)
 interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()[0]
 output_details = interpreter.get_output_details()[0]
-
+#################################################################################################################
 # prepare image
 test_image = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012/ILSVRC2012_val_00018455.JPEG'
 a_test_image = load_img(test_image, target_size=(224, 224))
 numpy_image = img_to_array(a_test_image, dtype=np.uint8)
 image_batch = np.expand_dims(numpy_image, axis=0)
-
+#################################################################################################################
 # invoke mode
 interpreter.set_tensor(input_details["index"], image_batch)
 interpreter.invoke()
 
 tensor_details = interpreter.get_tensor_details()
+#################################################################################################################
 
-splitting_layer_name = 'tfl.quantize'
+splitting_layer_name = 'tfl.quantize' #this relys on the observation that tfl.quantize is the first fms tensor
 current_tensors_type = 'weights'
 weights_counts = {'conv2d': 0, 'matmul': 0}
 fms_counts = {'conv2d': 1, 'matmul': 0}
@@ -91,8 +93,7 @@ for t in interpreter.get_tensor_details():
     current_tensor = np.reshape(current_tensor, (current_tensor.size))
 
     if current_tensors_type == 'weights':
-        if last_tensor_key in weights_counts and weights_counts[last_tensor_key] > 0:
-            print(weights_counts[last_tensor_key], original_shape)
+        print(tensor_name, t['index'], original_shape)
         if original_tensor.ndim == 1:
             if last_tensor_key == '':
                 continue

@@ -11,7 +11,7 @@ import analysis_utils
 import matplotlib.pyplot as plt
 import math
 
-utils.set_globals('prox', 'prox')
+utils.set_globals('mob_v2_0_5', 'mob_v2_0_5')
 
 layers_types = utils.read_layers_types()
 layers_weights = utils.read_layers_weight_shapes(layers_types)

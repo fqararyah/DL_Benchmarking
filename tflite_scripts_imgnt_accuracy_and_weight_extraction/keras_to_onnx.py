@@ -24,7 +24,7 @@ MODEL_NAME = 'mm'
 from tensorflow.keras.applications.resnet50 import ResNet50
 model = models.MobileNetV2(include_top=True, weights='imagenet')
 if MODEL_NAME == 'mnas':
-    model = Build_MnasNet('b1')
+    model = Build_MnasNet('b1_3')
 
 # convert to onnx model
 onnx_model = keras2onnx.convert_keras(model, model.name)

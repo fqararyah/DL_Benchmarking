@@ -44,6 +44,7 @@ elif directions_map[slice_direction] == 'hd':
     to_print = arr[:,:,slice_index]
     to_print = np.transpose(to_print, (1,0))
 
+print(to_print[16:19,31:34])
 np.savetxt(slice_file, to_print, fmt='%i')
 
 # for i in range(layers_ofms_shape[to_print_layer_index].height):

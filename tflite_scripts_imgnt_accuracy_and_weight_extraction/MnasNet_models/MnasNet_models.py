@@ -107,6 +107,17 @@ def Build_MnasNet(model_name, override_params=None):
             "r1_k3_s11_e6_i192_o320_noskip",
         ]
     
+    elif model_name == "b1_3":
+        blocks_args = [
+            "r1_k3_s11_e1_i32_o16_noskip",
+            "r3_k3_s22_e3_i16_o24",
+            "r3_k3_s22_e3_i24_o40",
+            "r3_k3_s22_e6_i40_o80",
+            "r2_k3_s11_e6_i80_o96",
+            "r4_k3_s22_e6_i96_o192",
+            "r1_k3_s11_e6_i192_o320_noskip",
+        ]
+    
     elif model_name == "prox":
         blocks_args = [
             "r1_k3_s11_e1_i40_o24_noskip",
@@ -121,6 +132,58 @@ def Build_MnasNet(model_name, override_params=None):
             "r1_k5_s11_e6_i104_o216",
             "r1_k5_s11_e3_i216_o216",
             "r1_k3_s11_e6_i216_o306_noskip",
+        ]
+    
+    elif model_name == "prox_3":
+        blocks_args = [
+            "r1_k3_s11_e1_i40_o24_noskip",
+            "r1_k3_s22_e3_i24_o32",
+            "r3_k3_s11_e3_i32_o32",
+            "r3_k3_s22_e6_i32_o48",
+            "r3_k3_s11_e3_i48_o48",
+            "r1_k3_s22_e6_i48_o88",
+            "r1_k3_s11_e3_i88_o88",
+            "r1_k3_s11_e6_i88_o104",
+            "r3_k3_s11_e6_i104_o104",
+            "r1_k3_s11_e6_i104_o216",
+            "r1_k3_s11_e3_i216_o216",
+            "r1_k3_s11_e6_i216_o306_noskip",
+        ]
+
+    elif model_name == "mprox":
+        blocks_args = [
+            "r1_k3_s11_e1_i40_o16_noskip",
+            "r1_k5_s22_e3_i16_o32",
+            "r1_k5_s11_e3_i32_o32",
+            "r1_k7_s22_e3_i32_o40",
+            "r1_k3_s11_e3_i40_o40",
+            "r2_k5_s11_e3_i40_o40",
+            "r1_k7_s22_e6_i40_o80",
+            "r3_k5_s11_e3_i80_o80",
+            "r1_k5_s11_e6_i80_o96",
+            "r3_k5_s11_e3_i96_o96",
+            "r1_k7_s22_e6_i96_o192",
+            "r1_k7_s11_e6_i192_o192",
+            "r2_k7_s11_e3_i192_o192",
+            "r1_k7_s11_e6_i192_o320_noskip",
+        ]
+    
+    elif model_name == "mprox_3":
+        blocks_args = [
+            "r1_k3_s11_e1_i40_o16_noskip",
+            "r1_k3_s22_e3_i16_o32",
+            "r1_k3_s11_e3_i32_o32",
+            "r1_k3_s22_e3_i32_o40",
+            "r1_k3_s11_e3_i40_o40",
+            "r2_k3_s11_e3_i40_o40",
+            "r1_k3_s22_e6_i40_o80",
+            "r3_k3_s11_e3_i80_o80",
+            "r1_k3_s11_e6_i80_o96",
+            "r3_k3_s11_e3_i96_o96",
+            "r1_k3_s22_e6_i96_o192",
+            "r1_k3_s11_e6_i192_o192",
+            "r2_k3_s11_e3_i192_o192",
+            "r1_k3_s11_e6_i192_o320_noskip",
         ]
 
     elif model_name == "a1":
