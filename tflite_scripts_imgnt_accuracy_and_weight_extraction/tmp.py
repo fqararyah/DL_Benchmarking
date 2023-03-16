@@ -1,17 +1,113 @@
-weights = [18, 28, 13, -7, -127, 11, 18, 33, 13]
-fms = [-122, -123, -128,-128, -128 ,-128, -118, -116, -113]
-
-res = 0
-
-for i in range(9):
-    res += (fms[i] + 128) * weights[i]
-res += 9339 
-
-scale_w_i_o = int(0.017232311889529228 * (2**32))
-
-
-print(res)
-res = ( (int(res * scale_w_i_o + (2**32)) >> 32 ) - 128)
-print(res)
-
-print(500000000>>32)
+serving_default_input_1:0 0
+mobilenetv2_1.00_224/block_13_pad/pad/paddings 1
+mobilenetv2_1.00_224/global_average_pooling2d/mean/reduction_indices 2
+mobilenetv2_1.00_224/conv1/conv2d 3
+mobilenetv2_1.00_224/block_5_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_5_project/conv2d 4
+mobilenetv2_1.00_224/block_5_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_5_project/conv2d1 5
+mobilenetv2_1.00_224/block_5_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_5_project/conv2d2 6
+mobilenetv2_1.00_224/block_5_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_5_project/conv2d3 7
+mobilenetv2_1.00_224/block_5_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_5_project/conv2d4 8
+mobilenetv2_1.00_224/expanded_conv_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/expanded_conv_conv2d/conv2d;mobilenetv2_1.00_224/block_5_project/conv2d;mobilenetv2_1.00_224/block_5_project_bn/fusedbatchnormv3 9
+mobilenetv2_1.00_224/expanded_conv_project/conv2d 10
+mobilenetv2_1.00_224/expanded_conv_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/expanded_conv_project/conv2d 11
+mobilenetv2_1.00_224/block_1_expand/conv2d 12
+mobilenetv2_1.00_224/block_12_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_12_project/conv2d 13
+mobilenetv2_1.00_224/block_12_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_12_project/conv2d1 14
+mobilenetv2_1.00_224/block_12_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_12_project/conv2d2 15
+mobilenetv2_1.00_224/block_12_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_12_project/conv2d3 16
+mobilenetv2_1.00_224/block_12_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_12_project/conv2d4 17
+mobilenetv2_1.00_224/block_1_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_1_conv2d/conv2d;mobilenetv2_1.00_224/block_12_project/conv2d;mobilenetv2_1.00_224/block_12_project_bn/fusedbatchnormv3 18
+mobilenetv2_1.00_224/block_1_project/conv2d 19
+mobilenetv2_1.00_224/block_2_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_2_project/conv2d 20
+mobilenetv2_1.00_224/block_2_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_2_project/conv2d1 21
+mobilenetv2_1.00_224/block_2_expand/conv2d 22
+mobilenetv2_1.00_224/block_3_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_3_conv2d/conv2d 23
+mobilenetv2_1.00_224/block_3_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_3_conv2d/conv2d1 24
+mobilenetv2_1.00_224/block_3_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_3_conv2d/conv2d2 25
+mobilenetv2_1.00_224/block_3_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_3_conv2d/conv2d3 26
+mobilenetv2_1.00_224/block_2_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_2_conv2d/conv2d;mobilenetv2_1.00_224/block_3_conv2d/conv2d;mobilenetv2_1.00_224/block_3_conv2d_bn/fusedbatchnormv3 27
+mobilenetv2_1.00_224/block_2_project/conv2d 28
+mobilenetv2_1.00_224/block_3_expand/conv2d 29
+mobilenetv2_1.00_224/block_3_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_3_conv2d/conv2d11 30
+mobilenetv2_1.00_224/block_3_project/conv2d 31
+mobilenetv2_1.00_224/block_4_expand/conv2d 32
+mobilenetv2_1.00_224/block_6_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_6_conv2d/conv2d 33
+mobilenetv2_1.00_224/block_6_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_6_conv2d/conv2d1 34
+mobilenetv2_1.00_224/block_6_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_6_conv2d/conv2d2 35
+mobilenetv2_1.00_224/block_6_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_6_conv2d/conv2d3 36
+mobilenetv2_1.00_224/block_6_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_6_conv2d/conv2d4 37
+mobilenetv2_1.00_224/block_6_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_6_conv2d/conv2d5 38
+mobilenetv2_1.00_224/block_4_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_4_conv2d/conv2d;mobilenetv2_1.00_224/block_6_conv2d/conv2d;mobilenetv2_1.00_224/block_6_conv2d_bn/fusedbatchnormv3 39
+mobilenetv2_1.00_224/block_4_project/conv2d 40
+mobilenetv2_1.00_224/block_5_expand/conv2d 41
+mobilenetv2_1.00_224/block_5_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_5_conv2d/conv2d;mobilenetv2_1.00_224/block_6_conv2d/conv2d;mobilenetv2_1.00_224/block_6_conv2d_bn/fusedbatchnormv3 42
+mobilenetv2_1.00_224/block_5_project/conv2d 43
+mobilenetv2_1.00_224/block_6_expand/conv2d 44
+mobilenetv2_1.00_224/block_6_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_6_conv2d/conv2d11 45
+mobilenetv2_1.00_224/block_6_project/conv2d 46
+mobilenetv2_1.00_224/block_9_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_9_project/conv2d 47
+mobilenetv2_1.00_224/block_9_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_9_project/conv2d1 48
+mobilenetv2_1.00_224/block_9_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_9_project/conv2d2 49
+mobilenetv2_1.00_224/block_9_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_9_project/conv2d3 50
+mobilenetv2_1.00_224/block_7_expand/conv2d 51
+mobilenetv2_1.00_224/block_10_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_10_conv2d/conv2d 52
+mobilenetv2_1.00_224/block_10_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_10_conv2d/conv2d1 53
+mobilenetv2_1.00_224/block_10_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_10_conv2d/conv2d2 54
+mobilenetv2_1.00_224/block_10_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_10_conv2d/conv2d3 55
+mobilenetv2_1.00_224/block_10_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_10_conv2d/conv2d4 56
+mobilenetv2_1.00_224/block_10_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_10_conv2d/conv2d5 57
+mobilenetv2_1.00_224/block_10_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_10_conv2d/conv2d6 58
+mobilenetv2_1.00_224/block_10_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_10_conv2d/conv2d7 59
+mobilenetv2_1.00_224/block_7_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_7_conv2d/conv2d;mobilenetv2_1.00_224/block_10_conv2d/conv2d;mobilenetv2_1.00_224/block_10_conv2d_bn/fusedbatchnormv3 60
+mobilenetv2_1.00_224/block_7_project/conv2d 61
+mobilenetv2_1.00_224/block_8_expand/conv2d 62
+mobilenetv2_1.00_224/block_8_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_8_conv2d/conv2d;mobilenetv2_1.00_224/block_10_conv2d/conv2d;mobilenetv2_1.00_224/block_10_conv2d_bn/fusedbatchnormv3 63
+mobilenetv2_1.00_224/block_8_project/conv2d 64
+mobilenetv2_1.00_224/block_9_expand/conv2d 65
+mobilenetv2_1.00_224/block_9_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_9_conv2d/conv2d;mobilenetv2_1.00_224/block_10_conv2d/conv2d;mobilenetv2_1.00_224/block_10_conv2d_bn/fusedbatchnormv3 66
+mobilenetv2_1.00_224/block_9_project/conv2d 67
+mobilenetv2_1.00_224/block_10_expand/conv2d 68
+mobilenetv2_1.00_224/block_10_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_10_conv2d/conv2d11 69
+mobilenetv2_1.00_224/block_10_project/conv2d 70
+mobilenetv2_1.00_224/block_11_expand/conv2d 71
+mobilenetv2_1.00_224/block_13_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_13_conv2d/conv2d 72
+mobilenetv2_1.00_224/block_13_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_13_conv2d/conv2d1 73
+mobilenetv2_1.00_224/block_13_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_13_conv2d/conv2d2 74
+mobilenetv2_1.00_224/block_13_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_13_conv2d/conv2d3 75
+mobilenetv2_1.00_224/block_13_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_13_conv2d/conv2d4 76
+mobilenetv2_1.00_224/block_13_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_13_conv2d/conv2d5 77
+mobilenetv2_1.00_224/block_11_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_11_conv2d/conv2d;mobilenetv2_1.00_224/block_13_conv2d/conv2d;mobilenetv2_1.00_224/block_13_conv2d_bn/fusedbatchnormv3 78
+mobilenetv2_1.00_224/block_11_project/conv2d 79
+mobilenetv2_1.00_224/block_12_expand/conv2d 80
+mobilenetv2_1.00_224/block_12_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_12_conv2d/conv2d;mobilenetv2_1.00_224/block_13_conv2d/conv2d;mobilenetv2_1.00_224/block_13_conv2d_bn/fusedbatchnormv3 81
+mobilenetv2_1.00_224/block_12_project/conv2d 82
+mobilenetv2_1.00_224/block_13_expand/conv2d 83
+mobilenetv2_1.00_224/block_13_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_13_conv2d/conv2d11 84
+mobilenetv2_1.00_224/block_13_project/conv2d 85
+mobilenetv2_1.00_224/block_15_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_15_project/conv2d 86
+mobilenetv2_1.00_224/block_15_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_15_project/conv2d1 87
+mobilenetv2_1.00_224/block_15_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_15_project/conv2d2 88
+mobilenetv2_1.00_224/block_14_expand/conv2d 89
+mobilenetv2_1.00_224/block_16_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_16_conv2d/conv2d 90
+mobilenetv2_1.00_224/block_16_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_16_conv2d/conv2d1 91
+mobilenetv2_1.00_224/block_16_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_16_conv2d/conv2d2 92
+mobilenetv2_1.00_224/block_16_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_16_conv2d/conv2d3 93
+mobilenetv2_1.00_224/block_16_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_16_conv2d/conv2d4 94
+mobilenetv2_1.00_224/block_16_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_16_conv2d/conv2d5 95
+mobilenetv2_1.00_224/block_14_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_14_conv2d/conv2d;mobilenetv2_1.00_224/block_16_conv2d/conv2d;mobilenetv2_1.00_224/block_16_conv2d_bn/fusedbatchnormv3 96
+mobilenetv2_1.00_224/block_14_project/conv2d 97
+mobilenetv2_1.00_224/block_15_expand/conv2d 98
+mobilenetv2_1.00_224/block_15_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_15_conv2d/conv2d;mobilenetv2_1.00_224/block_16_conv2d/conv2d;mobilenetv2_1.00_224/block_16_conv2d_bn/fusedbatchnormv3 99
+mobilenetv2_1.00_224/block_15_project/conv2d 100
+mobilenetv2_1.00_224/block_16_expand/conv2d 101
+mobilenetv2_1.00_224/block_16_conv2d_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_16_conv2d/conv2d11 102
+mobilenetv2_1.00_224/block_16_project/conv2d 103
+mobilenetv2_1.00_224/block_16_project_bn/fusedbatchnormv3;mobilenetv2_1.00_224/block_16_project/conv2d 104
+mobilenetv2_1.00_224/conv_1/conv2d1 105
+mobilenetv2_1.00_224/conv_1/conv2d 106
+mobilenetv2_1.00_224/predictions/matmul 107
+Traceback (most recent call last):
+  File "./extract_weights_and_fms_v2.py", line 188, in <module>
+    with open(model_arch_dir + 'layers_weights.txt', 'w') as f:
+FileNotFoundError: [Errno 2] No such file or directory: './models_archs/models/embdl_mob_v2/layers_weights.txt'
+fareed@fareed-OptiPlex-7090:/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction$ 

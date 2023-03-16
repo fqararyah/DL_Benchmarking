@@ -62,7 +62,7 @@ rng = np.loadtxt(range_file).astype(np.int8)
 #         sum += int(domain[i]) - rng[i]
 
 # print(sum)
-# print(sum/rng.size)
+print('(calculated, expected)')
 
 sum = 0
 cnt1=0

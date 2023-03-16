@@ -2,7 +2,7 @@ from fcntl import F_SETFL
 from models_archs import utils
 import analysis_utils
 
-MODEL_NAME = 'prox'
+MODEL_NAME = 'resnet50'
 
 utils.set_globals(MODEL_NAME, MODEL_NAME)
 
@@ -145,6 +145,10 @@ print_weights_sizes()
 layers_num_of_ops = analysis_utils.get_layers_num_of_ops(
         layers_inputs, layers_weights, layers_types, layers_strides)
 
+#print ops
+for i in range(len(layers_num_of_ops)):
+    print(layers_num_of_ops[i])
+
 avg_weight_reuse = 0
 avg_act_reuse = 0
 for i in range(len(weight_reuse)):
@@ -153,5 +157,5 @@ for i in range(len(weight_reuse)):
 for i in range(len(activation_reuse)):
     avg_act_reuse += activation_reuse[i] * activations_sizes[i]
 
-print(avg_weight_reuse/ sum(weights_sizes))
-print(avg_act_reuse / sum(activations_sizes))
+#print(avg_weight_reuse/ sum(weights_sizes))
+#print(avg_act_reuse / sum(activations_sizes))

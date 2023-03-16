@@ -42,11 +42,11 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'embdl_mob_v2'
+MODEL_NAME = 'mob_v2'
 MODEL_PATH = '/media/SSD2TB/wd/models/efficientnet_b0_no_sigmoid.h5'
 PRECISION = 8
 
-if MODEL_NAME == 'embdl_mob_v2':
+if MODEL_NAME == 'resnet50':
     model = tf.keras.models.load_model('mobilenet_v2.h5')
     print('EMBDL')
 elif MODEL_NAME == 'mob_v1':
@@ -125,7 +125,7 @@ if PRECISION == 8:
 prediction_dict_list = []
 
 # limit = len(test_images)
-limit = 100
+limit = 1000
 i=-1
 processed = 0
 while i < limit:

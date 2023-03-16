@@ -19,9 +19,9 @@ from models_archs import utils
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'embdl_mob_v2'
+MODEL_NAME = 'resnet50'
 ACTIVATION_FUNCTION = {'mob_v1': 'relu6','mob_v2': 'relu6', 'eff_b0': 'sigm', 'mnas': 'relu6', 'prox': 'relu6',\
-     'mob_v1_0_5': 'relu6', 'mob_v2_0_5': 'relu6', 'embdl_mob_v2': 'relu6'}
+     'mob_v1_0_5': 'relu6', 'mob_v2_0_5': 'relu6', 'embdl_mob_v2': 'relu6', 'resnet50': 'relu'}
 PRECISION = 8
 np.random.seed(0)
 
@@ -93,7 +93,7 @@ for t in interpreter.get_tensor_details():
     current_tensor = np.reshape(current_tensor, (current_tensor.size))
 
     if current_tensors_type == 'weights':
-        print(tensor_name, t['index'], original_shape)
+        #print(tensor_name, t['index'], original_shape)
         if original_tensor.ndim == 1:
             if last_tensor_key == '':
                 continue
