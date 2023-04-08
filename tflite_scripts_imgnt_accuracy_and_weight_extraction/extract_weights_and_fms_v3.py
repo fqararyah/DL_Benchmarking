@@ -19,9 +19,12 @@ from models_archs import utils
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'mob_v2'
-ACTIVATION_FUNCTION = {'mob_v1': 'relu6','mob_v2': 'relu6', 'eff_b0': 'sigm', 'mnas': 'relu6', 'prox': 'relu6',\
-     'mob_v1_0_5': 'relu6', 'mob_v2_0_5': 'relu6', 'embdl_mob_v2': 'relu6', 'resnet50': 'relu'}
+MODEL_NAME = 'mob_v2_v3'
+
+# from generic to specific (for string matching)
+ACTIVATION_FUNCTIONS = ['relu', 'relu6']
+TFLITE_CONV_OP_NAMES = ['depthwise_conv_2d', 'conv_2d']
+
 PRECISION = 8
 np.random.seed(0)
 
@@ -35,6 +38,85 @@ interpreter = tf.lite.Interpreter(model_path=str(
     tflite_model_quant_file), experimental_preserve_all_tensors=True)
 interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()[0]
+ops_details_list = interpreter._get_ops_details()
+tensors_details_list = interpreter.get_tensor_details()
+# print(interpreter._get_op_details(1))
+# print(interpreter._get_op_details(2))
+# print(interpreter.get_tensor_details()[3])
+# print(interpreter.get_tensor_details()[4])
+
+model_dag = []
+tmp_ofms_to_layer_indeices_map = {}
+
+op_index_comp = 0
+for op_details in ops_details_list:
+    model_dag_entry = {}
+    op_name = op_details['op_name'].lower()
+    model_dag_entry['name'] = op_name
+    op_index = op_details['index']
+    assert op_index == op_index_comp
+    model_dag_entry['id'] = op_index
+    op_index_comp += 1
+    op_inputs = op_details['inputs']
+    op_outputs = op_details['outputs']
+    op_inputs = sorted(op_inputs)
+
+    tmp_ofms_to_layer_indeices_map[op_outputs[0]] = op_index
+    model_dag_entry['parents'] = []
+    for op_input in op_inputs:
+        if op_input in tmp_ofms_to_layer_indeices_map:
+            model_dag_entry['parents'].append(
+                tmp_ofms_to_layer_indeices_map[op_input])
+
+    if op_name not in TFLITE_CONV_OP_NAMES:
+        model_dag.append(model_dag_entry)
+        continue
+    # assuming the op_inputs are of the weights, then the biases, theen the IFMs (based on my observation)
+    op_ifms_tensor = interpreter.get_tensor(op_inputs[-1])
+    op_ifms_tensor_details = tensors_details_list[op_inputs[-1]]
+    op_ofms_tensor = interpreter.get_tensor(op_outputs[0])
+    op_ofms_tensor_details = tensors_details_list[op_outputs[0]]
+    op_weights_tensor = interpreter.get_tensor(op_inputs[0])
+    op_weights_tensor_details = tensors_details_list[op_inputs[0]]
+    op_biases_tensor = interpreter.get_tensor(op_inputs[1])
+    op_biases_tensor_details = tensors_details_list[op_inputs[1]]
+
+    op_weights_shape = [int(i) for i in op_weights_tensor_details['shape']]
+
+    if 'depthwise' in op_name:
+        model_dag_entry['type'] = 'dw'
+        model_dag_entry['weights_shape'] = [
+            op_weights_shape[2], op_weights_shape[0], op_weights_shape[1]]
+    elif op_weights_shape[1] == 1 and op_weights_shape[2] == 1:
+        model_dag_entry['type'] = 'pw'
+        model_dag_entry['weights_shape'] = [
+            op_weights_shape[0], op_weights_shape[1]]
+    else:
+        model_dag_entry['type'] = 's'
+        model_dag_entry['weights_shape'] = [
+            op_weights_shape[0], op_weights_shape[3], op_weights_shape[1], op_weights_shape[2]]
+
+    model_dag_entry['ifms_shape'] = [int(op_ifms_tensor_details['shape'][3]), int(op_ifms_tensor_details['shape'][1]),
+                                     int(op_ifms_tensor_details['shape'][2])]
+    model_dag_entry['ofms_shape'] = [int(op_ofms_tensor_details['shape'][3]), int(op_ofms_tensor_details['shape'][1]),
+                                     int(op_ofms_tensor_details['shape'][2])]
+    model_dag_entry['strides'] = int(
+        model_dag_entry['ifms_shape'][-1] / model_dag_entry['ofms_shape'][-1])
+
+    for activation in ACTIVATION_FUNCTIONS:
+        if activation in op_ofms_tensor_details['name'].lower():
+            model_dag_entry['activation'] = activation
+        else:
+            model_dag_entry['activation'] = '0'
+
+    model_dag.append(model_dag_entry)
+
+json_object = json.dumps(model_dag)
+
+with open(model_arch_dir + "model_dag.json", "w") as outfile:
+    outfile.write(json_object)
+
+exit()
 output_details = interpreter.get_output_details()[0]
 #################################################################################################################
 # prepare image
@@ -50,7 +132,8 @@ interpreter.invoke()
 tensor_details = interpreter.get_tensor_details()
 #################################################################################################################
 
-splitting_layer_name = 'tfl.quantize' #this relys on the observation that tfl.quantize is the first fms tensor
+# this relys on the observation that tfl.quantize is the first fms tensor
+splitting_layer_name = 'tfl.quantize'
 current_tensors_type = 'weights'
 weights_counts = {'conv2d': 0, 'matmul': 0}
 fms_counts = {'conv2d': 1, 'matmul': 0}
@@ -97,17 +180,18 @@ for t in interpreter.get_tensor_details():
         if original_tensor.ndim == 1:
             if last_tensor_key == '':
                 continue
-            
-            file_name = last_tensor_key + '_' + str(weights_counts[last_tensor_key] - 1) + '_biases'
+
+            file_name = last_tensor_key + '_' + \
+                str(weights_counts[last_tensor_key] - 1) + '_biases'
             # if MODEL_NAME == 'mnas' and os.path.exists('./'+weights_fms_dir+'/biases/' +
             #         file_name + '.txt'):
             #     file_name = last_tensor_key + '_' + str(weights_counts[last_tensor_key]) + '_biases'
             np.savetxt('./'+weights_fms_dir+'/biases/' +
-                    file_name + '.txt', current_tensor, fmt='%i')
+                       file_name + '.txt', current_tensor, fmt='%i')
             np.savetxt('./'+weights_fms_dir+'/biases/' + file_name +
-                    '_scales.txt', t['quantization_parameters']['scales'])
+                       '_scales.txt', t['quantization_parameters']['scales'])
             np.savetxt('./'+weights_fms_dir+'/biases/' + file_name + '_zero_points.txt',
-                    t['quantization_parameters']['zero_points'], fmt='%i')
+                       t['quantization_parameters']['zero_points'], fmt='%i')
         else:
             if 'conv2d;' in tensor_name:
                 tensor_name_postfix += 'conv2d'
@@ -129,24 +213,24 @@ for t in interpreter.get_tensor_details():
                 layers_strides.append(1)
                 if original_shape[0] == 1:
                     conv_type = 'dw'
-                elif original_shape[1]== 1 and original_shape[2] == 1:
+                elif original_shape[1] == 1 and original_shape[2] == 1:
                     conv_type = 'pw'
                     if current_tensor_dims[1] > current_tensor_dims[0]:
                         layers_activations[-1] = '0'
                 else:
                     conv_type = 's'
-                
+
                 layers_types.append(conv_type)
                 layers_weights_dims.append(current_tensor_dims)
 
                 weights_file_name_postifix += '_' + conv_type + '_weights'
 
             np.savetxt('./'+weights_fms_dir+'/weights/' +
-                    file_name + weights_file_name_postifix + '.txt', current_tensor, fmt='%i')
+                       file_name + weights_file_name_postifix + '.txt', current_tensor, fmt='%i')
             np.savetxt('./'+weights_fms_dir+'/weights/' + file_name +
-                    '_scales.txt', t['quantization_parameters']['scales'])
+                       '_scales.txt', t['quantization_parameters']['scales'])
             np.savetxt('./'+weights_fms_dir+'/weights/' + file_name + '_zero_points.txt',
-                    t['quantization_parameters']['zero_points'], fmt='%i')
+                       t['quantization_parameters']['zero_points'], fmt='%i')
     else:
         if 'conv2d;' in tensor_name:
             tensor_name_postfix += 'conv2d'
@@ -155,11 +239,14 @@ for t in interpreter.get_tensor_details():
                 fms_counts[key] += 1
                 last_tensor_key = key
                 break
-        
-        file_name = last_tensor_key + '_' + str(fms_counts[last_tensor_key] - 1)
+
+        file_name = last_tensor_key + '_' + \
+            str(fms_counts[last_tensor_key] - 1)
         if last_tensor_key not in tensor_name_postfix:
-            file_name += '_' + tensor_name_postfix + '_' + str(internal_layers_count)
-            layers_execution_sequence.append(tensor_name_postfix + '_' + str(internal_layers_count))
+            file_name += '_' + tensor_name_postfix + \
+                '_' + str(internal_layers_count)
+            layers_execution_sequence.append(
+                tensor_name_postfix + '_' + str(internal_layers_count))
             internal_layers_count += 1
             if tensor_name_postfix in skip_connection_layers_types:
                 skip_connection_indices.append(fms_counts[last_tensor_key] - 2)
@@ -171,12 +258,12 @@ for t in interpreter.get_tensor_details():
             layers_inputs_dims.append(current_tensor_dims)
             layers_outputs_dims.append(current_tensor_dims)
             if len(layers_inputs_dims[-1]) == 3 and len(layers_inputs_dims[-2]) == 3 \
-                and  layers_inputs_dims[-1][2] != layers_inputs_dims[-2][2]:
+                    and layers_inputs_dims[-1][2] != layers_inputs_dims[-2][2]:
                 layers_strides[fms_counts[last_tensor_key] - 2] = 2
 
         if fms_counts['conv2d'] == 1:
             file_name = initial_ifms_file_name
-        
+
         #print(fms_counts['conv2d'], file_name + '_' + current_tensor_shape_str_rep)
         np.savetxt('./'+weights_fms_dir+'/fms/fms_' + file_name + '_' +
                    current_tensor_shape_str_rep + '.txt', current_tensor, fmt='%i')

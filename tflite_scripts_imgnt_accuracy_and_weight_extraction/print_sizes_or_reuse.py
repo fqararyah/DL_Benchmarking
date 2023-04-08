@@ -2,7 +2,7 @@ from fcntl import F_SETFL
 from models_archs import utils
 import analysis_utils
 
-MODEL_NAME = 'resnet50'
+MODEL_NAME = 'mob_v2'
 
 utils.set_globals(MODEL_NAME, MODEL_NAME)
 
@@ -137,10 +137,10 @@ def reuse_and_ops():
 
 #reuse_and_ops()
 
-print_fms_reuse()
-print_fms_sizes()
-print_weight_reuse()
-print_weights_sizes()
+# print_fms_reuse()
+# print_fms_sizes()
+# print_weight_reuse()
+# print_weights_sizes()
 
 layers_num_of_ops = analysis_utils.get_layers_num_of_ops(
         layers_inputs, layers_weights, layers_types, layers_strides)

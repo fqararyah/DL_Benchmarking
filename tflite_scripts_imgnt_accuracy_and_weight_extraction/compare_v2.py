@@ -102,7 +102,7 @@ for key, val in diff_locs.items():
     print(key, val)
     print('***************')
     count += 1
-    if count > 10:
+    if count > 100:
         break
 
 print('max= ', np.max( np.abs(domain - rng)))
