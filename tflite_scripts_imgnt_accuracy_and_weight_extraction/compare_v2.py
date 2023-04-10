@@ -15,44 +15,21 @@ if(len(sys.argv) > 1):
 if(len(sys.argv) > 2):
     ref = sys.argv[2]
 
-layers_ofms_shape = utils.read_layers_output_shapes()
-skip_connections_indices = utils.read_skip_connections_indices()
-layers_execution_sequence = utils.read_layers_execution_sequence()
-
 domain_file = './scratch_out/ofms_{}'.format(to_compare_layer_index)
 if len(ref)>0:
     domain_file += '_' + ref + '.txt'
 else:
     domain_file += '.txt'
 
-#domain_file = './scratch_out/ofms_1.txt'
+range_file = './{}/fms/ofms_{}.txt'.format(utils.NET_PREFIX, to_compare_layer_index)
 
-#range_file = './scratch_out/ofms_{}_ref.txt'.format(to_compare_layer_index)
-to_compare_fms = str(to_compare_layer_index + 1)
-conv_count = 0
-layer_index = 0
-non_standard = False
-while conv_count < (to_compare_layer_index + 1) + 1 and to_compare_layer_index != len(layers_ofms_shape) - 1:
-    non_standard = True
-    if layers_execution_sequence[layer_index] == 'conv2d':
-        conv_count += 1
-    layer_index += 1
+model_dag = utils.read_model_dag()
 
-print(layer_index, layers_execution_sequence[layer_index - 1])
-if non_standard and layers_execution_sequence[layer_index - 2] != 'conv2d' and 'pad' not in layers_execution_sequence[layer_index - 2]:
-    to_compare_fms += '_' + layers_execution_sequence[layer_index - 2]
+to_compare_layer_specs = model_dag[to_compare_layer_index]
+to_compare_layer_ofms_shape = to_compare_layer_specs['ofms_shape']
 
-
-
-range_file = './{}/fms/fms_conv2d_{}_{}_{}_{}.txt'.format(utils.NET_PREFIX ,to_compare_fms,\
-     layers_ofms_shape[to_compare_layer_index].depth, layers_ofms_shape[to_compare_layer_index].height,\
-     layers_ofms_shape[to_compare_layer_index].width)
-
-#range_file = './eff_b0/fms/fms_conv2d_2_mul_1_2_32_112_112.txt'
-print(range_file)
-
-ofms_hw = layers_ofms_shape[to_compare_layer_index].height * layers_ofms_shape[to_compare_layer_index].width
-ofms_w = layers_ofms_shape[to_compare_layer_index].width
+ofms_hw = to_compare_layer_ofms_shape[1] * to_compare_layer_ofms_shape[2]
+ofms_w = to_compare_layer_ofms_shape[2]
 domain = np.loadtxt(domain_file).astype(np.int8)
 rng = np.loadtxt(range_file).astype(np.int8)
 
