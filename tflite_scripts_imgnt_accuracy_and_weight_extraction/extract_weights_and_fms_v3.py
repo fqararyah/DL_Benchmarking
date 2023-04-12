@@ -15,15 +15,16 @@ import pathlib
 
 from models_archs import utils
 
+import tflite_ops_names
+
 # import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'mob_v2'
+MODEL_NAME = 'resnet50'
 
 # from generic to specific (for string matching)
 ACTIVATION_FUNCTIONS = ['relu', 'relu6']
-TFLITE_CONV_OP_NAMES = ['depthwise_conv_2d', 'conv_2d']
 
 PRECISION = 8
 np.random.seed(0)
@@ -78,7 +79,8 @@ for op_details in ops_details_list:
         op_ofms_tensor = np.transpose(op_ofms_tensor, (2, 0, 1))
         op_ofms_tensor = np.reshape(op_ofms_tensor, (op_ofms_tensor.size))
         file_name = 'ofms_' + str(op_index) + '.txt'
-        np.savetxt('./'+weights_fms_dir+'/fms/' + file_name, op_ofms_tensor, fmt = '%i')
+        np.savetxt('./'+weights_fms_dir+'/fms/' +
+                   file_name, op_ofms_tensor, fmt='%i')
 
     tmp_ofms_to_layer_indeices_map[op_outputs[0]] = op_index
     model_dag_entry['parents'] = []
@@ -103,7 +105,7 @@ for op_details in ops_details_list:
             model_dag_entry['ifms_zero_points'].append(
                 int(op_ifms_tensor_details['quantization_parameters']['zero_points'][0]))
 
-    elif op_name in TFLITE_CONV_OP_NAMES:
+    if op_name in tflite_ops_names.TFLITE_CONV_OP_NAMES or op_name in tflite_ops_names.TFLITE_FULLY_CONNECTED_OP_NAMES:
         # assuming the op_inputs are of the weights, then the biases, theen the IFMs (based on my observation)
         op_ifms_tensor = interpreter.get_tensor(op_inputs[-1])
         op_ifms_tensor_details = tensors_details_list[op_inputs[-1]]
@@ -114,70 +116,83 @@ for op_details in ops_details_list:
 
         assert(
             len(op_ifms_tensor_details['quantization_parameters']['scales']) == 1)
-        model_dag_entry['ifms_scales'] = float(op_ifms_tensor_details['quantization_parameters']['scales'][0])
+        model_dag_entry['ifms_scales'] = float(
+            op_ifms_tensor_details['quantization_parameters']['scales'][0])
         assert(
             len(op_ifms_tensor_details['quantization_parameters']['zero_points']) == 1)
-        model_dag_entry['ifms_zero_points']=int(
+        model_dag_entry['ifms_zero_points'] = int(
             op_ifms_tensor_details['quantization_parameters']['zero_points'][0])
 
-        op_ifms_tensor=np.squeeze(op_ifms_tensor)
-        op_ifms_tensor=np.transpose(op_ifms_tensor, (2, 0, 1))
-        op_ifms_tensor=np.reshape(op_ifms_tensor, (op_ifms_tensor.size))
-        file_name='ifms_' + str(op_index) + '.txt'
-        np.savetxt('./'+weights_fms_dir+'/fms/' + file_name, op_ifms_tensor, fmt = '%i')
+        op_ifms_tensor = np.squeeze(op_ifms_tensor)
+        if op_name in tflite_ops_names.TFLITE_CONV_OP_NAMES:
+            op_ifms_tensor = np.transpose(op_ifms_tensor, (2, 0, 1))
+        op_ifms_tensor = np.reshape(op_ifms_tensor, (op_ifms_tensor.size))
+        file_name = 'ifms_' + str(op_index) + '.txt'
+        np.savetxt('./'+weights_fms_dir+'/fms/' +
+                   file_name, op_ifms_tensor, fmt='%i')
 
-        op_weights_tensor=np.squeeze(op_weights_tensor)
+        op_weights_tensor = np.squeeze(op_weights_tensor)
         if op_weights_tensor.ndim == 4:
-            op_weights_tensor=np.transpose(op_weights_tensor, (0, 3, 1, 2))
+            op_weights_tensor = np.transpose(op_weights_tensor, (0, 3, 1, 2))
         elif op_weights_tensor.ndim == 3:
-            op_weights_tensor=np.transpose(op_weights_tensor, (2, 0, 1))
-        op_weights_tensor=np.reshape(
+            op_weights_tensor = np.transpose(op_weights_tensor, (2, 0, 1))
+        op_weights_tensor = np.reshape(
             op_weights_tensor, (op_weights_tensor.size))
-        file_name='weights_' + str(op_index)
+        file_name = 'weights_' + str(op_index)
         np.savetxt('./'+weights_fms_dir+'/weights/' + file_name +
-                   '.txt', op_weights_tensor, fmt = '%i')
+                   '.txt', op_weights_tensor, fmt='%i')
 
-        op_weights_scales_tensor=op_weights_tensor_details['quantization_parameters']['scales']
+        op_weights_scales_tensor = op_weights_tensor_details['quantization_parameters']['scales']
         np.savetxt('./'+weights_fms_dir+'/weights/' + file_name +
                    '_scales.txt', op_weights_scales_tensor)
 
-        op_weights_zero_pooints_tensor=op_weights_tensor_details[
+        op_weights_zero_pooints_tensor = op_weights_tensor_details[
             'quantization_parameters']['zero_points']
         np.savetxt('./'+weights_fms_dir+'/weights/' + file_name +
-                   '_zps.txt', op_weights_zero_pooints_tensor, fmt = '%i')
+                   '_zps.txt', op_weights_zero_pooints_tensor, fmt='%i')
 
-        file_name='biases_' + str(op_index) + '.txt'
+        file_name = 'biases_' + str(op_index) + '.txt'
         np.savetxt('./'+weights_fms_dir+'/biases/' +
-                   file_name, op_biases_tensor, fmt = '%i')
+                   file_name, op_biases_tensor, fmt='%i')
 
-        op_biases_scales_tensor=op_biases_tensor_details['quantization_parameters']['scales']
+        op_biases_scales_tensor = op_biases_tensor_details['quantization_parameters']['scales']
         np.savetxt('./'+weights_fms_dir+'/biases/' + file_name +
                    '_scales.txt', op_biases_scales_tensor)
 
-        op_biases_zero_points_tensor=op_biases_tensor_details[
+        op_biases_zero_points_tensor = op_biases_tensor_details[
             'quantization_parameters']['zero_points']
         np.savetxt('./'+weights_fms_dir+'/biases/' + file_name +
-                   '_zps.txt', op_biases_zero_points_tensor, fmt = '%i')
+                   '_zps.txt', op_biases_zero_points_tensor, fmt='%i')
 
-        op_weights_shape=[int(i) for i in op_weights_tensor_details['shape']]
+        op_weights_shape = [int(i) for i in op_weights_tensor_details['shape']]
 
         if 'depthwise' in op_name:
-            model_dag_entry['type']='dw'
-            model_dag_entry['weights_shape']=[
+            model_dag_entry['type'] = 'dw'
+            model_dag_entry['weights_shape'] = [
                 op_weights_shape[3], op_weights_shape[1], op_weights_shape[2]]
         elif op_weights_shape[1] == 1 and op_weights_shape[2] == 1:
             model_dag_entry['type'] = 'pw'
             model_dag_entry['weights_shape'] = [
                 op_weights_shape[0], op_weights_shape[3]]
-        else:
+        elif len(op_weights_shape) == 4:
             model_dag_entry['type'] = 's'
             model_dag_entry['weights_shape'] = [
                 op_weights_shape[0], op_weights_shape[3], op_weights_shape[1], op_weights_shape[2]]
+        else:
+            model_dag_entry['type'] = 'fc'
+            model_dag_entry['weights_shape'] = [i for i in op_weights_shape]
 
-        model_dag_entry['ifms_shape'] = [int(op_ifms_tensor_details['shape'][3]), int(op_ifms_tensor_details['shape'][1]),
-                                         int(op_ifms_tensor_details['shape'][2])]
-        model_dag_entry['ofms_shape'] = [int(op_ofms_tensor_details['shape'][3]), int(op_ofms_tensor_details['shape'][1]),
-                                         int(op_ofms_tensor_details['shape'][2])]
+        if len(op_ifms_tensor_details['shape']) == 4:
+            model_dag_entry['ifms_shape'] = [int(op_ifms_tensor_details['shape'][3]), int(op_ifms_tensor_details['shape'][1]),
+                                             int(op_ifms_tensor_details['shape'][2])]
+            model_dag_entry['ofms_shape'] = [int(op_ofms_tensor_details['shape'][3]), int(op_ofms_tensor_details['shape'][1]),
+                                             int(op_ofms_tensor_details['shape'][2])]
+        else:
+            model_dag_entry['ifms_shape'] = [
+                int(i) for i in op_ifms_tensor_details['shape']]
+            model_dag_entry['ofms_shape'] = [
+                int(i) for i in op_ofms_tensor_details['shape']]
+
         model_dag_entry['strides'] = int(
             model_dag_entry['ifms_shape'][-1] / model_dag_entry['ofms_shape'][-1])
 
@@ -186,6 +201,13 @@ for op_details in ops_details_list:
                 model_dag_entry['activation'] = activation
             else:
                 model_dag_entry['activation'] = '0'
+
+    else:
+        op_ifms_tensor_details = tensors_details_list[op_inputs[-1]]
+        model_dag_entry['ifms_shape'] = [
+            int(i) for i in op_ifms_tensor_details['shape']]
+        model_dag_entry['ofms_shape'] = [
+            int(i) for i in op_ofms_tensor_details['shape']]
 
     assert(
         len(op_ofms_tensor_details['quantization_parameters']['scales']) == 1)
