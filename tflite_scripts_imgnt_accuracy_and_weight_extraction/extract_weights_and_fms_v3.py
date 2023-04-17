@@ -21,7 +21,7 @@ import tflite_ops_names
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'resnet50'
+MODEL_NAME = 'mob_v2'
 
 # from generic to specific (for string matching)
 ACTIVATION_FUNCTIONS = ['relu', 'relu6']
@@ -77,10 +77,10 @@ for op_details in ops_details_list:
     op_ofms_tensor = np.squeeze(op_ofms_tensor)
     if op_ofms_tensor.ndim == 3:
         op_ofms_tensor = np.transpose(op_ofms_tensor, (2, 0, 1))
-        op_ofms_tensor = np.reshape(op_ofms_tensor, (op_ofms_tensor.size))
-        file_name = 'ofms_' + str(op_index) + '.txt'
-        np.savetxt('./'+weights_fms_dir+'/fms/' +
-                   file_name, op_ofms_tensor, fmt='%i')
+    op_ofms_tensor = np.reshape(op_ofms_tensor, (op_ofms_tensor.size))
+    file_name = 'ofms_' + str(op_index) + '.txt'
+    np.savetxt('./'+weights_fms_dir+'/fms/' +
+                file_name, op_ofms_tensor, fmt='%i')
 
     tmp_ofms_to_layer_indeices_map[op_outputs[0]] = op_index
     model_dag_entry['parents'] = []
@@ -217,6 +217,9 @@ for op_details in ops_details_list:
         len(op_ofms_tensor_details['quantization_parameters']['zero_points']) == 1)
     model_dag_entry['ofms_zero_points'] = int(
         op_ofms_tensor_details['quantization_parameters']['zero_points'][0])
+
+    if op_name in tflite_ops_names.TFLITE_AVG_POOL_OP_NAMES:
+        model_dag_entry['type'] = 'avgpool'
 
     model_dag.append(model_dag_entry)
 
