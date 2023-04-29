@@ -3,118 +3,132 @@ import numpy as np
 from models_archs import utils
 
 
-utils.NET_PREFIX = 'mob_v2'
+utils.NET_PREFIX = 'resnet50'
 utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
-layers_types = utils.read_layers_types()
-layers_weights_shape = utils.read_layers_weight_shapes(layers_types)
-layers_ifms_shape = utils.read_layers_input_shapes()
-layers_strides = utils.read_layers_strides()
-layers_relus = utils.read_layers_relus()
-layers_ofms_shape = utils.read_layers_output_shapes()
-skip_connections_indices = utils.read_skip_connections_indices()
+model_dag = utils.read_model_dag()
 
-layer_index = 23
+layer_index = 24
 
-layer_type = layers_types[layer_index]
-weights_file = './{}/weights/conv2d_{}_{}_weights.txt'.format(utils.NET_PREFIX, layer_index, layer_type)
-ifms_file = './{}/fms/fms_conv2d_{}_{}_{}_{}.txt'.format(utils.NET_PREFIX,layer_index, layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height,\
-    layers_ifms_shape[layer_index].width)
+layer_specs = model_dag[layer_index]
+
+weights_file = './{}/weights/weights_{}.txt'.format(
+    utils.NET_PREFIX, layer_index)
+ifms_file = './{}/fms/ifms_{}.txt'.format(utils.NET_PREFIX, layer_index)
 ofms_file = './scratch_out/ofms_{}_ref.txt'.format(layer_index)
-ifms_zero_points_file = './{}/fms/fms_conv2d_{}_zero_points.txt'.format(utils.NET_PREFIX, layer_index)
-bias_file = './{}/biases/conv2d_{}_biases.txt'.format(utils.NET_PREFIX, layer_index)
-weights_scale_file = './{}/weights/conv2d_{}_scales.txt'.format(utils.NET_PREFIX, layer_index)
-ifms_scale_file = './{}/fms/fms_conv2d_{}_scales.txt'.format(utils.NET_PREFIX, layer_index)
-ofms_scale_file = './{}/fms/fms_conv2d_{}_scales.txt'.format(utils.NET_PREFIX, layer_index + 1)
-ofms_zero_points_file = './{}/fms/fms_conv2d_{}_zero_points.txt'.format(utils.NET_PREFIX, layer_index + 1)
 
-layers_ifms_zero_point = {layer_index: np.loadtxt(ifms_zero_points_file).astype(np.int32)}
+bias_file = './{}/biases/biases_{}.txt'.format(utils.NET_PREFIX, layer_index)
+weights_scale_file = './{}/weights/weights_{}_scales.txt'.format(
+    utils.NET_PREFIX, layer_index)
+
+layers_ifms_zero_point = layer_specs['ifms_zero_points']
 layers_bias = {layer_index: np.loadtxt(bias_file).astype(np.int32)}
-layers_scale_ifms = {layer_index: np.loadtxt(ifms_scale_file)}#{0: 0.003921568393707275, 3: 0.0235294122248888, 6: 0.0235294122248888, 4:0.3023846447467804, 5: 0.00235294122248888 }
-layers_scale_weights = {layer_index: np.loadtxt(weights_scale_file)}#{0: [0.0095633129], 3: [0.02902807], 6: [0.01043679], 4: [0.00100364], 5: [0.00320544]}
-layers_scale_ofms = {layer_index: np.loadtxt(ofms_scale_file)}#{0: 0.0235294122248888, 3: 0.3023846447467804,  6: 0.1985088586807251, 4:0.0235294122248888, 5: 0.0235294122248888 } 
-layers_ofms_zero_point = {layer_index: np.loadtxt(ofms_zero_points_file).astype(np.int8)}#{0: 128, 3: 6, 6: 5, 4: 128}
-#layers_ifms_zero_point = {0: 128, 3: 128, 6: 128, 4: 6, 5:128}#{layer_index: np.loadtxt(ifms_zero_points_file).astype(np.int8)}
-#layers_bias = {0: [61864]*32, 3: [-2630]*32, 6: [32910]*32, 4: [2650]*32}#{layer_index: np.loadtxt(bias_file).astype(np.int32)}
-print(layers_ifms_zero_point[layer_index])
-print(layers_ofms_zero_point[layer_index])
-print(layers_bias[layer_index])
-print(layers_scale_ifms[layer_index])
-print(layers_scale_weights[layer_index])
-print(layers_scale_ofms[layer_index])
-#layers_ofms_zero_point
-conv_strides = layers_strides[layer_index]
+layers_scale_ifms = layer_specs['ifms_scales']
+# {0: [0.0095633129], 3: [0.02902807], 6: [0.01043679], 4: [0.00100364], 5: [0.00320544]}
+layers_scale_weights = {layer_index: np.loadtxt(weights_scale_file)}
+layers_scale_ofms = layer_specs['ofms_scales']
+layers_ofms_zero_point = layer_specs['ofms_zero_points']
+
+# print(layers_ifms_zero_point[layer_index])
+# print(layers_ofms_zero_point[layer_index])
+# print(layers_bias[layer_index])
+# print(layers_scale_ifms[layer_index])
+# print(layers_scale_weights[layer_index])
+# print(layers_scale_ofms[layer_index])
+# layers_ofms_zero_point
+conv_strides = layer_specs['strides']
+
+layer_type = layer_specs['type']
+layers_weights_shape = layer_specs['weights_shape']
+layers_ifms_shape = layer_specs['ifms_shape']
+ofms_shape = layer_specs['ofms_shape']
+layer_activation = layer_specs['activation']
 
 weights = np.loadtxt(weights_file).astype(np.int8)
-if layer_type == 'dw':
-    weights = np.reshape(weights,(layers_weights_shape[layer_index].num_of_filters, layers_weights_shape[layer_index].depth, layers_weights_shape[layer_index].height,\
-    layers_weights_shape[layer_index].width))
+if layer_type == 'pw':
+    weights = np.reshape(
+        weights, (layers_weights_shape[0], layers_weights_shape[1]))
 else:
-    weights = np.reshape(weights,(layers_weights_shape[layer_index].num_of_filters, layers_weights_shape[layer_index].depth, layers_weights_shape[layer_index].height,\
-    layers_weights_shape[layer_index].width))
+    weights = np.reshape(weights, (layers_weights_shape[0], layers_weights_shape[1], layers_weights_shape[2],
+                                   layers_weights_shape[3]))
 
 ifms = np.loadtxt(ifms_file).astype(np.int8)
-ifms = np.reshape(ifms, (layers_ifms_shape[layer_index].depth, layers_ifms_shape[layer_index].height, layers_ifms_shape[layer_index].width) )
+ifms = np.reshape(
+    ifms, (layers_ifms_shape[0], layers_ifms_shape[1], layers_ifms_shape[2]))
+ifms = np.reshape(ifms, (ofms_shape[0], ofms_shape[1], ofms_shape[2]))
 
-ofms_shape = (layers_weights_shape[layer_index].num_of_filters, int(layers_ifms_shape[layer_index].height /
-                                    conv_strides), int(layers_ifms_shape[layer_index].width/conv_strides))
 ofms = np.zeros(ofms_shape).astype(np.int8)
 
-filter_height =layers_weights_shape[layer_index].height
-filter_width =layers_weights_shape[layer_index].width
-padding_val = int( (filter_height - 1) / 2)
-#print(layers_ifms_zero_point[layer_index])
-print(layers_scale_ifms[layer_index] * layers_scale_weights[layer_index][0])
+filter_height = layers_weights_shape[2]
+filter_width = layers_weights_shape[3]
+padding_val = int((filter_height - 1) / 2)
+# print(layers_ifms_zero_point[layer_index])
+
 if layer_type != 'pw':
     if conv_strides == 1:
-        ifms = np.pad(ifms, ((0,0),(padding_val,padding_val),(padding_val,padding_val)), mode='constant', constant_values = layers_ifms_zero_point[layer_index])
+        ifms = np.pad(ifms, ((0, 0), (padding_val, padding_val), (padding_val, padding_val)),
+                      mode='constant', constant_values=layers_ifms_zero_point)
     elif conv_strides == 2:
-        ifms = np.pad(ifms, ((0,0),(0,padding_val),(0,padding_val)), mode='constant',  constant_values = layers_ifms_zero_point[layer_index])
+        ifms = np.pad(ifms, ((0, 0), (0, padding_val), (0, padding_val)),
+                      mode='constant',  constant_values=layers_ifms_zero_point)
+
 
 def conv():
-        for i in range(layers_weights_shape[layer_index].num_of_filters):
-            for j in range(ofms_shape[1]):
-                for k in range(ofms_shape[2]):
-                    tmp = np.sum(weights[i].astype(np.int32)) * -layers_ifms_zero_point[layer_index] + \
-                    np.sum(weights[i].astype(np.int32) * ( ifms[:, j*conv_strides:j*conv_strides + filter_height, \
-                        k*conv_strides:k*conv_strides + filter_width]) ) + layers_bias[layer_index][i]
-                    
-                    tmp = tmp * layers_scale_ifms[layer_index] * layers_scale_weights[layer_index][i]
-                    if layers_relus[layer_index] == 6:
-                        tmp = min(max(tmp, 0), 6)
-                    tmp = tmp / layers_scale_ofms[layer_index] + layers_ofms_zero_point[layer_index]
-                    if tmp > 0:
-                        tmp = int(tmp + 0.5)
-                    else:
-                        tmp = int(tmp -0.5)
-                    ofms[i][j][k] = tmp
+    for i in range(layers_weights_shape[0]):
+        for j in range(ofms_shape[1]):
+            for k in range(ofms_shape[2]):
+                tmp = np.sum(weights[i].astype(np.int32)) * -layers_ifms_zero_point + \
+                    np.sum(weights[i].astype(np.int32) * (ifms[:, j*conv_strides:j*conv_strides + filter_height,
+                                                               k*conv_strides:k*conv_strides + filter_width])) + layers_bias[layer_index][i]
+                if i == 0 and j == 0 and k == 1:
+                    print(np.sum(weights[i,0:64,:,:].astype(np.int32) * (ifms[0:64, j*conv_strides:j*conv_strides + filter_height,
+                                                                      k*conv_strides:k*conv_strides + filter_width])))
+                    print(weights[i,1,:])
+                tmp = tmp * layers_scale_ifms * \
+                    layers_scale_weights[layer_index][i]
+                if layer_activation == 'RELU6':
+                    tmp = min(max(tmp, 0), 6)
+                tmp = tmp / \
+                    layers_scale_ofms + \
+                    layers_ofms_zero_point
+                if tmp > 0:
+                    tmp = int(tmp + 0.5)
+                else:
+                    tmp = int(tmp - 0.5)
+                ofms[i][j][k] = tmp
+
 
 def dw_conv():
     for i in range(layers_weights_shape[layer_index].num_of_filters):
         for j in range(ofms_shape[1]):
             for k in range(ofms_shape[2]):
                 tmp = np.sum(weights[i].astype(np.float32)) * - layers_ifms_zero_point[layer_index] + \
-                    np.sum(weights[i].astype(np.float32) * ifms[i, j*conv_strides:j*conv_strides + \
-                        filter_height, k*conv_strides:k*conv_strides + filter_width]) + layers_bias[layer_index][i]
+                    np.sum(weights[i].astype(np.float32) * ifms[i, j*conv_strides:j*conv_strides +
+                                                                filter_height, k*conv_strides:k*conv_strides + filter_width]) + layers_bias[layer_index][i]
 
-                if layer_index == 7 and i ==11 and j == 3:
+                if layer_index == 7 and i == 11 and j == 3:
                     scale_w_i_o = int(0.017232311889529228 * (2**32))
-                    tmp = ( (int(tmp * scale_w_i_o + (2**32)) >> 32 ) - 128)
+                    tmp = ((int(tmp * scale_w_i_o + (2**32)) >> 32) - 128)
                     print(tmp)
                 else:
-                    tmp = tmp * layers_scale_ifms[layer_index] * layers_scale_weights[layer_index][i]
-                    if layers_relus[layer_index] == 6:
+                    tmp = tmp * \
+                        layers_scale_ifms[layer_index] * \
+                        layers_scale_weights[layer_index][i]
+                    if layer_activation == 'RELU6':
                         tmp = min(max(tmp, 0), 6)
-                    tmp = tmp / layers_scale_ofms[layer_index] + layers_ofms_zero_point[layer_index]
+                    tmp = tmp / \
+                        layers_scale_ofms[layer_index] + \
+                        layers_ofms_zero_point[layer_index]
                     if tmp > 0:
                         tmp = int(tmp + 0.5)
                     else:
-                        tmp = int(tmp -0.5)
+                        tmp = int(tmp - 0.5)
                 ofms[i][j][k] = tmp
+
 
 if layer_type == 'dw':
     dw_conv()
 else:
     conv()
-ofms = ofms.reshape((ofms_shape[0]* ofms_shape[1]* ofms_shape[2]))
+ofms = ofms.reshape((ofms_shape[0] * ofms_shape[1] * ofms_shape[2]))
 np.savetxt(ofms_file, ofms, fmt='%i')

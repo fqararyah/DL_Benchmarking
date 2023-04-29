@@ -21,7 +21,7 @@ import tflite_ops_names
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'mob_v2'
+MODEL_NAME = 'resnet50'
 
 # from generic to specific (for string matching)
 ACTIVATION_FUNCTIONS = ['relu', 'relu6']
@@ -198,7 +198,8 @@ for op_details in ops_details_list:
 
         for activation in ACTIVATION_FUNCTIONS:
             if activation in op_ofms_tensor_details['name'].lower():
-                model_dag_entry['activation'] = activation
+                model_dag_entry['activation'] = activation.upper()
+                break
             else:
                 model_dag_entry['activation'] = '0'
 

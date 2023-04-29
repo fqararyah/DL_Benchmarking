@@ -5,7 +5,8 @@ import numpy as np
 from models_archs import utils
 import sys
 
-utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
+model = 'resnet50'
+utils.set_globals(model, model)
 
 to_print_layer_index = 7
 slice_index = 0

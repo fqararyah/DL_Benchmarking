@@ -4,10 +4,12 @@ import numpy as np
 import sys
 from models_archs import utils
 
-utils.NET_PREFIX = 'mob_v2'
+utils.NET_PREFIX = 'resnet50'
 utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
 to_compare_layer_index = 7
+
+VERY_DIFF_THRESHOLD = 2
 
 ref = ''
 if(len(sys.argv) > 1):
@@ -64,7 +66,7 @@ for i in range(rng.size):
         h = int((i % ofms_hw) / ofms_w)
         w = int(i % ofms_w) 
         position = (d, h, w)
-        if int(domain[i]) - rng[i] < -1 or int(domain[i]) - rng[i] > 1:
+        if (int(domain[i]) - rng[i] < -VERY_DIFF_THRESHOLD or int(domain[i]) - rng[i] > VERY_DIFF_THRESHOLD):# and (h != 0 and h != 55):
             diff_locs[position] = (domain[i], rng[i])
             #print(domain[i], rng[i])
             cnt3 += 1

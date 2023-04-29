@@ -140,7 +140,11 @@ def reuse_and_ops():
 # print_fms_reuse()
 print_fms_sizes(True)
 # print_weight_reuse()
-#print_weights_sizes(True)
+#print_weights_sizes()
+# cumulative_weights_sizes = [0] * len(weights_sizes)
+# for i in range(len(weights_sizes)):
+#     cumulative_weights_sizes[i] =  cumulative_weights_sizes[i-1] + weights_sizes[i]
+#     print(cumulative_weights_sizes[i])
 
 layers_num_of_ops = analysis_utils.get_layers_num_of_ops(
         layers_inputs, layers_weights, layers_types, layers_strides)
