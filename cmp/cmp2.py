@@ -1,228 +1,576 @@
-#!/usr/bin/env python3
-#
-# SPDX-FileCopyrightText: Copyright (c) 1993-2022 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
-# SPDX-License-Identifier: Apache-2.0
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
-from __future__ import print_function
-from pickle import NONE
-
-import numpy as np
-import tensorrt as trt
-import pycuda.driver as cuda
-import pycuda.autoinit
-from PIL import ImageDraw
-
-from data_processing import PreprocessYOLO, PostprocessYOLO, ALL_CATEGORIES
-
-import sys, os
-import json
-sys.path.insert(1, os.path.join(sys.path[0], ".."))
-import common
-from downloader import getFilePath
-
-TRT_LOGGER = trt.Logger()
-
-
-def draw_bboxes(image_raw, bboxes, confidences, categories, all_categories, bbox_color="blue"):
-    """Draw the bounding boxes on the original input image and return it.
-
-    Keyword arguments:
-    image_raw -- a raw PIL Image
-    bboxes -- NumPy array containing the bounding box coordinates of N objects, with shape (N,4).
-    categories -- NumPy array containing the corresponding category for each object,
-    with shape (N,)
-    confidences -- NumPy array containing the corresponding confidence for each object,
-    with shape (N,)
-    all_categories -- a list of all categories in the correct ordered (required for looking up
-    the category name)
-    bbox_color -- an optional string specifying the color of the bounding boxes (default: 'blue')
-    """
-    draw = ImageDraw.Draw(image_raw)
-    print(bboxes, confidences, categories)
-    for box, score, category in zip(bboxes, confidences, categories):
-        x_coord, y_coord, width, height = box
-        left = max(0, np.floor(x_coord + 0.5).astype(int))
-        top = max(0, np.floor(y_coord + 0.5).astype(int))
-        right = min(image_raw.width, np.floor(x_coord + width + 0.5).astype(int))
-        bottom = min(image_raw.height, np.floor(y_coord + height + 0.5).astype(int))
-
-        draw.rectangle(((left, top), (right, bottom)), outline=bbox_color)
-        draw.text((left, top - 12), "{0} {1:.2f}".format(all_categories[category], score), fill=bbox_color)
-
-    return image_raw
-
-
-def get_engine(onnx_file_path, engine_file_path=""):
-    """Attempts to load a serialized engine if available, otherwise builds a new TensorRT engine and saves it."""
-
-    def build_engine():
-        """Takes an ONNX file and creates a TensorRT engine to run inference with"""
-        with trt.Builder(TRT_LOGGER) as builder, builder.create_network(
-            common.EXPLICIT_BATCH
-        ) as network, builder.create_builder_config() as config, trt.OnnxParser(
-            network, TRT_LOGGER
-        ) as parser, trt.Runtime(
-            TRT_LOGGER
-        ) as runtime:
-            #config.max_workspace_size = 1 << 28  # 256MiB
-            #builder.max_batch_size = 1
-            # Parse model file
-            if not os.path.exists(onnx_file_path):
-                print(
-                    "ONNX file {} not found, please run yolov3_to_onnx.py first to generate it.".format(onnx_file_path)
-                )
-                exit(0)
-            print("Loading ONNX file from path {}...".format(onnx_file_path))
-            with open(onnx_file_path, "rb") as model:
-                print("Beginning ONNX file parsing")
-                if not parser.parse(model.read()):
-                    print("ERROR: Failed to parse the ONNX file.")
-                    for error in range(parser.num_errors):
-                        print(parser.get_error(error))
-                    return None
-            # The actual yolov3.onnx is generated with batch size 64. Reshape input to batch size 1
-            network.get_input(0).shape = [1, 3, 608, 608]
-            print("Completed parsing of ONNX file")
-            print("Building an engine from file {}; this may take a while...".format(onnx_file_path))
-            plan = builder.build_serialized_network(network, config)
-            engine = runtime.deserialize_cuda_engine(plan)
-            print("Completed creating Engine")
-            with open(engine_file_path, "wb") as f:
-                f.write(plan)
-            return engine
-
-    if os.path.exists(engine_file_path):
-        # If a serialized engine exists, use it instead of building an engine.
-        print("Reading engine from file {}".format(engine_file_path))
-        with open(engine_file_path, "rb") as f, trt.Runtime(TRT_LOGGER) as runtime:
-            return runtime.deserialize_cuda_engine(f.read())
-    else:
-        return build_engine()
-
-def locate_images(path):
-    image_list = []
-    # dirs=directories
-    for (root, dirs, file) in os.walk(path):
-        for f in file:
-            if '.jpg' in f:
-                image_list.append(os.path.abspath(os.path.join(path, f)))
-                #print(image_list[-1])
-    return image_list
-
-DATASET_PATH = ''
-MODEL_PATH = ''
-LABELS_PATH = ''
-GROUND_TRUTH_PATH = ''
-
-def read_settings():
-    global DATASET_PATH, MODEL_PATH, LABELS_PATH, GROUND_TRUTH_PATH
-    with open('./settings.txt', 'r') as f:
-        for line in f:
-            line = line.replace('\n', '').replace(' ', '')
-            if 'dataset_path' in line.lower():
-                DATASET_PATH = line.split('::')[1]
-            elif 'model_path' in line.lower():
-                MODEL_PATH = line.split('::')[1]
-            elif 'labels_path' in line.lower():
-                LABELS_PATH = line.split('::')[1]
-            elif 'ground_truth_path' in line.lower():
-                GROUND_TRUTH_PATH = line.split('::')[1]
-
-def main():
-    """Create a TensorRT engine for ONNX-based YOLOv3-608 and run inference."""
-    read_settings()
-    MODEL_NAME = MODEL_PATH.split('/')[-1].split('.')[0].lower()
-    # Try to load a previously generated YOLOv3-608 network graph in ONNX format:
-    onnx_file_path = "yolov3.onnx"
-    engine_file_path = "yolov3.trt"
-    # Download a dog image and save it to the following file path:
-    image_paths = locate_images(DATASET_PATH)
-    prediction_dict_list = []
-    step = 0
-    with get_engine(onnx_file_path, engine_file_path) as engine, engine.create_execution_context() as context:
-        for input_image_path in image_paths: 
-            #print(input_image_path)
-            # Two-dimensional tuple with the target network's (spatial) input resolution in HW ordered
-            input_resolution_yolov3_HW = (608, 608)
-            # Create a pre-processor object by specifying the required input resolution for YOLOv3
-            preprocessor = PreprocessYOLO(input_resolution_yolov3_HW)
-            # Load an image from the specified input path, and return it together with  a pre-processed version
-            image_raw, image = preprocessor.process(input_image_path)
-            # Store the shape of the original input image in WH format, we will need it for later
-            shape_orig_WH = image_raw.size
-
-            # Output shapes expected by the post-processor
-            output_shapes = [(1, 255, 19, 19), (1, 255, 38, 38), (1, 255, 76, 76)]
-            # Do inference with TensorRT
-            trt_outputs = []
-            
-            inputs, outputs, bindings, stream = common.allocate_buffers(engine)
-            # Do inference
-            #print("Running inference on image {}...".format(input_image_path))
-            # Set host input to the image. The common.do_inference function will copy the input to the GPU before executing.
-            inputs[0].host = image
-            trt_outputs = common.do_inference_v2(context, bindings=bindings, inputs=inputs, outputs=outputs, stream=stream)
-
-            # Before doing post-processing, we need to reshape the outputs as the common.do_inference will give us flat arrays.
-            trt_outputs = [output.reshape(shape) for output, shape in zip(trt_outputs, output_shapes)]
-
-            postprocessor_args = {
-                "yolo_masks": [(6, 7, 8), (3, 4, 5), (0, 1, 2)],  # A list of 3 three-dimensional tuples for the YOLO masks
-                "yolo_anchors": [
-                    (10, 13),
-                    (16, 30),
-                    (33, 23),
-                    (30, 61),
-                    (62, 45),  # A list of 9 two-dimensional tuples for the YOLO anchors
-                    (59, 119),
-                    (116, 90),
-                    (156, 198),
-                    (373, 326),
-                ],
-                "obj_threshold": 0.00001,  # Threshold for object coverage, float value between 0 and 1 , fareed: it was 0.6
-                "nms_threshold": 0.5,  # Threshold for non-max suppression algorithm, float value between 0 and 1, , fareed: it was 0.5
-                "yolo_input_resolution": input_resolution_yolov3_HW,
-            }
-            
-            postprocessor = PostprocessYOLO(**postprocessor_args)
-
-            # Run the post-processing algorithms on the TensorRT outputs and get the bounding box details of detected objects
-            boxes, classes, scores = postprocessor.process(trt_outputs, (shape_orig_WH))
-
-            if boxes is not None:
-                for (box, _class, score) in zip(boxes, classes, scores): 
-                    prediction_dict = {"image_id":int(input_image_path.split('/')[-1].split('.')[0]), "category_id": int(_class)\
-                        , "bbox": box.tolist(), "score": float(score)}
-                    prediction_dict_list.append(prediction_dict)
-                    #print(prediction_dict)
-            print(step)
-            step += 1
-            #if step == 100:
-            #    break
-
-    json_object = json.dumps(prediction_dict_list)
-
-    with open(MODEL_NAME + "_predictions.json", "w") as outfile:
-        outfile.write(json_object)
-        # Draw the bounding boxes onto the original input image and save it as a PNG file
-        #obj_detected_img = draw_bboxes(image_raw, boxes, scores, classes, ALL_CATEGORIES)
-        #output_image_path = "dog_bboxes.png"
-        #obj_detected_img.save(output_image_path, "PNG")
-        #print("Saved image with bounding boxes of detected objects to {}.".format(output_image_path))
-
-
-if __name__ == "__main__":
-    main()
+-128 * 4
+-512
+-128 * -11
+896
+-128 * -54
+7808
+-128 * 15
+5888
+-128 * 4
+5376
+-128 * 2
+5120
+-128 * -40
+10240
+-128 * 12
+8704
+-128 * -42
+14080
+-128 * 13
+12416
+-128 * -27
+15872
+-128 * -24
+18944
+-128 * 33
+14720
+-128 * -35
+19200
+-128 * -10
+20480
+-128 * -6
+21248
+-128 * -44
+26880
+-128 * -22
+29696
+-128 * -31
+33664
+-128 * 62
+25728
+-128 * 4
+25216
+-128 * 41
+19968
+-128 * -4
+20480
+-128 * 0
+20480
+-128 * -27
+23936
+-128 * -17
+26112
+-128 * -43
+31616
+-128 * -1
+31744
+-128 * -18
+34048
+-128 * -38
+38912
+-128 * -36
+43520
+-128 * 29
+39808
+-128 * 32
+35712
+-128 * -11
+37120
+-128 * 30
+33280
+-128 * -13
+34944
+-128 * 13
+33280
+-128 * -24
+36352
+-128 * 5
+35712
+-128 * 6
+34944
+-128 * 10
+33664
+-128 * 42
+28288
+-128 * 4
+27776
+-128 * -3
+28160
+-128 * -3
+28544
+-128 * -2
+28800
+-128 * -7
+29696
+-128 * 2
+29440
+-128 * -76
+39168
+-128 * -24
+42240
+-128 * -50
+48640
+-128 * 63
+40576
+-128 * 5
+39936
+-128 * 65
+31616
+-128 * -13
+33280
+-128 * 0
+33280
+-128 * -18
+35584
+-128 * 25
+32384
+-128 * 8
+31360
+-128 * 31
+27392
+-128 * 0
+27392
+-128 * -21
+30080
+-128 * -30
+33920
+-128 * 25
+30720
+-128 * 16
+28672
+-128 * 39
+23680
+-128 * 49
+17408
+-128 * -15
+19328
+-128 * -24
+22400
+-128 * -23
+25344
+-128 * -32
+29440
+-128 * -10
+30720
+-128 * -2
+30976
+-128 * 54
+24064
+-128 * 1
+23936
+-128 * 9
+22784
+-128 * 9
+21632
+-128 * 0
+21632
+-128 * 38
+16768
+-128 * 26
+13440
+-128 * 45
+7680
+-128 * -30
+11520
+-128 * -55
+18560
+-128 * 3
+18176
+-128 * -23
+21120
+-128 * 15
+19200
+-128 * -9
+20352
+-128 * 0
+20352
+-128 * -9
+21504
+-128 * 16
+19456
+-128 * 64
+11264
+-128 * -26
+14592
+-128 * 47
+8576
+-128 * -56
+15744
+-128 * 21
+13056
+-128 * 23
+10112
+-128 * -74
+19584
+-128 * 10
+18304
+-128 * -31
+22272
+-128 * 25
+19072
+-128 * -16
+21120
+-128 * 0
+21120
+-128 * -3
+21504
+-128 * -83
+32128
+-128 * 46
+26240
+-128 * 48
+20096
+-128 * 15
+18176
+-128 * 39
+13184
+-128 * 86
+2176
+-128 * -28
+5760
+-128 * -2
+6016
+-128 * 2
+5760
+-128 * 96
+-6528
+-128 * 14
+-8320
+-128 * -1
+-8192
+-128 * 41
+-13440
+-128 * 17
+-15616
+-128 * -70
+-6656
+-128 * 12
+-8192
+-128 * 0
+-8192
+-128 * -23
+-5248
+-128 * -14
+-3456
+-128 * -8
+-2432
+-128 * 7
+-3328
+-128 * 6
+-4096
+-128 * 32
+-8192
+-128 * -14
+-6400
+-128 * 31
+-10368
+-95 * -5
+-9893
+-89 * -49
+-5532
+-128 * -99
+7140
+-128 * 64
+-1052
+-128 * -30
+2788
+-126 * 57
+-4394
+-128 * -39
+598
+-108 * -8
+1462
+-124 * -19
+3818
+-128 * 7
+2922
+-128 * -17
+5098
+-99 * 31
+2029
+-128 * -2
+2285
+-128 * -60
+9965
+-128 * -48
+16109
+-126 * -56
+23165
+-128 * -24
+26237
+-128 * 23
+23293
+-128 * -45
+29053
+-128 * -25
+32253
+-123 * -6
+32991
+-128 * -29
+36703
+-76 * 60
+32143
+-128 * 0
+32143
+-97 * -30
+35053
+-47 * -25
+36228
+-101 * -11
+37339
+-128 * 4
+36827
+-128 * -33
+41051
+-86 * 32
+38299
+-128 * -104
+51611
+-128 * -3
+51995
+-91 * 90
+43805
+-87 * -45
+47720
+-126 * -17
+49862
+-128 * 3
+49478
+-113 * 27
+46427
+-95 * -29
+49182
+-113 * 74
+40820
+-77 * 28
+38664
+-128 * -34
+43016
+-128 * -2
+43272
+-128 * -2
+43528
+-116 * -7
+44340
+-90 * -6
+44880
+-128 * -62
+52816
+-128 * -82
+63312
+-105 * 23
+60897
+-128 * -122
+76513
+-128 * -16
+78561
+-128 * -42
+83937
+-128 * 18
+81633
+-122 * -5
+82243
+-128 * 121
+66755
+-128 * -39
+71747
+-128 * 0
+71747
+-128 * -20
+74307
+-53 * 12
+73671
+-95 * -47
+78136
+-128 * 54
+71224
+-128 * 23
+68280
+-108 * -6
+68928
+-128 * 0
+68928
+-128 * 15
+67008
+-128 * 49
+60736
+-128 * 32
+56640
+-128 * 51
+50112
+-128 * 18
+47808
+-128 * 39
+42816
+-128 * -36
+47424
+-128 * 74
+37952
+-128 * -13
+39616
+-128 * 29
+35904
+-128 * 77
+26048
+-128 * 25
+22848
+-128 * -7
+23744
+-128 * 2
+23488
+-128 * 25
+20288
+-128 * 23
+17344
+-128 * 21
+14656
+-128 * -1
+14784
+-128 * -18
+17088
+-128 * 28
+13504
+-128 * -4
+14016
+-128 * 56
+6848
+-128 * 68
+-1856
+-128 * -13
+-192
+-128 * 0
+-192
+-128 * -6
+576
+-128 * 15
+-1344
+-128 * 7
+-2240
+-128 * -70
+6720
+-128 * 70
+-2240
+-128 * -48
+3904
+-128 * 15
+1984
+-128 * 23
+-960
+-128 * -26
+2368
+-108 * 93
+-7676
+-128 * -7
+-6780
+-128 * 19
+-9212
+-128 * 28
+-12796
+-103 * -36
+-9088
+-78 * 26
+-11116
+-75 * -16
+-9916
+-128 * 64
+-18108
+-128 * 27
+-21564
+-128 * 7
+-22460
+-128 * -15
+-20540
+-128 * 86
+-31548
+-107 * -16
+-29836
+-128 * -42
+-24460
+-128 * -6
+-23692
+-124 * 44
+-29148
+-121 * -10
+-27938
+-128 * 14
+-29730
+-128 * 30
+-33570
+-128 * 21
+-36258
+-128 * -35
+-31778
+-128 * 19
+-34210
+-128 * 0
+-34210
+-122 * -24
+-31282
+-114 * 20
+-33562
+-114 * -1
+-33448
+-125 * 101
+-46073
+-128 * 16
+-48121
+-103 * 4
+-48533
+-93 * 56
+-53741
+-124 * 24
+-56717
+-126 * -12
+-55205
+-128 * 14
+-56997
+-128 * -45
+-51237
+-128 * 95
+-63397
+-128 * 24
+-66469
+-116 * -15
+-64729
+-62 * -126
+-56917
+-103 * 13
+-58256
+-128 * -11
+-56848
+-128 * -22
+-54032
+-128 * -64
+-45840
+-128 * 45
+-51600
+-128 * 18
+-53904
+-128 * -29
+-50192
+-121 * -32
+-46320
+-128 * -40
+-41200
+-123 * 87
+-51901
+-128 * 26
+-55229
+-128 * -45
+-49469
+-128 * 44
+-55101
+-128 * -25
+-51901
+-128 * -54
+-44989
+-128 * 36
+-49597
+-128 * 0
+-49597
+-128 * -51
+-43069
+-128 * -45
+-37309
+-123 * -44
+-31897
+-128 * 30
+-35737
+-128 * -38
+-30873
+-114 * 71
+-38967
+-116 * -43
+-33979
+-74 * -49
+-30353

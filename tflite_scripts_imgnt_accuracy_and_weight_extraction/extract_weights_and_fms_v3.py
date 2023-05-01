@@ -75,12 +75,20 @@ for op_details in ops_details_list:
     op_ofms_tensor_details = tensors_details_list[op_outputs[0]]
     op_ofms_tensor = interpreter.get_tensor(op_outputs[0])
     op_ofms_tensor = np.squeeze(op_ofms_tensor)
+
+    for activation in ACTIVATION_FUNCTIONS:
+        if activation in op_ofms_tensor_details['name'].lower():
+            model_dag_entry['activation'] = activation.upper()
+            break
+        else:
+            model_dag_entry['activation'] = '0'
+
     if op_ofms_tensor.ndim == 3:
         op_ofms_tensor = np.transpose(op_ofms_tensor, (2, 0, 1))
     op_ofms_tensor = np.reshape(op_ofms_tensor, (op_ofms_tensor.size))
     file_name = 'ofms_' + str(op_index) + '.txt'
     np.savetxt('./'+weights_fms_dir+'/fms/' +
-                file_name, op_ofms_tensor, fmt='%i')
+               file_name, op_ofms_tensor, fmt='%i')
 
     tmp_ofms_to_layer_indeices_map[op_outputs[0]] = op_index
     model_dag_entry['parents'] = []
@@ -195,13 +203,6 @@ for op_details in ops_details_list:
 
         model_dag_entry['strides'] = int(
             model_dag_entry['ifms_shape'][-1] / model_dag_entry['ofms_shape'][-1])
-
-        for activation in ACTIVATION_FUNCTIONS:
-            if activation in op_ofms_tensor_details['name'].lower():
-                model_dag_entry['activation'] = activation.upper()
-                break
-            else:
-                model_dag_entry['activation'] = '0'
 
     else:
         op_ifms_tensor_details = tensors_details_list[op_inputs[-1]]
