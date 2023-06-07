@@ -47,9 +47,8 @@ MODEL_NAME = 'mob_v2'
 MODEL_PATH = '/media/SSD2TB/wd/models/efficientnet_b0_no_sigmoid.h5'
 PRECISION = 8
 
-if MODEL_NAME == 'embdl_mob_v2':
-    model = tf.keras.models.load_model('mobilenet_v2.h5')
-    print('EMBDL')
+if MODEL_NAME == 'resnet50':
+    model = model = models.ResNet50()
 elif MODEL_NAME == 'mob_v1':
     model = models.MobileNet()
 elif MODEL_NAME == 'mob_v1_0_5':

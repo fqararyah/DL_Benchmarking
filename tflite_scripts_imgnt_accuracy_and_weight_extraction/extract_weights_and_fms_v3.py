@@ -21,7 +21,7 @@ import tflite_ops_names
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'resnet50'
+MODEL_NAME = 'dense_121'
 
 # from generic to specific (for string matching)
 ACTIVATION_FUNCTIONS = ['relu', 'relu6']
@@ -45,6 +45,8 @@ tensors_details_list = interpreter.get_tensor_details()
 # prepare image
 test_image = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012/ILSVRC2012_val_00018455.JPEG'
 a_test_image = load_img(test_image, target_size=(224, 224))
+if 'inc_' in MODEL_NAME:
+    a_test_image = np.resize(a_test_image, (299, 299, 3))
 numpy_image = img_to_array(a_test_image, dtype=np.uint8)
 image_batch = np.expand_dims(numpy_image, axis=0)
 #################################################################################################################
@@ -122,6 +124,12 @@ for op_details in ops_details_list:
         op_biases_tensor = interpreter.get_tensor(op_inputs[1])
         op_biases_tensor_details = tensors_details_list[op_inputs[1]]
 
+        if len(op_biases_tensor.shape) > 1 and len(op_weights_tensor.shape) == 1:
+            op_weights_tensor = op_biases_tensor
+            op_weights_tensor_details = op_biases_tensor_details
+            op_biases_tensor = interpreter.get_tensor(op_inputs[0])
+            op_biases_tensor_details = tensors_details_list[op_inputs[0]]
+
         assert(
             len(op_ifms_tensor_details['quantization_parameters']['scales']) == 1)
         model_dag_entry['ifms_scales'] = float(
@@ -132,7 +140,7 @@ for op_details in ops_details_list:
             op_ifms_tensor_details['quantization_parameters']['zero_points'][0])
 
         op_ifms_tensor = np.squeeze(op_ifms_tensor)
-        if op_name in tflite_ops_names.TFLITE_CONV_OP_NAMES:
+        if op_name in tflite_ops_names.TFLITE_CONV_OP_NAMES and op_ifms_tensor.ndim == 3:
             op_ifms_tensor = np.transpose(op_ifms_tensor, (2, 0, 1))
         op_ifms_tensor = np.reshape(op_ifms_tensor, (op_ifms_tensor.size))
         file_name = 'ifms_' + str(op_index) + '.txt'
@@ -212,13 +220,15 @@ for op_details in ops_details_list:
             int(i) for i in op_ofms_tensor_details['shape']]
 
     assert(
-        len(op_ofms_tensor_details['quantization_parameters']['scales']) == 1)
-    model_dag_entry['ofms_scales'] = float(
-        op_ofms_tensor_details['quantization_parameters']['scales'][0])
+        len(op_ofms_tensor_details['quantization_parameters']['scales']) <= 1)
+    if len(op_ofms_tensor_details['quantization_parameters']['scales']) == 1:
+        model_dag_entry['ofms_scales'] = float(
+            op_ofms_tensor_details['quantization_parameters']['scales'][0])
     assert(
-        len(op_ofms_tensor_details['quantization_parameters']['zero_points']) == 1)
-    model_dag_entry['ofms_zero_points'] = int(
-        op_ofms_tensor_details['quantization_parameters']['zero_points'][0])
+        len(op_ofms_tensor_details['quantization_parameters']['zero_points']) <= 1)
+    if len(op_ofms_tensor_details['quantization_parameters']['zero_points']) == 1:
+        model_dag_entry['ofms_zero_points'] = int(
+            op_ofms_tensor_details['quantization_parameters']['zero_points'][0])
 
     if op_name in tflite_ops_names.TFLITE_AVG_POOL_OP_NAMES:
         model_dag_entry['type'] = 'avgpool'

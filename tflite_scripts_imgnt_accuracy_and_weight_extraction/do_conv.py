@@ -3,12 +3,12 @@ import numpy as np
 from models_archs import utils
 
 
-utils.NET_PREFIX = 'resnet50'
+utils.NET_PREFIX = 'mob_v2'
 utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
 model_dag = utils.read_model_dag()
 
-layer_index = 40
+layer_index = 9
 
 layer_specs = model_dag[layer_index]
 
@@ -48,6 +48,9 @@ weights = np.loadtxt(weights_file).astype(np.int8)
 if layer_type == 'pw':
     weights = np.reshape(
         weights, (layers_weights_shape[0], layers_weights_shape[1]))
+elif layer_type == 'dw':
+    weights = np.reshape(
+        weights, (layers_weights_shape[0], layers_weights_shape[1], layers_weights_shape[2]))
 else:
     weights = np.reshape(weights, (layers_weights_shape[0], layers_weights_shape[1], layers_weights_shape[2],
                                    layers_weights_shape[3]))
@@ -57,9 +60,12 @@ ifms = np.reshape(ifms, (layers_ifms_shape[0], layers_ifms_shape[1], layers_ifms
 
 ofms = np.zeros(ofms_shape).astype(np.int8)
 
-if layer_specs['type'] != 'pw':
+if layer_specs['type'] == 's':
     filter_height = layers_weights_shape[2]
     filter_width = layers_weights_shape[3]
+elif layer_specs['type'] == 'dw':
+    filter_height = layers_weights_shape[1]
+    filter_width = layers_weights_shape[2]
 else:
     filter_height = 1
     filter_width = 1
@@ -102,7 +108,7 @@ def conv():
 
 
 def dw_conv():
-    for i in range(layers_weights_shape[layer_index].num_of_filters):
+    for i in range(layers_weights_shape[0]):
         for j in range(ofms_shape[1]):
             for k in range(ofms_shape[2]):
                 tmp = np.sum(weights[i].astype(np.float32)) * - layers_ifms_zero_point[layer_index] + \
@@ -131,18 +137,22 @@ def dw_conv():
 res = 0
 if layer_type == 'pw':
     for k in range(layers_weights_shape[1]):
-        res += ifms[k][0][2] * weights[0][k].astype(np.int32)
+        res += ifms[k][0][0] * weights[0][k].astype(np.int32)
+elif layer_type == 'dw':
+    print(weights[125,:,:])
+    print(ifms[125,18:21, 40: 43])
+    for l in range(3):
+        for m in range(3):
+            res += ifms[125][18+l][40+m] * weights[125][l][m].astype(np.int32)
 else:
     for l in range(3):
         for m in range(3):
             for k in range(layers_weights_shape[1]):
                 res += ifms[k][l][m] * weights[0][k][l][m].astype(np.int32)
                 #print(ifms[k][l][m], '*', weights[0][k][l][m])
-print(res)
+print('res:', res)
 
-if layer_type == 'dw':
-    dw_conv()
-else:
+if layer_type != 'dw':
     conv()
 ofms = ofms.reshape((ofms_shape[0] * ofms_shape[1] * ofms_shape[2]))
 np.savetxt(ofms_file, ofms, fmt='%i')

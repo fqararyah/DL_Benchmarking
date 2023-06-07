@@ -2,7 +2,7 @@ from fcntl import F_SETFL
 from models_archs import utils
 import analysis_utils
 
-MODEL_NAME = 'resnet50'
+MODEL_NAME = 'mob_v2'
 
 utils.set_globals(MODEL_NAME, MODEL_NAME)
 
@@ -138,9 +138,9 @@ def reuse_and_ops():
 #reuse_and_ops()
 
 # print_fms_reuse()
-print_fms_sizes(True)
+#print_fms_sizes(True)
 # print_weight_reuse()
-#print_weights_sizes()
+#print_weights_sizes(True)
 # cumulative_weights_sizes = [0] * len(weights_sizes)
 # for i in range(len(weights_sizes)):
 #     cumulative_weights_sizes[i] =  cumulative_weights_sizes[i-1] + weights_sizes[i]
@@ -150,8 +150,11 @@ layers_num_of_ops = analysis_utils.get_layers_num_of_ops(
         layers_inputs, layers_weights, layers_types, layers_strides)
 
 #print ops
-# for i in range(len(layers_num_of_ops)):
-#     print(layers_num_of_ops[i])
+sum_ops_so_far = 0
+sum_ops = sum(layers_num_of_ops)
+for i in range(len(layers_num_of_ops)):
+    sum_ops_so_far += layers_num_of_ops[i]
+    print(i, layers_num_of_ops[i]/1000000, sum_ops_so_far/1000000, sum_ops_so_far / sum_ops)
 
 avg_weight_reuse = 0
 avg_act_reuse = 0

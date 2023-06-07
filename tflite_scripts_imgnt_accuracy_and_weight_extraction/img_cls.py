@@ -42,13 +42,12 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'mob_v2'
+MODEL_NAME = 'exc'
 MODEL_PATH = '/media/SSD2TB/wd/models/efficientnet_b0_no_sigmoid.h5'
 PRECISION = 8
 
 if MODEL_NAME == 'resnet50':
-    model = tf.keras.models.load_model('mobilenet_v2.h5')
-    print('EMBDL')
+    model = model = models.ResNet50()
 elif MODEL_NAME == 'mob_v1':
     model = models.MobileNet()
 elif MODEL_NAME == 'mob_v1_0_5':
@@ -57,6 +56,10 @@ elif MODEL_NAME == 'mob_v2':
     model = models.MobileNetV2()
 elif MODEL_NAME == 'mob_v2_0_5':
     model = models.MobileNetV2(alpha=0.5)
+elif MODEL_NAME == 'mob_v2_0_75':
+    model = models.MobileNetV2(alpha=0.75)
+elif MODEL_NAME == 'mob_v2_0_25':
+    model = models.MobileNetV2(alpha=0.35)
 elif MODEL_NAME == 'eff_b0':
     model = models.EfficientNetB0()
 elif MODEL_NAME == 'nas':
@@ -67,8 +70,12 @@ elif MODEL_NAME == 'prox':
      model = Build_MnasNet('mprox')
 elif MODEL_NAME in ['eff_b0_ns_ns', 'eff_b0_no_sig', 'eff_b0_ns']:
     model = tf.keras.models.load_model(MODEL_PATH)
+elif MODEL_NAME == 'inc_v3':
+    model = models.InceptionV3()
+elif MODEL_NAME == 'dense_121':
+    model = models.DenseNet121()
 else:
-    model = models.ResNet50()
+    model = models.ResNet50(input_shape=(512, 512, 3), include_top=False)
 
 # print(model.summary())
 # exit()
@@ -76,6 +83,8 @@ else:
 def representative_dataset():
     for i in range(200):
         a_test_image = load_img(test_images[i], target_size=(224, 224))
+        if 'inc_' in MODEL_NAME:
+            a_test_image = load_img(test_images[i], target_size=(299, 299))
         numpy_image = img_to_array(a_test_image)
         image_batch = np.expand_dims(numpy_image, axis=0)
         if MODEL_NAME == 'mob_v1':
@@ -89,9 +98,10 @@ def representative_dataset():
         yield [processed_image.astype(np.float32)]
 
 #this save is for the sake of converting to trt later by trtexec:
-#first use python -m tf2onnx.convert --saved-model tensorflow-model-path --output model.onnx
+#first use python3 -m tf2onnx.convert --saved-model tensorflow-model-path --output model.onnx
 #this will convert the model to onnx that can be used by trtexec but not trt scripts
-#second: run trtexec and dump the output as trt engine 
+#second: run trtexec and dump the output as trt engine:
+#trtexec --onnx=onnx_model_path --int8 --saveEngine=path_to_save_trt_engine
 #third: run the resulte using trt scripts
 if PRECISION == 8:
     model.save(MODEL_NAME + "_inout")
@@ -136,6 +146,9 @@ while i < limit:
     # processed += 1
 
     a_test_image = load_img(test_images[i], target_size=(224, 224))
+    if 'inc_' in MODEL_NAME:
+        a_test_image = load_img(test_images[i], target_size=(299, 299))
+
     numpy_image = img_to_array(a_test_image)
     image_batch = np.expand_dims(numpy_image, axis=0)
 

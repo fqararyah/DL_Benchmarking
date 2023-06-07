@@ -4,12 +4,12 @@ import numpy as np
 import sys
 from models_archs import utils
 
-utils.NET_PREFIX = 'resnet50'
+utils.NET_PREFIX = 'mob_v2'
 utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
 to_compare_layer_index = 7
 
-VERY_DIFF_THRESHOLD = 2
+VERY_DIFF_THRESHOLD = 5
 
 ref = ''
 if(len(sys.argv) > 1):
@@ -17,13 +17,12 @@ if(len(sys.argv) > 1):
 if(len(sys.argv) > 2):
     ref = sys.argv[2]
 
-domain_file = './scratch_out/ofms_{}'.format(to_compare_layer_index)
-if len(ref)>0:
-    domain_file += '_' + ref + '.txt'
-else:
-    domain_file += '.txt'
+domain_file = './scratch_out/ofms_{}.txt'.format(to_compare_layer_index)
 
-range_file = './{}/fms/ofms_{}.txt'.format(utils.NET_PREFIX, to_compare_layer_index)
+if len(ref)>0:
+    range_file = './scratch_out/ofms_{}_ref.txt'.format(to_compare_layer_index)
+else:
+    range_file = './{}/fms/ofms_{}.txt'.format(utils.NET_PREFIX, to_compare_layer_index)
 
 model_dag = utils.read_model_dag()
 
