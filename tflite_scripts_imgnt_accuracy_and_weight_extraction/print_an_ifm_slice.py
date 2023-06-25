@@ -5,10 +5,10 @@ import numpy as np
 from models_archs import utils
 import sys
 
-model = 'mob_v2'
+model = 'mob_v1'
 utils.set_globals(model, model)
 
-to_print_layer_index = 7
+to_print_layer_index = 3
 slice_index = 0
 slice_direction = 0
 directions_map = {0:'hw', 1:'hd'}

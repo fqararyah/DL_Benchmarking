@@ -21,7 +21,7 @@ import tflite_ops_names
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'dense_121'
+MODEL_NAME = 'mob_v1'
 
 # from generic to specific (for string matching)
 ACTIVATION_FUNCTIONS = ['relu', 'relu6']
@@ -89,7 +89,11 @@ for op_details in ops_details_list:
         op_ofms_tensor = np.transpose(op_ofms_tensor, (2, 0, 1))
     op_ofms_tensor = np.reshape(op_ofms_tensor, (op_ofms_tensor.size))
     file_name = 'ofms_' + str(op_index) + '.txt'
-    np.savetxt('./'+weights_fms_dir+'/fms/' +
+    directory = './'+weights_fms_dir+'/fms/' 
+    if not os.path.exists(directory):
+        # If it doesn't exist, create it
+        os.makedirs(directory)
+    np.savetxt(directory +
                file_name, op_ofms_tensor, fmt='%i')
 
     tmp_ofms_to_layer_indeices_map[op_outputs[0]] = op_index
@@ -155,11 +159,16 @@ for op_details in ops_details_list:
         op_weights_tensor = np.reshape(
             op_weights_tensor, (op_weights_tensor.size))
         file_name = 'weights_' + str(op_index)
-        np.savetxt('./'+weights_fms_dir+'/weights/' + file_name +
+
+        directory = './'+weights_fms_dir+'/weights/' 
+        if not os.path.exists(directory):
+            # If it doesn't exist, create it
+            os.makedirs(directory)
+        np.savetxt(directory + file_name +
                    '.txt', op_weights_tensor, fmt='%i')
 
         op_weights_scales_tensor = op_weights_tensor_details['quantization_parameters']['scales']
-        np.savetxt('./'+weights_fms_dir+'/weights/' + file_name +
+        np.savetxt(directory + file_name +
                    '_scales.txt', op_weights_scales_tensor)
 
         op_weights_zero_pooints_tensor = op_weights_tensor_details[
@@ -167,8 +176,12 @@ for op_details in ops_details_list:
         np.savetxt('./'+weights_fms_dir+'/weights/' + file_name +
                    '_zps.txt', op_weights_zero_pooints_tensor, fmt='%i')
 
+        directory = './'+weights_fms_dir+'/biases/' 
+        if not os.path.exists(directory):
+            # If it doesn't exist, create it
+            os.makedirs(directory)
         file_name = 'biases_' + str(op_index) + '.txt'
-        np.savetxt('./'+weights_fms_dir+'/biases/' +
+        np.savetxt(directory +
                    file_name, op_biases_tensor, fmt='%i')
 
         op_biases_scales_tensor = op_biases_tensor_details['quantization_parameters']['scales']
@@ -236,6 +249,10 @@ for op_details in ops_details_list:
     model_dag.append(model_dag_entry)
 
 json_object = json.dumps(model_dag)
+
+if not os.path.exists(model_arch_dir):
+    # If it doesn't exist, create it
+    os.makedirs(model_arch_dir)
 
 with open(model_arch_dir + "model_dag.json", "w") as outfile:
     outfile.write(json_object)

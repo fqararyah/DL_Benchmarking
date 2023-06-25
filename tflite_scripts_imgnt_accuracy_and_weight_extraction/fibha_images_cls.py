@@ -43,9 +43,9 @@ def locate_images(path):
 test_images = locate_images(DATA_PATH)
 fibha_image_names = list(fibha_images.keys())
 
-MODEL_NAME = 'mob_v2'
-MODEL_PATH = '/media/SSD2TB/wd/models/efficientnet_b0_no_sigmoid.h5'
-PRECISION = 8
+MODEL_NAME = 'original_mobilenetv2'
+MODEL_PATH = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/original_mobilenetv2.h5'
+PRECISION = 32
 
 if MODEL_NAME == 'resnet50':
     model = model = models.ResNet50()
@@ -57,6 +57,10 @@ elif MODEL_NAME == 'mob_v2':
     model = models.MobileNetV2()
 elif MODEL_NAME == 'mob_v2_0_5':
     model = models.MobileNetV2(alpha=0.5)
+elif MODEL_NAME == 'mob_v2_0_75':
+    model = models.MobileNetV2(alpha=0.75)
+elif MODEL_NAME == 'mob_v2_0_25':
+    model = models.MobileNetV2(alpha=0.35)
 elif MODEL_NAME == 'eff_b0':
     model = models.EfficientNetB0()
 elif MODEL_NAME == 'nas':
@@ -67,8 +71,12 @@ elif MODEL_NAME == 'prox':
      model = Build_MnasNet('mprox')
 elif MODEL_NAME in ['eff_b0_ns_ns', 'eff_b0_no_sig', 'eff_b0_ns']:
     model = tf.keras.models.load_model(MODEL_PATH)
+elif MODEL_NAME == 'inc_v3':
+    model = models.InceptionV3()
+elif MODEL_NAME == 'dense_121':
+    model = models.DenseNet121()
 else:
-    model = models.ResNet50()
+    model = tf.keras.models.load_model(MODEL_PATH)
 
 # print(model.summary())
 # exit()
@@ -93,8 +101,7 @@ def representative_dataset():
 #this will convert the model to onnx that can be used by trtexec but not trt scripts
 #second: run trtexec and dump the output as trt engine 
 #third: run the resulte using trt scripts
-if PRECISION == 8:
-    model.save(MODEL_NAME + "_inout")
+model.save(MODEL_NAME + '_' + str(PRECISION) + "_inout")
 
 if PRECISION == 8:
     tflite_models_dir = pathlib.Path("./")

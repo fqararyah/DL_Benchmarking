@@ -42,8 +42,8 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'exc'
-MODEL_PATH = '/media/SSD2TB/wd/models/efficientnet_b0_no_sigmoid.h5'
+MODEL_NAME = 'mob_v1'
+MODEL_PATH = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/uniform_mobilenetv2_25.h5'
 PRECISION = 8
 
 if MODEL_NAME == 'resnet50':
@@ -75,7 +75,7 @@ elif MODEL_NAME == 'inc_v3':
 elif MODEL_NAME == 'dense_121':
     model = models.DenseNet121()
 else:
-    model = models.ResNet50(input_shape=(512, 512, 3), include_top=False)
+    model = tf.keras.models.load_model(MODEL_PATH)
 
 # print(model.summary())
 # exit()

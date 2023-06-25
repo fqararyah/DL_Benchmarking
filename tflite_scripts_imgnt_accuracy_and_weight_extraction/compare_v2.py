@@ -4,7 +4,7 @@ import numpy as np
 import sys
 from models_archs import utils
 
-utils.NET_PREFIX = 'mob_v2'
+utils.NET_PREFIX = 'mob_v1'
 utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
 to_compare_layer_index = 7
@@ -23,6 +23,8 @@ if len(ref)>0:
     range_file = './scratch_out/ofms_{}_ref.txt'.format(to_compare_layer_index)
 else:
     range_file = './{}/fms/ofms_{}.txt'.format(utils.NET_PREFIX, to_compare_layer_index)
+
+print(domain_file, range_file)
 
 model_dag = utils.read_model_dag()
 
