@@ -2,7 +2,7 @@ from fcntl import F_SETFL
 from models_archs import utils
 import analysis_utils
 
-MODEL_NAME = 'uniform_mobilenetv2_5'
+MODEL_NAME = 'nonuniform_mobilenetv2_75' #uniform_mobilenetv2_75
 
 utils.set_globals(MODEL_NAME, MODEL_NAME)
 
@@ -10,7 +10,6 @@ model_dag = model_dag = utils.read_model_dag()
 
 weight_reuse = []
 activation_reuse = []
-weights_sizes = []
 activations_sizes = []
 weight_reuse_and_ops = {}
 activation_reuse_and_ops = {}
@@ -89,7 +88,7 @@ def get_layers_op_counts(model_dag):
             for i in layers_weights_shape:
                 layer_num_of_ops *= i
 
-            layer_num_of_ops *= layers_ofms_shape[1] * layers_ofms_shape[2] 
+            layer_num_of_ops *= layers_ofms_shape[1] * layers_ofms_shape[2]
 
             layers_num_of_ops.append(layer_num_of_ops)
 
@@ -148,45 +147,97 @@ def get_layers_op_counts(model_dag):
 #         print(w_reuse_vals[i]/totla_ops)
 
 
-#reuse_and_ops()
+# reuse_and_ops()
 
 # print_fms_reuse()
-#print_fms_sizes(True)
+# print_fms_sizes(True)
 # print_weight_reuse()
-#print_weights_sizes(True)
+# print_weights_sizes(True)
 # cumulative_weights_sizes = [0] * len(weights_sizes)
 # for i in range(len(weights_sizes)):
 #     cumulative_weights_sizes[i] =  cumulative_weights_sizes[i-1] + weights_sizes[i]
 #     print(cumulative_weights_sizes[i])
 
+def get_fms_sizes(model_dag):
+
+    fms_sizes = []
+    for layer_specs in model_dag:
+        if 'type' in layer_specs and layer_specs['type'] in ['s', 'dw', 'pw']:
+            fms_sizes.append(layer_specs['ifms_shape'][0] * layer_specs['ifms_shape'][1] * layer_specs['ifms_shape'][2] +
+                              layer_specs['ofms_shape'][0] * layer_specs['ofms_shape'][1] * layer_specs['ofms_shape'][2])
+
+    return fms_sizes
+
+
+def get_weights_sizes(model_dag):
+
+    weights_sizes = []
+    for layer_specs in model_dag: 
+        if 'type' in layer_specs and layer_specs['type'] in ['s', 'dw', 'pw']:
+            weights_shape = layer_specs['weights_shape']
+            if layer_specs['type'] in ['s']:
+                weights_sizes.append(
+                    weights_shape[0] * weights_shape[1] * weights_shape[2] * weights_shape[3])
+            elif layer_specs['type'] in ['dw']:
+                weights_sizes.append(
+                    weights_shape[0] * weights_shape[1] * weights_shape[2])
+            elif layer_specs['type'] in ['pw']:
+                weights_sizes.append(weights_shape[0] * weights_shape[1])
+
+    return weights_sizes
+
+
 def print_filters_channels(model_dag):
 
     for layer_specs in model_dag:
         if 'type' in layer_specs and layer_specs['type'] in ['s', 'dw', 'pw']:
-            print(layer_specs['weights_shape'][0] * layer_specs['weights_shape'][0])
+            print(layer_specs['weights_shape'][0]
+                  * layer_specs['weights_shape'][0])
+
 
 layers_num_of_ops = get_layers_op_counts(model_dag)
 
-#print ops
+# print ops
 sum_ops_so_far = 0
 sum_ops = sum(layers_num_of_ops)
-for i in range(len(layers_num_of_ops)):
-    sum_ops_so_far += layers_num_of_ops[i]
-    #print(i, layers_num_of_ops[i]/1000000, sum_ops_so_far/1000000, sum_ops_so_far / sum_ops)
-    print(layers_num_of_ops[i]/1000000)
+# for i in range(len(layers_num_of_ops)):
+#     sum_ops_so_far += layers_num_of_ops[i]
+#     #print(i, layers_num_of_ops[i]/1000000, sum_ops_so_far/1000000, sum_ops_so_far / sum_ops)
+#     print(layers_num_of_ops[i]/1000000)
 
-#print_filters_channels(model_dag)
-print('****************')
-print(sum_ops / 1000000)
-print('****************')
+# print_filters_channels(model_dag)
+# print('****************')
+# print(sum_ops / 1000000)
+# print('****************')
 
 avg_weight_reuse = 0
 avg_act_reuse = 0
-for i in range(len(weight_reuse)):
-    avg_weight_reuse += weight_reuse[i] * weights_sizes[i]
+# for i in range(len(weight_reuse)):
+#     avg_weight_reuse += weight_reuse[i] * weights_sizes[i]
 
-for i in range(len(activation_reuse)):
-    avg_act_reuse += activation_reuse[i] * activations_sizes[i]
+# for i in range(len(activation_reuse)):
+#     avg_act_reuse += activation_reuse[i] * activations_sizes[i]
 
 #print(avg_weight_reuse/ sum(weights_sizes))
 #print(avg_act_reuse / sum(activations_sizes))
+
+
+def divisible_by_32(model_dag):
+
+    divisable_layers_count = 0
+    for layer_specs in model_dag:
+        if 'type' in layer_specs and layer_specs['type'] in ['s', 'dw', 'pw']:
+            ifms_shape = layer_specs['ifms_shape']
+            if ifms_shape[0] % 32 == 0 or ifms_shape[1] % 32 == 0 or ifms_shape[2] % 32 == 0:
+                divisable_layers_count += 1
+
+    return divisable_layers_count
+
+weights_sizes = get_weights_sizes(model_dag)
+fms_sizes = get_fms_sizes(model_dag)
+
+for i in range(len(weights_sizes)):
+    print(weights_sizes[i] + fms_sizes[i])
+
+print('*******************')
+print(divisible_by_32(model_dag))

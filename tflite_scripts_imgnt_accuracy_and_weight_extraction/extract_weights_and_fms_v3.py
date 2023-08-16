@@ -24,7 +24,7 @@ import tflite_ops_names
 MODEL_NAME = 'mob_v1'
 
 # from generic to specific (for string matching)
-ACTIVATION_FUNCTIONS = ['relu', 'relu6']
+ACTIVATION_FUNCTIONS = ['relu6', 'relu']
 
 PRECISION = 8
 np.random.seed(0)
