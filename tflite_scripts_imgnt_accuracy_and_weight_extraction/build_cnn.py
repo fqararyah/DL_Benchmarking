@@ -39,7 +39,7 @@ model.save(MODEL_NAME + "_inout")
 # e.g. python3 -m tf2onnx.convert --saved-model uniform_mobilenetv2_75_32_inout --output uniform_mobilenetv2_75.onnx
 # this will convert the model to onnx that can be used by trtexec but not trt scripts
 # second: run trtexec and dump the output as trt engine:
-# trtexec --onnx=onnx_model_path --int8 --saveEngine=path_to_save_trt_engine
+# ./trtexec --onnx=onnx_model_path --int8 --saveEngine=path_to_save_trt_engine
 # third: run the resulte using trt scripts
 
 if EXIT_AFTER_CREATING_THE_FIRST:
