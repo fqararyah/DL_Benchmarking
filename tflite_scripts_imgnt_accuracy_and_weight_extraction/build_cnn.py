@@ -6,24 +6,44 @@ import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
 
 MODEL_NAME = 'mob_v1_slice'
+EXIT_AFTER_CREATING_THE_FIRST = True
+
+dw_repititions = 0
+pw_repititions = 100
 
 model = models.Sequential()
 model.add(layers.Conv2D(32, (3, 3),
           strides=(2, 2), input_shape=(224, 224, 3), padding='same', activation='relu'))
-model.add(layers.DepthwiseConv2D((3, 3), padding='same', activation='relu'))
-model.add(layers.Conv2D(64, (1, 1), activation='relu'))
-model.add(layers.DepthwiseConv2D((3, 3), strides=(
-    2, 2), padding='same', activation='relu'))
-model.add(layers.Conv2D(128, (1, 1), activation='relu'))
-model.add(layers.DepthwiseConv2D((3, 3), padding='same', activation='relu'))
-model.add(layers.Conv2D(128, (1, 1), activation='relu'))
-model.add(layers.DepthwiseConv2D((3, 3), strides=(
-    2, 2), padding='same', activation='relu'))
+
+for i in range(dw_repititions):
+    model.add(layers.DepthwiseConv2D((3, 3), padding='same', activation='relu'))
+
+for i in range(pw_repititions):
+    model.add(layers.Conv2D(64, (1, 1), activation='relu'))
+
+
+# model.add(layers.DepthwiseConv2D((3, 3), strides=(
+#     2, 2), padding='same', activation='relu'))
+# model.add(layers.Conv2D(128, (1, 1), activation='relu'))
+# model.add(layers.DepthwiseConv2D((3, 3), padding='same', activation='relu'))
+# model.add(layers.Conv2D(128, (1, 1), activation='relu'))
+# model.add(layers.DepthwiseConv2D((3, 3), strides=(
+#     2, 2), padding='same', activation='relu'))
 
 print(model.summary())
 
 model.save(MODEL_NAME + "_inout")
 
+# to use later by trtexec:
+# first use python3 -m tf2onnx.convert --saved-model tensorflow-model-path --output model.onnx
+# e.g. python3 -m tf2onnx.convert --saved-model uniform_mobilenetv2_75_32_inout --output uniform_mobilenetv2_75.onnx
+# this will convert the model to onnx that can be used by trtexec but not trt scripts
+# second: run trtexec and dump the output as trt engine:
+# trtexec --onnx=onnx_model_path --int8 --saveEngine=path_to_save_trt_engine
+# third: run the resulte using trt scripts
+
+if EXIT_AFTER_CREATING_THE_FIRST:
+    exit(0)
 ############################################################################
 MODEL_NAME = 'mob_v1_slice_h'
 

@@ -44,7 +44,7 @@ test_images = locate_images(DATA_PATH)
 
 MODEL_NAME = 'mob_v2'
 MODEL_PATH = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/'+MODEL_NAME+'.h5'
-PRECISION = 8
+PRECISION = 32
 
 if MODEL_NAME == 'resnet_50':
     model = model = models.ResNet50()

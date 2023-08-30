@@ -12,7 +12,7 @@ DELIMITER = '::'
 
 NET_PREFIX = 'mob_v2'
 NET_FULL_NAME = 'mobilenet_v2'
-input_folder = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/models_archs/models/'\
+input_folder = current_dir + '/models_archs/models/'\
     + NET_FULL_NAME + '/'
 IFMS_FILE = input_folder + 'layers_inputs.txt'
 OFMS_FILE = input_folder + 'layers_outputs.txt'
@@ -32,7 +32,7 @@ def set_globals(prefix, full_name):
         LAYERS_EXECUTION_SEQUENCE, MODEL_DAG_FILE
     NET_PREFIX = prefix
     NET_FULL_NAME = full_name
-    input_folder = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/models_archs/models/'\
+    input_folder = current_dir + '/models/'\
         + NET_FULL_NAME + '/'
     IFMS_FILE = input_folder + 'layers_inputs.txt'
     OFMS_FILE = input_folder + 'layers_outputs.txt'

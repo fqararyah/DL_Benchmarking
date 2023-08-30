@@ -24,8 +24,8 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'mob_v2'
-PRECISION = 8
+MODEL_NAME = 'mob_v1'
+PRECISION = 32
 
 model = models.MobileNetV2()
 
