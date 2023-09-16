@@ -42,7 +42,6 @@ GlobalParams = namedtuple(
 )
 
 
-
 def decode_block_string(block_string):
     """Gets a MNasNet block through a string notation of arguments.
     E.g. r2_k3_s2_e1_i32_o16_se0.25_noskip: r - number of repeat blocks,
@@ -80,7 +79,6 @@ def decode_block_string(block_string):
     )
 
 
-
 def Build_MnasNet(model_name, override_params=None):
     global_params = GlobalParams(
         batch_norm_momentum=0.99,
@@ -106,7 +104,7 @@ def Build_MnasNet(model_name, override_params=None):
             "r4_k5_s22_e6_i96_o192",
             "r1_k3_s11_e6_i192_o320_noskip",
         ]
-    
+
     elif model_name == "b1_3":
         blocks_args = [
             "r1_k3_s11_e1_i32_o16_noskip",
@@ -117,7 +115,7 @@ def Build_MnasNet(model_name, override_params=None):
             "r4_k3_s22_e6_i96_o192",
             "r1_k3_s11_e6_i192_o320_noskip",
         ]
-    
+
     elif model_name == "prox":
         blocks_args = [
             "r1_k3_s11_e1_i40_o24_noskip",
@@ -133,7 +131,7 @@ def Build_MnasNet(model_name, override_params=None):
             "r1_k5_s11_e3_i216_o216",
             "r1_k3_s11_e6_i216_o306_noskip",
         ]
-    
+
     elif model_name == "prox_3":
         blocks_args = [
             "r1_k3_s11_e1_i40_o24_noskip",
@@ -148,6 +146,21 @@ def Build_MnasNet(model_name, override_params=None):
             "r1_k3_s11_e6_i104_o216",
             "r1_k3_s11_e3_i216_o216",
             "r1_k3_s11_e6_i216_o306_noskip",
+        ]
+
+    elif model_name == "gprox_3":
+        blocks_args = [
+            "r1_k3_s11_e1_i40_o24_noskip",
+            "r1_k3_s22_e3_i24_o32",
+            "r1_k3_s22_e3_i32_o56",
+            "r1_k3_s11_e3_i56_o56",
+            "r1_k3_s22_e6_i56_o112",
+            "r1_k3_s11_e3_i112_o112",
+            "r1_k3_s11_e6_i112_o128",
+            "r2_k3_s11_e3_i128_o128",
+            "r1_k3_s22_e6_i128_o256",
+            "r3_k3_s11_e6_i256_o256",
+            "r1_k3_s11_e6_i256_o432",
         ]
 
     elif model_name == "mprox":
@@ -167,7 +180,7 @@ def Build_MnasNet(model_name, override_params=None):
             "r2_k7_s11_e3_i192_o192",
             "r1_k7_s11_e6_i192_o320_noskip",
         ]
-    
+
     elif model_name == "mprox_3":
         blocks_args = [
             "r1_k3_s11_e1_i40_o16_noskip",
@@ -232,7 +245,8 @@ def Build_MnasNet(model_name, override_params=None):
         ]
 
     else:
-        raise NotImplementedError("model name is not pre-defined: %s" % model_name)
+        raise NotImplementedError(
+            "model name is not pre-defined: %s" % model_name)
 
     if override_params:
         global_params = global_params._replace(**override_params)

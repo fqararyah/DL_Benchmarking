@@ -42,9 +42,9 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'mob_v2'
+MODEL_NAME = 'gprox_3'
 MODEL_PATH = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/'+MODEL_NAME+'.h5'
-PRECISION = 32
+PRECISION = 8
 
 if MODEL_NAME == 'resnet_50':
     model = model = models.ResNet50()
@@ -66,14 +66,16 @@ elif MODEL_NAME == 'nas':
     model = models.NASNetMobile()
 elif MODEL_NAME == 'mnas':
     model = Build_MnasNet('b1')
-elif MODEL_NAME == 'prox':
-    model = Build_MnasNet('mprox')
+elif MODEL_NAME == 'gprox_3':
+    model = Build_MnasNet('gprox_3')
 elif MODEL_NAME in ['eff_b0_ns_ns', 'eff_b0_no_sig', 'eff_b0_ns']:
     model = tf.keras.models.load_model(MODEL_PATH)
 elif MODEL_NAME == 'inc_v3':
     model = models.InceptionV3()
-elif MODEL_NAME == 'dense_121':
-    model = models.DenseNet121()
+elif MODEL_NAME == 'Xce':
+    model = models.Xception()
+elif MODEL_NAME == 'xce_r':
+    model = models.Xception(input_shape=(224, 224, 3), weights=None)
 else:
     model = tf.keras.models.load_model(MODEL_PATH)
 
@@ -84,7 +86,7 @@ else:
 def representative_dataset():
     for i in range(200):
         a_test_image = load_img(test_images[i], target_size=(224, 224))
-        if 'inc_' in MODEL_NAME:
+        if 'inc_' in MODEL_NAME or 'Xce' in MODEL_NAME:
             a_test_image = load_img(test_images[i], target_size=(299, 299))
         numpy_image = img_to_array(a_test_image)
         image_batch = np.expand_dims(numpy_image, axis=0)
@@ -149,7 +151,7 @@ while i < limit:
     # processed += 1
 
     a_test_image = load_img(test_images[i], target_size=(224, 224))
-    if 'inc_' in MODEL_NAME:
+    if 'inc_' in MODEL_NAME or 'Xce' in MODEL_NAME:
         a_test_image = load_img(test_images[i], target_size=(299, 299))
 
     numpy_image = img_to_array(a_test_image)
