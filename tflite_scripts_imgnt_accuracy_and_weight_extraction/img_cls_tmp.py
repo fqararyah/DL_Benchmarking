@@ -42,7 +42,8 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'mob_v2'
+MODEL_NAME = 'mobilenet_v2'
+TFLITE_MODEL_PATH = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/'+MODEL_NAME+'.tflite'
 MODEL_PATH = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/'+MODEL_NAME+'.h5'
 PRECISION = 8
 
@@ -76,7 +77,7 @@ elif MODEL_NAME == 'Xce':
     model = models.Xception()
 elif MODEL_NAME == 'xce_r':
     model = models.Xception(input_shape=(224, 224, 3), weights=None)
-else:
+elif TFLITE_MODEL_PATH == '':
     model = tf.keras.models.load_model(MODEL_PATH)
 
 # print(model.summary())
@@ -101,19 +102,24 @@ def representative_dataset():
         yield [processed_image.astype(np.float32)]
 
 
-# this save is for the sake of converting to trt later by trtexec:
-# first use python3 -m tf2onnx.convert --saved-model tensorflow-model-path --output model.onnx
-# e.g. python3 -m tf2onnx.convert --saved-model uniform_mobilenetv2_75_32_inout --output uniform_mobilenetv2_75.onnx
-# this will convert the model to onnx that can be used by trtexec but not trt scripts
-# second: run trtexec and dump the output as trt engine:
-# trtexec --onnx=onnx_model_path --int8 --saveEngine=path_to_save_trt_engine
-# third: run the resulte using trt scripts
-model.save(MODEL_NAME + '_' + str(PRECISION) + "_inout")
+if TFLITE_MODEL_PATH == '':
+    # this save is for the sake of converting to trt later by trtexec:
+    # first use python3 -m tf2onnx.convert --saved-model tensorflow-model-path --output model.onnx
+    # e.g. python3 -m tf2onnx.convert --saved-model uniform_mobilenetv2_75_32_inout --output uniform_mobilenetv2_75.onnx
+    # this will convert the model to onnx that can be used by trtexec but not trt scripts
+    # second: run trtexec and dump the output as trt engine:
+    # trtexec --onnx=onnx_model_path --int8 --saveEngine=path_to_save_trt_engine
+    # third: run the resulte using trt scripts
+    model.save(MODEL_NAME + '_' + str(PRECISION) + "_inout")
 
 if PRECISION == 8:
     tflite_models_dir = pathlib.Path("./")
-    tflite_model_quant_file = tflite_models_dir / \
-        (MODEL_NAME + '_' + str(PRECISION) + ".tflite")
+    if TFLITE_MODEL_PATH == '':
+        tflite_model_quant_file = tflite_models_dir / \
+            (MODEL_NAME + '_' + str(PRECISION) + ".tflite")
+    else:
+        tflite_model_quant_file = TFLITE_MODEL_PATH
+    print(tflite_model_quant_file)
     if not os.path.exists(tflite_model_quant_file):
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
@@ -176,6 +182,12 @@ while i < limit:
         output_details = interpreter.get_output_details()[0]
         if input_details['dtype'] == np.uint8:
             numpy_image = img_to_array(a_test_image, dtype=np.uint8)
+            image_batch = np.expand_dims(numpy_image, axis=0)
+            # input_scale, input_zero_point = input_details["quantization"]
+            # image_batch = image_batch / input_scale + input_zero_point
+            # image_batch = image_batch.astype(np.uint8)
+        elif input_details['dtype'] == np.int8:
+            numpy_image = img_to_array(a_test_image, dtype=np.int8)
             image_batch = np.expand_dims(numpy_image, axis=0)
             # input_scale, input_zero_point = input_details["quantization"]
             # image_batch = image_batch / input_scale + input_zero_point

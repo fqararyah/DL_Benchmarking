@@ -2,7 +2,7 @@ from fcntl import F_SETFL
 from models_archs import utils
 import analysis_utils
 
-MODEL_NAME = 'nonuniform_mobilenetv2_75' #uniform_mobilenetv2_75
+MODEL_NAME = 'mob_v2' #uniform_mobilenetv2_75
 
 utils.set_globals(MODEL_NAME, MODEL_NAME)
 
@@ -199,7 +199,9 @@ layers_num_of_ops = get_layers_op_counts(model_dag)
 
 # print ops
 sum_ops_so_far = 0
-sum_ops = sum(layers_num_of_ops)
+sum_ops = sum(layers_num_of_ops * 2)
+print(sum_ops/1000000000)
+exit(0)
 # for i in range(len(layers_num_of_ops)):
 #     sum_ops_so_far += layers_num_of_ops[i]
 #     #print(i, layers_num_of_ops[i]/1000000, sum_ops_so_far/1000000, sum_ops_so_far / sum_ops)

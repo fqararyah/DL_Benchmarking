@@ -21,7 +21,7 @@ import tflite_ops_names
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'gprox_3'
+MODEL_NAME = 'mob_v2'
 
 # from generic to specific (for string matching)
 ACTIVATION_FUNCTIONS = ['relu6', 'relu']
@@ -47,7 +47,11 @@ test_image = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/i
 a_test_image = load_img(test_image, target_size=(224, 224))
 if 'inc_' in MODEL_NAME:
     a_test_image = np.resize(a_test_image, (299, 299, 3))
-numpy_image = img_to_array(a_test_image, dtype=np.uint8)
+
+if input_details['dtype'] == np.uint8:
+    numpy_image = img_to_array(a_test_image, dtype=np.uint8)
+elif input_details['dtype'] == np.int8:
+    numpy_image = img_to_array(a_test_image, dtype=np.int8)
 image_batch = np.expand_dims(numpy_image, axis=0)
 #################################################################################################################
 # invoke mode
@@ -124,11 +128,11 @@ for op_details in ops_details_list:
         if op_inputs[0] < 0 or op_inputs[1] < 0 or op_inputs[-1] < 0:
               print(op_name, 'has missing tensors')
         else:
-            op_ifms_tensor = interpreter.get_tensor(op_inputs[-1])
+            op_ifms_tensor = interpreter.get_tensor(op_inputs[-1]) #inputs tensor
             op_ifms_tensor_details = tensors_details_list[op_inputs[-1]]
-            op_weights_tensor = interpreter.get_tensor(op_inputs[0])
+            op_weights_tensor = interpreter.get_tensor(op_inputs[0]) #weights tensor
             op_weights_tensor_details = tensors_details_list[op_inputs[0]]
-            op_biases_tensor = interpreter.get_tensor(op_inputs[1])
+            op_biases_tensor = interpreter.get_tensor(op_inputs[1])#biases tensor
             op_biases_tensor_details = tensors_details_list[op_inputs[1]]
 
             if len(op_biases_tensor.shape) > 1 and len(op_weights_tensor.shape) == 1:
@@ -136,7 +140,7 @@ for op_details in ops_details_list:
                 op_weights_tensor_details = op_biases_tensor_details
                 op_biases_tensor = interpreter.get_tensor(op_inputs[0])
                 op_biases_tensor_details = tensors_details_list[op_inputs[0]]
-
+            print(op_ifms_tensor_details['quantization_parameters']['scales'])
             assert(
                 len(op_ifms_tensor_details['quantization_parameters']['scales']) == 1)
             model_dag_entry['ifms_scales'] = float(
