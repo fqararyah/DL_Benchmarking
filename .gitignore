@@ -3,6 +3,7 @@
 *.json
 *.onnx
 *.trt
+*.h5
 out
 *.pb
 variables
@@ -18,3 +19,6 @@ which_side_is_padded.txt
 preprocessed_tst_images
 preprocessed_tst_images/*
 tflite_scripts_imgnt_accuracy_and_weight_extraction/**/*.txt
+*.log
+*.jou
+*.str

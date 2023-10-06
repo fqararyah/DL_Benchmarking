@@ -17,11 +17,12 @@ from models_archs import utils
 
 import tflite_ops_names
 
+
 # import os
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'mob_v2'
+MODEL_NAME = 'mob_v1_0_5'
 
 # from generic to specific (for string matching)
 ACTIVATION_FUNCTIONS = ['relu6', 'relu']

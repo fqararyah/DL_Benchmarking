@@ -47,6 +47,20 @@ class ModelData(object):
 TRT_LOGGER = trt.Logger(trt.Logger.WARNING)
 MODEL_NAME = common.MODEL_PATH.split('/')[-1].split('.')[0].lower()
 
+class MyAlgoSelector(trt.IAlgorithmSelector):
+    def __init__(self):
+        trt.IAlgorithmSelector.__init__(self)
+
+    def report_algorithms(self, context, choices):
+        # Prints the time of the chosen algorithm by TRT from the
+        # selection list passed in by select_algorithms
+        for choice in choices:
+            print(choice.algorithm_variant.implementation, choice.algorithm_variant.tactic)
+    
+    def select_algorithms(self, context, choices):
+        assert len(choices) > 0
+        return list(range(len(choices)))
+    
 
 class MyProfiler(trt.IProfiler):
     profiling_dict = {}
@@ -75,6 +89,7 @@ def build_engine_onnx(model_file):
             cache_file=calibration_cache, batch_size=32, total_images=-1)
         config.set_flag(trt.BuilderFlag.INT8)
         config.int8_calibrator = calibrator
+        #config.algorithm_selector = MyAlgoSelector()
     elif common.PRECISION == '16':
         print('***************************')
         print('**********16***************')
@@ -83,6 +98,10 @@ def build_engine_onnx(model_file):
     # end_new
 
     parser = trt.OnnxParser(network, TRT_LOGGER)
+
+    profile = builder.create_optimization_profile();
+    profile.set_shape("input_1", (1, 224, 224, 3), (1, 224, 224, 3), (1, 224, 224, 3)) 
+    config.add_optimization_profile(profile)
 
     config.max_workspace_size = common.GiB(1)
     # Load the Onnx model and parse it in order to populate the TensorRT network.
@@ -185,7 +204,8 @@ def main():
     #    print(entry[0])
 
     print(len(test_images))
-    images_to_test = 10000
+    images_to_test = 2000
+    warmup_iters = 1000
     power_measurement = True
     bad_count = 0
     prediction_dict_list = []
@@ -209,7 +229,7 @@ def main():
         #pred = labels[np.argmax(trt_outputs[0])]
         t2 = time.time()
         indices = np.argsort(trt_outputs[0])[-5:]
-        if i >= 5:
+        if i >= warmup_iters:
             avg_time += t2 - t1
         indices = np.flip(indices)
         prediction_dict = {"dets": indices.tolist(
@@ -231,8 +251,7 @@ def main():
         elif print_layer_name:
             print(layer_name, layer_time)
             i += 1
-        elif ('conv' in layer_name.lower() or 'depthwise' in layer_name.lower()) and 'reformatting' not in layer_name.lower() \
-                and 'pwn()' not in layer_name.lower():
+        elif ('conv' in layer_name.lower() or 'depthwise' in layer_name.lower()) and 'reformatting' not in layer_name.lower():
             if print_layer_index:
                 print(i, layer_time)
             else:
@@ -250,7 +269,7 @@ def main():
     json_object = json.dumps(prediction_dict_list)
     print('bad images:', bad_count)
 
-    avg_time /= (images_to_test - 5)
+    avg_time /= (images_to_test - warmup_iters)
     print('average inference time:', avg_time * 1000, ' ms')
 
     with open(MODEL_NAME + '_' + common.PRECISION + "_predictions.json", "w") as outfile:

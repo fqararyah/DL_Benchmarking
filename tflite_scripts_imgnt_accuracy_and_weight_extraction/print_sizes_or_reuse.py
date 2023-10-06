@@ -2,7 +2,7 @@ from fcntl import F_SETFL
 from models_archs import utils
 import analysis_utils
 
-MODEL_NAME = 'mob_v2' #uniform_mobilenetv2_75
+MODEL_NAME = 'mob_v1_0_5' #uniform_mobilenetv2_75
 
 utils.set_globals(MODEL_NAME, MODEL_NAME)
 
@@ -195,51 +195,18 @@ def print_filters_channels(model_dag):
                   * layer_specs['weights_shape'][0])
 
 
+weight_sizes = get_fms_sizes(model_dag)
+for weigh_size in weight_sizes:
+    print(weigh_size)
+
 layers_num_of_ops = get_layers_op_counts(model_dag)
 
 # print ops
 sum_ops_so_far = 0
 sum_ops = sum(layers_num_of_ops * 2)
-print(sum_ops/1000000000)
-exit(0)
-# for i in range(len(layers_num_of_ops)):
-#     sum_ops_so_far += layers_num_of_ops[i]
-#     #print(i, layers_num_of_ops[i]/1000000, sum_ops_so_far/1000000, sum_ops_so_far / sum_ops)
-#     print(layers_num_of_ops[i]/1000000)
+# print(sum_ops/1000000000)
+# print('***************************************')
 
-# print_filters_channels(model_dag)
-# print('****************')
-# print(sum_ops / 1000000)
-# print('****************')
-
-avg_weight_reuse = 0
-avg_act_reuse = 0
-# for i in range(len(weight_reuse)):
-#     avg_weight_reuse += weight_reuse[i] * weights_sizes[i]
-
-# for i in range(len(activation_reuse)):
-#     avg_act_reuse += activation_reuse[i] * activations_sizes[i]
-
-#print(avg_weight_reuse/ sum(weights_sizes))
-#print(avg_act_reuse / sum(activations_sizes))
-
-
-def divisible_by_32(model_dag):
-
-    divisable_layers_count = 0
-    for layer_specs in model_dag:
-        if 'type' in layer_specs and layer_specs['type'] in ['s', 'dw', 'pw']:
-            ifms_shape = layer_specs['ifms_shape']
-            if ifms_shape[0] % 32 == 0 or ifms_shape[1] % 32 == 0 or ifms_shape[2] % 32 == 0:
-                divisable_layers_count += 1
-
-    return divisable_layers_count
-
-weights_sizes = get_weights_sizes(model_dag)
-fms_sizes = get_fms_sizes(model_dag)
-
-for i in range(len(weights_sizes)):
-    print(weights_sizes[i] + fms_sizes[i])
-
-print('*******************')
-print(divisible_by_32(model_dag))
+# for layer_specs in model_dag:
+#     if 'type' in layer_specs and layer_specs['type'] in ['s', 'dw', 'pw']:
+#         print(layer_specs['ifms_shape'][1])

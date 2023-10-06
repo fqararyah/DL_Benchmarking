@@ -13,6 +13,7 @@ import tensorflow.keras.applications as models
 from MnasNet_models.MnasNet_models import Build_MnasNet
 import time
 import pathlib
+#from keras_squeezenet import SqueezeNet
 
 import sys
 
@@ -42,7 +43,7 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'mob_v2'
+MODEL_NAME = 'mob_v1_0_5'
 MODEL_PATH = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/'+MODEL_NAME+'.h5'
 PRECISION = 8
 
@@ -66,6 +67,10 @@ elif MODEL_NAME == 'nas':
     model = models.NASNetMobile()
 elif MODEL_NAME == 'mnas':
     model = Build_MnasNet('b1')
+elif MODEL_NAME == 'prox':
+    model = Build_MnasNet('prox')
+elif MODEL_NAME == 'mprox':
+    model = Build_MnasNet('mprox')
 elif MODEL_NAME == 'gprox_3':
     model = Build_MnasNet('gprox_3')
 elif MODEL_NAME in ['eff_b0_ns_ns', 'eff_b0_no_sig', 'eff_b0_ns']:
@@ -76,6 +81,14 @@ elif MODEL_NAME == 'Xce':
     model = models.Xception()
 elif MODEL_NAME == 'xce_r':
     model = models.Xception(input_shape=(224, 224, 3), weights=None)
+elif MODEL_NAME == 'vgg16':
+    model = models.VGG16()
+elif MODEL_NAME == 'vgg19':
+    model = models.VGG19()
+elif MODEL_NAME == 'resnet101':
+    model = models.ResNet101()
+elif MODEL_NAME == 'squ':
+    model = tf.keras.models.load_model('./squ_inout')
 else:
     model = tf.keras.models.load_model(MODEL_PATH)
 

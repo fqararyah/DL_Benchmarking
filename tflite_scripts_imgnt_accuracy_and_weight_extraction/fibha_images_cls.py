@@ -49,6 +49,8 @@ PRECISION = 32
 
 if MODEL_NAME == 'resnet50':
     model = model = models.ResNet50()
+if MODEL_NAME == 'resnet50':
+    model = model = models.ResNet50()
 elif MODEL_NAME == 'mob_v1':
     model = models.MobileNet()
 elif MODEL_NAME == 'mob_v1_0_5':
@@ -73,8 +75,8 @@ elif MODEL_NAME in ['eff_b0_ns_ns', 'eff_b0_no_sig', 'eff_b0_ns']:
     model = tf.keras.models.load_model(MODEL_PATH)
 elif MODEL_NAME == 'inc_v3':
     model = models.InceptionV3()
-elif MODEL_NAME == 'dense_121':
-    model = models.DenseNet121()
+elif MODEL_NAME == 'resnet101':
+    model = models.ResNet101()
 else:
     model = tf.keras.models.load_model(MODEL_PATH)
 

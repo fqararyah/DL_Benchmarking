@@ -5,7 +5,7 @@ import numpy as np
 import sys
 from models_archs import utils
 
-utils.NET_PREFIX = 'mob_v1'
+utils.NET_PREFIX = 'mob_v2'
 utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
 IN = 0
