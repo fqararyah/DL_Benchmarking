@@ -195,3 +195,7 @@ def read_layers_execution_sequence():
 def read_model_dag():
     f = open(MODEL_DAG_FILE)
     return json.load(f)
+
+def read_model_dag_file(dag_file):
+    f = open(dag_file)
+    return json.load(f)

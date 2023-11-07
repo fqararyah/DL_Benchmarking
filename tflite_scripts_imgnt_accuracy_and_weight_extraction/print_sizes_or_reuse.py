@@ -2,7 +2,7 @@ from fcntl import F_SETFL
 from models_archs import utils
 import analysis_utils
 
-MODEL_NAME = 'mob_v1_0_5' #uniform_mobilenetv2_75
+MODEL_NAME = 'mob_v2' #uniform_mobilenetv2_75
 
 utils.set_globals(MODEL_NAME, MODEL_NAME)
 
@@ -196,15 +196,15 @@ def print_filters_channels(model_dag):
 
 
 weight_sizes = get_fms_sizes(model_dag)
-for weigh_size in weight_sizes:
-    print(weigh_size)
+# for weigh_size in weight_sizes:
+#     print(weigh_size)
 
 layers_num_of_ops = get_layers_op_counts(model_dag)
 
 # print ops
 sum_ops_so_far = 0
 sum_ops = sum(layers_num_of_ops * 2)
-# print(sum_ops/1000000000)
+print(sum_ops/1000000000)
 # print('***************************************')
 
 # for layer_specs in model_dag:

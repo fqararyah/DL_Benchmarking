@@ -51,14 +51,16 @@ class MyAlgoSelector(trt.IAlgorithmSelector):
     def __init__(self):
         trt.IAlgorithmSelector.__init__(self)
 
-    def report_algorithms(self, context, choices):
+    def report_algorithms(self, contexts, choices):
         # Prints the time of the chosen algorithm by TRT from the
         # selection list passed in by select_algorithms
-        for choice in choices:
-            print(choice.algorithm_variant.implementation, choice.algorithm_variant.tactic)
-    
-    def select_algorithms(self, context, choices):
+        #for algo_context in contexts:
+        #    print(algo_context.name)
+        return
+    def select_algorithms(self, contexts, choices):
         assert len(choices) > 0
+        print(">>>>", range(len(choices)))
+        #return list(range(min(len(choices), 5)))
         return list(range(len(choices)))
     
 
@@ -86,15 +88,17 @@ def build_engine_onnx(model_file):
         print('***************************')
         calibration_cache = "mnist_calibration.cache"
         calibrator = imagenet_calib.ResNet50EntropyCalibrator(
-            cache_file=calibration_cache, batch_size=32, total_images=-1)
+            cache_file=calibration_cache, batch_size=32, total_images=1024)
         config.set_flag(trt.BuilderFlag.INT8)
         config.int8_calibrator = calibrator
-        #config.algorithm_selector = MyAlgoSelector()
+        config.algorithm_selector = MyAlgoSelector()
     elif common.PRECISION == '16':
         print('***************************')
         print('**********16***************')
         print('***************************')
         config.set_flag(trt.BuilderFlag.FP16)
+        config.algorithm_selector = MyAlgoSelector()
+        
     # end_new
 
     parser = trt.OnnxParser(network, TRT_LOGGER)
@@ -206,7 +210,7 @@ def main():
     print(len(test_images))
     images_to_test = 2000
     warmup_iters = 1000
-    power_measurement = True
+    power_measurement = False
     bad_count = 0
     prediction_dict_list = []
     avg_time = 0

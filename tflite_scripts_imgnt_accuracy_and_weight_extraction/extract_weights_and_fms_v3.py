@@ -1,4 +1,3 @@
-from inspect import currentframe
 import json
 from operator import mod
 import tensorflow as tf
@@ -22,7 +21,7 @@ import tflite_ops_names
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'mob_v1_0_5'
+MODEL_NAME = 'xce_r'
 
 # from generic to specific (for string matching)
 ACTIVATION_FUNCTIONS = ['relu6', 'relu']
