@@ -21,7 +21,7 @@ import tflite_ops_names
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'xce_r'
+MODEL_NAME = 'mob_v2'
 
 # from generic to specific (for string matching)
 ACTIVATION_FUNCTIONS = ['relu6', 'relu']
@@ -43,7 +43,9 @@ ops_details_list = interpreter._get_ops_details()
 tensors_details_list = interpreter.get_tensor_details()
 #################################################################################################################
 # prepare image
-test_image = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012/ILSVRC2012_val_00018455.JPEG'
+test_image = \
+'/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized/ILSVRC2012_val_00006950.JPEG'
+#'/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012/ILSVRC2012_val_00018455.JPEG'
 a_test_image = load_img(test_image, target_size=(224, 224))
 if 'inc_' in MODEL_NAME:
     a_test_image = np.resize(a_test_image, (299, 299, 3))
@@ -140,7 +142,7 @@ for op_details in ops_details_list:
                 op_weights_tensor_details = op_biases_tensor_details
                 op_biases_tensor = interpreter.get_tensor(op_inputs[0])
                 op_biases_tensor_details = tensors_details_list[op_inputs[0]]
-            print(op_ifms_tensor_details['quantization_parameters']['scales'])
+            #print(op_ifms_tensor_details['quantization_parameters']['scales'])
             assert(
                 len(op_ifms_tensor_details['quantization_parameters']['scales']) == 1)
             model_dag_entry['ifms_scales'] = float(
@@ -233,11 +235,30 @@ for op_details in ops_details_list:
                 model_dag_entry['ifms_shape'][-1] / model_dag_entry['ofms_shape'][-1])
 
     else:
+        op_ifms_tensor_details = tensors_details_list[op_input]
+        assert(
+        len(op_ifms_tensor_details['quantization_parameters']['scales']) == 1)
+        model_dag_entry['ifms_scales'] = float(
+            op_ifms_tensor_details['quantization_parameters']['scales'][0])
+        assert(
+            len(op_ifms_tensor_details['quantization_parameters']['zero_points']) == 1)
+        model_dag_entry['ifms_zero_points'] = int(
+            op_ifms_tensor_details['quantization_parameters']['zero_points'][0])
+    
         op_ifms_tensor_details = tensors_details_list[op_inputs[-1]]
         model_dag_entry['ifms_shape'] = [
             int(i) for i in op_ifms_tensor_details['shape']]
         model_dag_entry['ofms_shape'] = [
             int(i) for i in op_ofms_tensor_details['shape']]
+        
+        op_ifms_tensor = interpreter.get_tensor(op_inputs[-1])
+        op_ifms_tensor = np.squeeze(op_ifms_tensor)
+        if op_name in tflite_ops_names.TFLITE_CONV_OP_NAMES and op_ifms_tensor.ndim == 3:
+            op_ifms_tensor = np.transpose(op_ifms_tensor, (2, 0, 1))
+        op_ifms_tensor = np.reshape(op_ifms_tensor, (op_ifms_tensor.size))
+        file_name = 'ifms_' + str(op_index) + '.txt'
+        np.savetxt('./'+weights_fms_dir+'/fms/' +
+                file_name, op_ifms_tensor, fmt='%i')
 
     assert(
         len(op_ofms_tensor_details['quantization_parameters']['scales']) <= 1)

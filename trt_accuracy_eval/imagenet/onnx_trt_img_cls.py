@@ -91,13 +91,13 @@ def build_engine_onnx(model_file):
             cache_file=calibration_cache, batch_size=32, total_images=1024)
         config.set_flag(trt.BuilderFlag.INT8)
         config.int8_calibrator = calibrator
-        config.algorithm_selector = MyAlgoSelector()
+        #config.algorithm_selector = MyAlgoSelector()
     elif common.PRECISION == '16':
         print('***************************')
         print('**********16***************')
         print('***************************')
         config.set_flag(trt.BuilderFlag.FP16)
-        config.algorithm_selector = MyAlgoSelector()
+        #config.algorithm_selector = MyAlgoSelector()
         
     # end_new
 

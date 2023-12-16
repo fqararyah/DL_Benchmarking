@@ -36,8 +36,8 @@ PRECISION = 8
 np.random.seed(0)
 
 weights_fms_dir = MODEL_NAME
-model_arch_dir = '/media/SSD2TB/fareed/wd/models/codesign/batch1_model_dags/'
-tflite_models_dir = '/media/SSD2TB/fareed/wd/models/codesign/batch1_models/'
+model_arch_dir = '/media/SSD2TB/fareed/wd/models/codesign/batch2_model_dags/'
+tflite_models_dir = '/media/SSD2TB/fareed/wd/models/codesign/batch2_models/'
 
 
 for model_file_name in os.listdir(tflite_models_dir):

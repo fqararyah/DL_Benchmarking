@@ -20,8 +20,10 @@ import sys
 proxylessnas_dir = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/proxylessnas'
 sys.path.append(proxylessnas_dir)
 
+RESIZED_DATA_PATH = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized'
 
 DATA_PATH = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012'
+PREDICTIONS_DIR = 'predictions'
 
 fibha_images = {}
 with open('predictions_cpu.json') as json_file:
@@ -44,8 +46,9 @@ def locate_images(path):
 test_images = locate_images(DATA_PATH)
 
 MODEL_NAME = 'mob_v2'
+
 MODEL_PATH = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/'+MODEL_NAME+'.h5'
-PRECISION = 32
+PRECISION = 8 #FP32, FP16, INT8
 
 if MODEL_NAME == 'resnet_50':
     model = model = models.ResNet50()
@@ -153,7 +156,7 @@ if PRECISION == 8:
 prediction_dict_list = []
 
 # limit = len(test_images)
-limit = 100
+limit = 1000
 i = -1
 processed = 0
 while i < limit:
@@ -209,5 +212,5 @@ while i < limit:
 
 json_object = json.dumps(prediction_dict_list)
 
-with open(MODEL_NAME + '_' + str(PRECISION) + '_' + str(limit) + "_predictions.json", "w") as outfile:
+with open(PREDICTIONS_DIR + '/' + MODEL_NAME + '_' + str(PRECISION) + '_' + str(limit) + "_predictions.json", "w") as outfile:
     outfile.write(json_object)

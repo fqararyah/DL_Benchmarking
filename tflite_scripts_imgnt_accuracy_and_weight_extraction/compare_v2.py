@@ -14,7 +14,7 @@ IN_OUT = OUT
 
 to_compare_layer_index = 7
 
-VERY_DIFF_THRESHOLD = 5
+VERY_DIFF_THRESHOLD = 10
 
 ref = ''
 if(len(sys.argv) > 1):
@@ -22,8 +22,13 @@ if(len(sys.argv) > 1):
 if(len(sys.argv) > 2):
     ref = sys.argv[2]
 
+model_dag = utils.read_model_dag()
+
 domain_file = './scratch_out/ofms_{}.txt'.format(to_compare_layer_index)
 
+layer_children = model_dag[to_compare_layer_index]["children"]
+if len(layer_children) == 1 and "add" in model_dag[layer_children[0]]["name"]:
+    to_compare_layer_index = model_dag[layer_children[0]]["id"]
 if len(ref)>0:
     range_file = './scratch_out/ofms_{}_ref.txt'.format(to_compare_layer_index)
 else:
@@ -33,8 +38,6 @@ else:
         range_file = './{}/fms/ofms_{}.txt'.format(utils.NET_PREFIX, to_compare_layer_index)
 
 print(domain_file, range_file)
-
-model_dag = utils.read_model_dag()
 
 to_compare_layer_specs = model_dag[to_compare_layer_index]
 
@@ -99,12 +102,14 @@ for key, val in diff_locs.items():
     if count > 100:
         break
 
+num_elements = cnt1 + cnt2
+
 if(rng.size != domain.size):
     print("SIZE MIMATCH")
 else:
     print('max= ', np.max( np.abs(domain - rng)))
     print(sum)
     print(sum/rng.size)
-    print('equal: ', cnt1)
-    print('different: ', cnt2)
-    print('very different: ', cnt3)
+    print('equal: ', cnt1 / num_elements)
+    print('different: ', cnt2 / num_elements)
+    print('very different: ', cnt3 / num_elements)

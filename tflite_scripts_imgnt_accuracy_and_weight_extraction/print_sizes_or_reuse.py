@@ -2,7 +2,7 @@ from fcntl import F_SETFL
 from models_archs import utils
 import analysis_utils
 
-MODEL_NAME = 'mob_v2' #uniform_mobilenetv2_75
+MODEL_NAME = 'gprox_3'  # uniform_mobilenetv2_75
 
 utils.set_globals(MODEL_NAME, MODEL_NAME)
 
@@ -90,7 +90,7 @@ def get_layers_op_counts(model_dag):
 
             layer_num_of_ops *= layers_ofms_shape[1] * layers_ofms_shape[2]
 
-            layers_num_of_ops.append(layer_num_of_ops)
+            layers_num_of_ops.append(2 * layer_num_of_ops)
 
     return layers_num_of_ops
 
@@ -164,7 +164,7 @@ def get_fms_sizes(model_dag):
     for layer_specs in model_dag:
         if 'type' in layer_specs and layer_specs['type'] in ['s', 'dw', 'pw']:
             fms_sizes.append(layer_specs['ifms_shape'][0] * layer_specs['ifms_shape'][1] * layer_specs['ifms_shape'][2] +
-                              layer_specs['ofms_shape'][0] * layer_specs['ofms_shape'][1] * layer_specs['ofms_shape'][2])
+                             layer_specs['ofms_shape'][0] * layer_specs['ofms_shape'][1] * layer_specs['ofms_shape'][2])
 
     return fms_sizes
 
@@ -172,7 +172,7 @@ def get_fms_sizes(model_dag):
 def get_weights_sizes(model_dag):
 
     weights_sizes = []
-    for layer_specs in model_dag: 
+    for layer_specs in model_dag:
         if 'type' in layer_specs and layer_specs['type'] in ['s', 'dw', 'pw']:
             weights_shape = layer_specs['weights_shape']
             if layer_specs['type'] in ['s']:
@@ -195,16 +195,20 @@ def print_filters_channels(model_dag):
                   * layer_specs['weights_shape'][0])
 
 
-weight_sizes = get_fms_sizes(model_dag)
+fms_sizes = get_fms_sizes(model_dag)
+weight_sizes = get_weights_sizes(model_dag)
 # for weigh_size in weight_sizes:
 #     print(weigh_size)
 
+# sum(weight_sizes)
 layers_num_of_ops = get_layers_op_counts(model_dag)
 
+for i in range(len(layers_num_of_ops)):
+    print(layers_num_of_ops[i] / (fms_sizes[i] + weight_sizes[i]))
 # print ops
-sum_ops_so_far = 0
-sum_ops = sum(layers_num_of_ops * 2)
-print(sum_ops/1000000000)
+#sum_ops_so_far = 0
+#sum_ops = sum(layers_num_of_ops)
+# print(sum_ops/1000000000)
 # print('***************************************')
 
 # for layer_specs in model_dag:
