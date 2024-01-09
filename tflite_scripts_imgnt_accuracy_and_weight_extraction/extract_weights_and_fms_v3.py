@@ -44,7 +44,7 @@ tensors_details_list = interpreter.get_tensor_details()
 #################################################################################################################
 # prepare image
 test_image = \
-'/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized/ILSVRC2012_val_00006950.JPEG'
+'/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized_1000/ILSVRC2012_val_00000932.JPEG'
 #'/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012/ILSVRC2012_val_00018455.JPEG'
 a_test_image = load_img(test_image, target_size=(224, 224))
 if 'inc_' in MODEL_NAME:

@@ -20,7 +20,7 @@ import sys
 proxylessnas_dir = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/proxylessnas'
 sys.path.append(proxylessnas_dir)
 
-RESIZED_DATA_PATH = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized'
+RESIZED_DATA_PATH = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized_1000'
 
 DATA_PATH = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012'
 PREDICTIONS_DIR = 'predictions'

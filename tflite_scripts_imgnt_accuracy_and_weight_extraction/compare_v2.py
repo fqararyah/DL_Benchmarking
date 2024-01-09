@@ -14,7 +14,7 @@ IN_OUT = OUT
 
 to_compare_layer_index = 7
 
-VERY_DIFF_THRESHOLD = 10
+VERY_DIFF_THRESHOLD = 0
 
 ref = ''
 if(len(sys.argv) > 1):
@@ -27,7 +27,7 @@ model_dag = utils.read_model_dag()
 domain_file = './scratch_out/ofms_{}.txt'.format(to_compare_layer_index)
 
 layer_children = model_dag[to_compare_layer_index]["children"]
-if len(layer_children) == 1 and "add" in model_dag[layer_children[0]]["name"]:
+if ref == '' and len(layer_children) == 1 and "add" in model_dag[layer_children[0]]["name"]:
     to_compare_layer_index = model_dag[layer_children[0]]["id"]
 if len(ref)>0:
     range_file = './scratch_out/ofms_{}_ref.txt'.format(to_compare_layer_index)
