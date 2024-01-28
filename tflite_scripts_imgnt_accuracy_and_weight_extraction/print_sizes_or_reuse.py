@@ -19,68 +19,29 @@ activation_resuse_thresholds = {9: 0, 16: 0, 24: 0, 25: 0, 32: 0, 40: 0, 48: 0, 
                                 144: 0, 160: 0, 192: 0, 240: 0, 256: 0, 288: 0, 320: 0, 348: 0, 480: 0, 512: 0, 576: 0, 960: 0, 1000: 0, 1152: 0, 1280: 0}
 
 
-# def print_dw_ops():
-#     layers_num_of_ops = analysis_utils.get_layers_num_of_ops(
-#         layers_inputs, layers_weights, layers_types, layers_strides)
-#     for i in range(len(layers_types)):
-#         if layers_types[i] == 'dw':
-#             print(layers_num_of_ops[i])
-
-
-# def print_weights_sizes(print_it=False):
-#     for weights_shape in layers_weights:
-#         weights_sizes.append(weights_shape.depth * weights_shape.height *
-#                              weights_shape.width * weights_shape.num_of_filters)
-#         if print_it:
-#             print(weights_sizes[-1])
-
-
-# def print_fms_reuse(print_it=False):
-#     i = 0
-#     for weights_shape in layers_weights:
-#         if layers_types[i] == 'pw':
-#             if print_it:
-#                 print(weights_shape.num_of_filters)
-#             activation_reuse.append(weights_shape.num_of_filters)
-#         elif layers_types[i] == 'dw':
-#             if print_it:
-#                 print(weights_shape.height * weights_shape.width)
-#             activation_reuse.append(weights_shape.height * weights_shape.width)
-#         elif layers_types[i] == 's':
-#             if print_it:
-#                 print(weights_shape.height * weights_shape.width *
-#                       weights_shape.num_of_filters)
-#             activation_reuse.append(
-#                 weights_shape.height * weights_shape.width * weights_shape.num_of_filters)
-#         i += 1
-
-
-# def print_fms_sizes(print_it=False):
-#     sum = 0
-#     for i in range(len(layers_inputs)):
-#         activations_sizes.append(layers_inputs[i].depth * layers_inputs[i].height *
-#         layers_inputs[i].width + layers_outputs[i].depth * layers_outputs[i].height *
-#         layers_outputs[i].width)
-#         if print_it:
-#             print(activations_sizes[-1])
-
-#         sum += layers_inputs[i].depth * layers_inputs[i].height * \
-#             layers_inputs[i].width + layers_outputs[i].depth * layers_outputs[i].height * \
-#             layers_outputs[i].width
-#     print('all(in millions):', sum/1000000)
-
-
-# def print_weight_reuse(print_it=False):
-#     for i in range(len(layers_inputs)):
-#         if print_it:
-#             print(layers_outputs[i].height * layers_outputs[i].width)
-#         weight_reuse.append(layers_outputs[i].height * layers_outputs[i].width)
-
 def get_layers_op_counts(model_dag):
 
     layers_num_of_ops = []
     for layer_specs in model_dag:
         if 'type' in layer_specs and layer_specs['type'] in ['s', 'dw', 'pw']:
+            layers_ofms_shape = layer_specs['ofms_shape']
+            layers_weights_shape = layer_specs['weights_shape']
+
+            layer_num_of_ops = 1
+            for i in layers_weights_shape:
+                layer_num_of_ops *= i
+
+            layer_num_of_ops *= layers_ofms_shape[1] * layers_ofms_shape[2]
+
+            layers_num_of_ops.append(2 * layer_num_of_ops)
+
+    return layers_num_of_ops
+
+def get_dw_laye_op_counts(model_dag):
+
+    layers_num_of_ops = []
+    for layer_specs in model_dag:
+        if 'type' in layer_specs and layer_specs['type'] in ['dw']:
             layers_ofms_shape = layer_specs['ofms_shape']
             layers_weights_shape = layer_specs['weights_shape']
 
@@ -202,13 +163,17 @@ weight_sizes = get_weights_sizes(model_dag)
 
 # sum(weight_sizes)
 layers_num_of_ops = get_layers_op_counts(model_dag)
+dw_layers_num_of_ops = get_dw_laye_op_counts(model_dag)
 
-for i in range(len(layers_num_of_ops)):
-    print(layers_num_of_ops[i] / (fms_sizes[i] + weight_sizes[i]))
+sum_ops = sum(layers_num_of_ops)
+sum_dw_ops = sum(dw_layers_num_of_ops)
+print(sum_ops/1000000000)
+print('dw / all:', sum_dw_ops / sum_ops)
+# for i in range(len(layers_num_of_ops)):
+#     print(layers_num_of_ops[i] / (fms_sizes[i] + weight_sizes[i]))
 # print ops
 #sum_ops_so_far = 0
-#sum_ops = sum(layers_num_of_ops)
-# print(sum_ops/1000000000)
+
 # print('***************************************')
 
 # for layer_specs in model_dag:

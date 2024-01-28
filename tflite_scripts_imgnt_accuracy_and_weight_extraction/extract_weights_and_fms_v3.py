@@ -208,6 +208,8 @@ for op_details in ops_details_list:
                 model_dag_entry['type'] = 'dw'
                 model_dag_entry['weights_shape'] = [
                     op_weights_shape[3], op_weights_shape[1], op_weights_shape[2]]
+            elif  op_name in tflite_ops_names.TFLITE_FULLY_CONNECTED_OP_NAMES:
+                model_dag_entry['type'] = 'fc'
             elif op_weights_shape[1] == 1 and op_weights_shape[2] == 1:
                 model_dag_entry['type'] = 'pw'
                 model_dag_entry['weights_shape'] = [
@@ -217,7 +219,6 @@ for op_details in ops_details_list:
                 model_dag_entry['weights_shape'] = [
                     op_weights_shape[0], op_weights_shape[3], op_weights_shape[1], op_weights_shape[2]]
             else:
-                model_dag_entry['type'] = 'fc'
                 model_dag_entry['weights_shape'] = [i for i in op_weights_shape]
 
             if len(op_ifms_tensor_details['shape']) == 4:
