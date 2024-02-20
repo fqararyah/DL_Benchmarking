@@ -5,7 +5,7 @@ import numpy as np
 import sys
 from models_archs import utils
 
-utils.NET_PREFIX = 'mob_v2'
+utils.NET_PREFIX = 'resnet50'
 utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
 IN = 0
@@ -27,7 +27,9 @@ model_dag = utils.read_model_dag()
 domain_file = './scratch_out/ofms_{}.txt'.format(to_compare_layer_index)
 
 layer_children = model_dag[to_compare_layer_index]["children"]
-if ref == '' and len(layer_children) == 1 and "add" in model_dag[layer_children[0]]["name"]:
+fused_with_add =  "add" in model_dag[layer_children[0]]["name"] and \
+      model_dag[layer_children[0]]['id'] == to_compare_layer_index + 1
+if ref == '' and fused_with_add:
     to_compare_layer_index = model_dag[layer_children[0]]["id"]
 if len(ref)>0:
     range_file = './scratch_out/ofms_{}_ref.txt'.format(to_compare_layer_index)

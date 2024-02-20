@@ -236,6 +236,19 @@ for op_details in ops_details_list:
                 model_dag_entry['ifms_shape'][-1] / model_dag_entry['ofms_shape'][-1])
 
     else:
+        if op_name == 'pad':
+            for input_index in op_inputs:
+                input_details = tensors_details_list[input_index]
+                if 'paddings' in input_details['name']:
+                    paddings = interpreter.get_tensor(input_index)
+                    padding_t_b = paddings[1]
+                    padding_l_r = paddings[2]
+                    #print(padding_t_b[0], padding_t_b[1], padding_l_r[0], padding_l_r[1])
+                    model_dag_entry['padding_top'] = int(padding_t_b[0])
+                    model_dag_entry['padding_bottom'] = int(padding_t_b[1])
+                    model_dag_entry['padding_left'] = int(padding_l_r[0])
+                    model_dag_entry['padding_right'] = int(padding_l_r[1])
+
         op_ifms_tensor_details = tensors_details_list[op_input]
         assert(
         len(op_ifms_tensor_details['quantization_parameters']['scales']) == 1)

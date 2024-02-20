@@ -2,7 +2,7 @@ from fcntl import F_SETFL
 from models_archs import utils
 import analysis_utils
 
-MODEL_NAME = 'gprox_3'  # uniform_mobilenetv2_75
+MODEL_NAME = 'mob_v2'  # uniform_mobilenetv2_75
 
 utils.set_globals(MODEL_NAME, MODEL_NAME)
 
@@ -166,9 +166,18 @@ layers_num_of_ops = get_layers_op_counts(model_dag)
 dw_layers_num_of_ops = get_dw_laye_op_counts(model_dag)
 
 sum_ops = sum(layers_num_of_ops)
+
 sum_dw_ops = sum(dw_layers_num_of_ops)
 print(sum_ops/1000000000)
 print('dw / all:', sum_dw_ops / sum_ops)
+
+sum_seml_ops = sum(layers_num_of_ops[7:])
+sum_seml_dw_ops = sum(dw_layers_num_of_ops[2:])
+print('seml dw / seml pw:', sum_seml_dw_ops / (sum_seml_ops - sum_seml_dw_ops) )
+
+print('seml / all: ', sum_seml_ops / sum_ops)
+
+print([layers_num_of_ops[i] / layers_num_of_ops[0] for i in range(20)])
 # for i in range(len(layers_num_of_ops)):
 #     print(layers_num_of_ops[i] / (fms_sizes[i] + weight_sizes[i]))
 # print ops

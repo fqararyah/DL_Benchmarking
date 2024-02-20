@@ -45,12 +45,12 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'mob_v2'
+MODEL_NAME = 'resnet50'
 
 MODEL_PATH = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/'+MODEL_NAME+'.h5'
 PRECISION = 8 #FP32, FP16, INT8
 
-if MODEL_NAME == 'resnet_50':
+if MODEL_NAME == 'resnet50':
     model = model = models.ResNet50()
 elif MODEL_NAME == 'mob_v1':
     model = models.MobileNet()
@@ -156,7 +156,7 @@ if PRECISION == 8:
 prediction_dict_list = []
 
 # limit = len(test_images)
-limit = 1000
+limit = 100
 i = -1
 processed = 0
 while i < limit:
