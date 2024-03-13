@@ -2,7 +2,7 @@ from fcntl import F_SETFL
 from models_archs import utils
 import analysis_utils
 
-MODEL_NAME = 'mob_v2'  # uniform_mobilenetv2_75
+MODEL_NAME = 'xce_r'  # uniform_mobilenetv2_75
 
 utils.set_globals(MODEL_NAME, MODEL_NAME)
 
@@ -55,70 +55,6 @@ def get_dw_laye_op_counts(model_dag):
 
     return layers_num_of_ops
 
-# def reuse_and_ops():
-#     print_weight_reuse()
-#     print_fms_reuse()
-
-#     layers_num_of_ops = analysis_utils.get_layers_num_of_ops(
-#         layers_inputs, layers_weights, layers_types, layers_strides)
-
-#     totla_ops = sum(layers_num_of_ops)
-
-#     for i in range(len(weight_reuse)):
-#         if weight_reuse[i] not in weight_reuse_and_ops:
-#             weight_reuse_and_ops[weight_reuse[i]] = 0
-#         if activation_reuse[i] not in activation_reuse_and_ops:
-#             activation_reuse_and_ops[activation_reuse[i]] = 0
-
-#         weight_reuse_and_ops[weight_reuse[i]] += layers_num_of_ops[i]
-#         activation_reuse_and_ops[activation_reuse[i]] += layers_num_of_ops[i]
-
-#     w_reuse_keys = weight_reuse_and_ops.keys()
-#     w_reuse_vals = weight_reuse_and_ops.values()
-
-#     zipped_lists = zip(w_reuse_keys, w_reuse_vals)
-#     sorted_pairs = sorted(zipped_lists)
-#     tuples = zip(*sorted_pairs)
-#     w_reuse_keys, w_reuse_vals = [list(tuple) for tuple in tuples]
-
-#     for threshold in activation_resuse_thresholds.keys():
-#         for reuse, ops in activation_reuse_and_ops.items():
-#             if reuse >= threshold:
-#                 activation_resuse_thresholds[threshold] += ops
-
-#     for i in range(len(w_reuse_keys) - 2, -1, -1):
-#         w_reuse_vals[i] += w_reuse_vals[i+1]
-
-#     # for i in range(len(a_reuse_keys)):
-#     #     print(a_reuse_keys[i])
-
-#     # print('*****')
-
-#     for thresold, ops in activation_resuse_thresholds.items():
-#         print(ops/totla_ops)
-
-#     print('*****')
-
-#     for i in range(len(w_reuse_keys)):
-#         print(w_reuse_keys[i])
-
-#     print('*****')
-
-#     for i in range(len(w_reuse_keys)):
-#         print(w_reuse_vals[i]/totla_ops)
-
-
-# reuse_and_ops()
-
-# print_fms_reuse()
-# print_fms_sizes(True)
-# print_weight_reuse()
-# print_weights_sizes(True)
-# cumulative_weights_sizes = [0] * len(weights_sizes)
-# for i in range(len(weights_sizes)):
-#     cumulative_weights_sizes[i] =  cumulative_weights_sizes[i-1] + weights_sizes[i]
-#     print(cumulative_weights_sizes[i])
-
 def get_fms_sizes(model_dag):
 
     fms_sizes = []
@@ -161,7 +97,9 @@ weight_sizes = get_weights_sizes(model_dag)
 # for weigh_size in weight_sizes:
 #     print(weigh_size)
 
-# sum(weight_sizes)
+print('weights:', sum(weight_sizes)/1000000)
+print('weights up to:', sum(weight_sizes[:13])/1000000)
+
 layers_num_of_ops = get_layers_op_counts(model_dag)
 dw_layers_num_of_ops = get_dw_laye_op_counts(model_dag)
 

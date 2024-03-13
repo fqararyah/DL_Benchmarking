@@ -3,12 +3,12 @@ import numpy as np
 from models_archs import utils
 
 
-utils.NET_PREFIX = 'mob_v2'
+utils.NET_PREFIX = 'resnet50'
 utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
 model_dag = utils.read_model_dag()
 
-layer_index = 9
+layer_index = 7
 
 layer_specs = model_dag[layer_index]
 
@@ -90,13 +90,17 @@ def conv():
                 if i == 0 and j == 0 and k == 0:
                     print(filter_height)
                     print(filter_width)
-                    print(np.sum(weights[i].astype(np.int32) * (ifms[:, j*conv_strides:j*conv_strides + filter_height,
+                    print(np.sum(weights[i, 0:32].astype(np.int32) * (ifms[0:32, j*conv_strides:j*conv_strides + filter_height,
+                                                                                 k*conv_strides:k*conv_strides + filter_width])))
+                    print(np.sum(weights[i, 32:].astype(np.int32) * (ifms[32:, j*conv_strides:j*conv_strides + filter_height,
                                                                                  k*conv_strides:k*conv_strides + filter_width])))
                     # print(weights[i, 31, :])
                 tmp = tmp * layers_scale_ifms * \
                     layers_scale_weights[layer_index][i]
                 if layer_activation == 'RELU6':
                     tmp = min(max(tmp, 0), 6)
+                elif layer_activation == 'RELU':
+                    tmp = max(tmp, 0)
                 tmp = tmp / \
                     layers_scale_ofms + \
                     layers_ofms_zero_point
@@ -105,6 +109,8 @@ def conv():
                 else:
                     tmp = int(tmp - 0.5)
                 ofms[i][j][k] = tmp
+                if i == 0 and j == 0 and k == 0:
+                    print(tmp)
 
 
 def dw_conv():

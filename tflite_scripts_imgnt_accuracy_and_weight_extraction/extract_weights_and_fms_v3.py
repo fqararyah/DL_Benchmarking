@@ -21,7 +21,7 @@ import tflite_ops_names
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'mob_v2'
+MODEL_NAME = 'resnet152'
 
 # from generic to specific (for string matching)
 ACTIVATION_FUNCTIONS = ['relu6', 'relu']
@@ -250,15 +250,19 @@ for op_details in ops_details_list:
                     model_dag_entry['padding_right'] = int(padding_l_r[1])
 
         op_ifms_tensor_details = tensors_details_list[op_input]
-        assert(
-        len(op_ifms_tensor_details['quantization_parameters']['scales']) == 1)
-        model_dag_entry['ifms_scales'] = float(
-            op_ifms_tensor_details['quantization_parameters']['scales'][0])
-        assert(
-            len(op_ifms_tensor_details['quantization_parameters']['zero_points']) == 1)
-        model_dag_entry['ifms_zero_points'] = int(
-            op_ifms_tensor_details['quantization_parameters']['zero_points'][0])
-    
+        # assert(
+        if len(op_ifms_tensor_details['quantization_parameters']['scales']) == 1:
+            model_dag_entry['ifms_scales'] = float(
+                op_ifms_tensor_details['quantization_parameters']['scales'][0])
+        else:
+            model_dag_entry['ifms_scales'] = 1.0
+
+        if len(op_ifms_tensor_details['quantization_parameters']['zero_points']) == 1:
+            model_dag_entry['ifms_zero_points'] = int(
+                op_ifms_tensor_details['quantization_parameters']['zero_points'][0])
+        else:
+            model_dag_entry['ifms_zero_points'] = 0
+            
         op_ifms_tensor_details = tensors_details_list[op_inputs[-1]]
         model_dag_entry['ifms_shape'] = [
             int(i) for i in op_ifms_tensor_details['shape']]

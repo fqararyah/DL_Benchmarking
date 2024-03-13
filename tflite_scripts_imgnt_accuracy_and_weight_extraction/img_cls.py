@@ -45,13 +45,15 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'resnet50'
+MODEL_NAME = 'resnet152'
 
 MODEL_PATH = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/'+MODEL_NAME+'.h5'
 PRECISION = 8 #FP32, FP16, INT8
 
 if MODEL_NAME == 'resnet50':
     model = model = models.ResNet50()
+elif MODEL_NAME == 'resnet152':
+    model = model = models.ResNet152()
 elif MODEL_NAME == 'mob_v1':
     model = models.MobileNet()
 elif MODEL_NAME == 'mob_v1_0_5':

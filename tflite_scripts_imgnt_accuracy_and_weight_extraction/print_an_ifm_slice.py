@@ -8,7 +8,7 @@ import sys
 model = 'resnet50'
 utils.set_globals(model, model)
 
-to_print_layer_index = 3
+to_print_layer_index = 7
 slice_index = 0
 slice_direction = 0
 directions_map = {0:'hw', 1:'hd'}
