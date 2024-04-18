@@ -3,12 +3,12 @@ import numpy as np
 from models_archs import utils
 
 
-utils.NET_PREFIX = 'resnet50'
+utils.NET_PREFIX = 'mob_v2'
 utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
 model_dag = utils.read_model_dag()
 
-layer_index = 7
+layer_index = 3
 
 layer_specs = model_dag[layer_index]
 
@@ -43,6 +43,7 @@ layers_weights_shape = layer_specs['weights_shape']
 layers_ifms_shape = layer_specs['ifms_shape']
 ofms_shape = layer_specs['ofms_shape']
 layer_activation = layer_specs['activation']
+print(layer_activation)
 
 weights = np.loadtxt(weights_file).astype(np.int8)
 if layer_type == 'pw':
@@ -90,10 +91,12 @@ def conv():
                 if i == 0 and j == 0 and k == 0:
                     print(filter_height)
                     print(filter_width)
-                    print(np.sum(weights[i, 0:32].astype(np.int32) * (ifms[0:32, j*conv_strides:j*conv_strides + filter_height,
+                    print('sum: ', np.sum(weights[i, :].astype(np.int32) * (ifms[:, j*conv_strides:j*conv_strides + filter_height,
                                                                                  k*conv_strides:k*conv_strides + filter_width])))
-                    print(np.sum(weights[i, 32:].astype(np.int32) * (ifms[32:, j*conv_strides:j*conv_strides + filter_height,
-                                                                                 k*conv_strides:k*conv_strides + filter_width])))
+                    # print(np.sum(weights[i, 0:32].astype(np.int32) * (ifms[0:32, j*conv_strides:j*conv_strides + filter_height,
+                    #                                                              k*conv_strides:k*conv_strides + filter_width])))
+                    # print(np.sum(weights[i, 32:].astype(np.int32) * (ifms[32:, j*conv_strides:j*conv_strides + filter_height,
+                    #                                                              k*conv_strides:k*conv_strides + filter_width])))
                     # print(weights[i, 31, :])
                 tmp = tmp * layers_scale_ifms * \
                     layers_scale_weights[layer_index][i]
@@ -121,7 +124,7 @@ def dw_conv():
                     np.sum(weights[i].astype(np.float32) * ifms[i, j*conv_strides:j*conv_strides +
                                                                 filter_height, k*conv_strides:k*conv_strides + filter_width]) + layers_bias[layer_index][i]
 
-                if layer_index == 7 and i == 11 and j == 3:
+                if layer_index == 7 and i == 0 and j == 0:
                     scale_w_i_o = int(0.017232311889529228 * (2**32))
                     tmp = ((int(tmp * scale_w_i_o + (2**32)) >> 32) - 128)
                     print(tmp)
@@ -143,7 +146,7 @@ def dw_conv():
 res = 0
 if layer_type == 'pw':
     for k in range(layers_weights_shape[1]):
-        res += ifms[k][0][0] * weights[0][k].astype(np.int32)
+        res += ifms[k][111][1] * weights[0][k].astype(np.int32)
 elif layer_type == 'dw':
     print(weights[125,:,:])
     print(ifms[125,18:21, 40: 43])

@@ -5,30 +5,39 @@ import numpy as np
 from models_archs import utils
 import sys
 
-model = 'resnet50'
+model = 'mob_v2'
 utils.set_globals(model, model)
 
 to_print_layer_index = 7
 slice_index = 0
 slice_direction = 0
 directions_map = {0:'hw', 1:'hd'}
-
+from_scratch = False
 
 if(len(sys.argv) > 1):
     to_print_layer_index = int(sys.argv[1])
 if(len(sys.argv) > 2):
     slice_index = int(sys.argv[2])
 if(len(sys.argv) > 3):
-    slice_direction = int(sys.argv[3])
+    from_scratch = True
+if(len(sys.argv) > 4):
+    slice_direction = int(sys.argv[4])
 
 
 model_dag = utils.read_model_dag()
 layer_ifms_shape = model_dag[to_print_layer_index]['ifms_shape']
-
+if from_scratch:
+    layer_ifms_shape = model_dag[to_print_layer_index]['ofms_shape']
+    
 ifms_file = './{}/fms/ifms_{}.txt'.format(utils.NET_PREFIX, to_print_layer_index)
+if from_scratch:
+    ifms_file = './scratch_out/ofms_{}_ref.txt'.format(to_print_layer_index)
 
 slice_file = './scratch_out/ifms_{}_slice_{}_{}.txt'.format(to_print_layer_index, slice_index, directions_map[slice_direction])
 
+if from_scratch:
+    slice_file = './scratch_out/ofms_{}_slice_{}_{}.txt'.format(to_print_layer_index, slice_index, directions_map[slice_direction])
+    
 arr = np.loadtxt(ifms_file).astype(np.int8)
 
 arr = np.reshape(arr, (layer_ifms_shape[0], layer_ifms_shape[1],layer_ifms_shape[2]))

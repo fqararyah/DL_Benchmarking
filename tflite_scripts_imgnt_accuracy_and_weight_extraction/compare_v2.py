@@ -5,7 +5,7 @@ import numpy as np
 import sys
 from models_archs import utils
 
-utils.NET_PREFIX = 'resnet50'
+utils.NET_PREFIX = 'mob_v2'
 utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
 IN = 0
@@ -14,7 +14,7 @@ IN_OUT = OUT
 
 to_compare_layer_index = 7
 
-VERY_DIFF_THRESHOLD = 0
+VERY_DIFF_THRESHOLD = 5
 
 ref = ''
 if(len(sys.argv) > 1):
@@ -98,9 +98,10 @@ for i in range(min(rng.size, domain.size)):
 
 count = 0
 for key, val in diff_locs.items():
-    print(key, val)
-    print('***************')
-    count += 1
+    if key[1] == 3 or 1 == 1:
+        print(key, val)
+        print('***************')
+        count += 1
     if count > 100:
         break
 

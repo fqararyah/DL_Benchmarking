@@ -199,3 +199,39 @@ def read_model_dag():
 def read_model_dag_file(dag_file):
     f = open(dag_file)
     return json.load(f)
+
+def get_layers_op_counts(model_dag):
+
+    layers_num_of_ops = []
+    for layer_specs in model_dag:
+        if 'type' in layer_specs and layer_specs['type'] in ['s', 'dw', 'pw']:
+            layers_ofms_shape = layer_specs['ofms_shape']
+            layers_weights_shape = layer_specs['weights_shape']
+
+            layer_num_of_ops = 1
+            for i in layers_weights_shape:
+                layer_num_of_ops *= i
+
+            layer_num_of_ops *= layers_ofms_shape[1] * layers_ofms_shape[2]
+
+            layers_num_of_ops.append(2 * layer_num_of_ops)
+
+    return layers_num_of_ops
+
+def get_dw_laye_op_counts(model_dag):
+
+    layers_num_of_ops = []
+    for layer_specs in model_dag:
+        if 'type' in layer_specs and layer_specs['type'] in ['dw']:
+            layers_ofms_shape = layer_specs['ofms_shape']
+            layers_weights_shape = layer_specs['weights_shape']
+
+            layer_num_of_ops = 1
+            for i in layers_weights_shape:
+                layer_num_of_ops *= i
+
+            layer_num_of_ops *= layers_ofms_shape[1] * layers_ofms_shape[2]
+
+            layers_num_of_ops.append(2 * layer_num_of_ops)
+
+    return layers_num_of_ops
