@@ -11,10 +11,11 @@ utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 IN = 0
 OUT = 1
 IN_OUT = OUT 
+DISPLAY_VALS = 1000
 
 to_compare_layer_index = 7
 
-VERY_DIFF_THRESHOLD = 5
+VERY_DIFF_THRESHOLD = 1
 
 ref = ''
 if(len(sys.argv) > 1):
@@ -102,7 +103,7 @@ for key, val in diff_locs.items():
         print(key, val)
         print('***************')
         count += 1
-    if count > 100:
+    if count > DISPLAY_VALS:
         break
 
 num_elements = cnt1 + cnt2
@@ -114,5 +115,5 @@ else:
     print(sum)
     print(sum/rng.size)
     print('equal: ', cnt1 / num_elements)
-    print('different: ', cnt2 / num_elements)
+    print('different: ', cnt2, cnt2 / num_elements)
     print('very different: ', cnt3 / num_elements)

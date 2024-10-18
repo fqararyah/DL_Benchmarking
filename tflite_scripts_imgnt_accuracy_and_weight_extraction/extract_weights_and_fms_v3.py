@@ -21,7 +21,7 @@ import tflite_ops_names
 # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 #################################################################################################################
-MODEL_NAME = 'resnet152'
+MODEL_NAME = 'xce_r'
 
 # from generic to specific (for string matching)
 ACTIVATION_FUNCTIONS = ['relu6', 'relu']
@@ -127,9 +127,17 @@ for op_details in ops_details_list:
 
     if op_name in tflite_ops_names.TFLITE_CONV_OP_NAMES or op_name in tflite_ops_names.TFLITE_FULLY_CONNECTED_OP_NAMES:
         # assuming the op_inputs are of the weights, then the biases, theen the IFMs (based on my observation)
-        if op_inputs[0] < 0 or op_inputs[1] < 0 or op_inputs[-1] < 0:
-              print(op_name, 'has missing tensors')
-        else:
+        missing = 0
+        if op_inputs[0] < 0:
+            print(op_name, 'has missing tensors (weights)')
+            missing = 1
+        if op_inputs[1] < 0:
+            print(op_name, 'has missing tensors (bias)')
+            missing = 1
+        if op_inputs[-1] < 0:
+            print(op_name, 'has missing tensors (ifm)')
+            missing = 1
+        if missing == 0:
             op_ifms_tensor = interpreter.get_tensor(op_inputs[-1]) #inputs tensor
             op_ifms_tensor_details = tensors_details_list[op_inputs[-1]]
             op_weights_tensor = interpreter.get_tensor(op_inputs[0]) #weights tensor
@@ -210,6 +218,8 @@ for op_details in ops_details_list:
                     op_weights_shape[3], op_weights_shape[1], op_weights_shape[2]]
             elif  op_name in tflite_ops_names.TFLITE_FULLY_CONNECTED_OP_NAMES:
                 model_dag_entry['type'] = 'fc'
+                model_dag_entry['weights_shape'] = [
+                    op_weights_shape[0], op_weights_shape[1]]
             elif op_weights_shape[1] == 1 and op_weights_shape[2] == 1:
                 model_dag_entry['type'] = 'pw'
                 model_dag_entry['weights_shape'] = [
@@ -224,16 +234,19 @@ for op_details in ops_details_list:
             if len(op_ifms_tensor_details['shape']) == 4:
                 model_dag_entry['ifms_shape'] = [int(op_ifms_tensor_details['shape'][3]), int(op_ifms_tensor_details['shape'][1]),
                                                 int(op_ifms_tensor_details['shape'][2])]
-                model_dag_entry['ofms_shape'] = [int(op_ofms_tensor_details['shape'][3]), int(op_ofms_tensor_details['shape'][1]),
-                                                int(op_ofms_tensor_details['shape'][2])]
             else:
                 model_dag_entry['ifms_shape'] = [
                     int(i) for i in op_ifms_tensor_details['shape']]
+                
+            if len(op_ofms_tensor_details['shape']) == 4:
+                model_dag_entry['ofms_shape'] = [int(op_ofms_tensor_details['shape'][3]), int(op_ofms_tensor_details['shape'][1]),
+                                                int(op_ofms_tensor_details['shape'][2])]
+            else:
                 model_dag_entry['ofms_shape'] = [
                     int(i) for i in op_ofms_tensor_details['shape']]
 
-            model_dag_entry['strides'] = int(
-                model_dag_entry['ifms_shape'][-1] / model_dag_entry['ofms_shape'][-1])
+            model_dag_entry['strides'] = int(round(
+                model_dag_entry['ifms_shape'][-1] / model_dag_entry['ofms_shape'][-1]))
 
     else:
         if op_name == 'pad':
@@ -264,10 +277,19 @@ for op_details in ops_details_list:
             model_dag_entry['ifms_zero_points'] = 0
             
         op_ifms_tensor_details = tensors_details_list[op_inputs[-1]]
-        model_dag_entry['ifms_shape'] = [
-            int(i) for i in op_ifms_tensor_details['shape']]
-        model_dag_entry['ofms_shape'] = [
-            int(i) for i in op_ofms_tensor_details['shape']]
+        if len(op_ifms_tensor_details['shape']) == 4:
+                model_dag_entry['ifms_shape'] = [int(op_ifms_tensor_details['shape'][3]), int(op_ifms_tensor_details['shape'][1]),
+                                                int(op_ifms_tensor_details['shape'][2])]
+        else:
+            model_dag_entry['ifms_shape'] = [
+                int(i) for i in op_ifms_tensor_details['shape']]
+            
+        if len(op_ofms_tensor_details['shape']) == 4:
+            model_dag_entry['ofms_shape'] = [int(op_ofms_tensor_details['shape'][3]), int(op_ofms_tensor_details['shape'][1]),
+                                            int(op_ofms_tensor_details['shape'][2])]
+        else:
+            model_dag_entry['ofms_shape'] = [
+                int(i) for i in op_ofms_tensor_details['shape']]
         
         op_ifms_tensor = interpreter.get_tensor(op_inputs[-1])
         op_ifms_tensor = np.squeeze(op_ifms_tensor)

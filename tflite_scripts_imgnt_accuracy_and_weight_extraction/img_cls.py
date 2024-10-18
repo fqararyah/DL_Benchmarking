@@ -13,17 +13,14 @@ import tensorflow.keras.applications as models
 from MnasNet_models.MnasNet_models import Build_MnasNet
 import time
 import pathlib
-#from keras_squeezenet import SqueezeNet
-
 import sys
 
-proxylessnas_dir = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/proxylessnas'
-sys.path.append(proxylessnas_dir)
-
 RESIZED_DATA_PATH = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized_1000'
-
 DATA_PATH = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012'
 PREDICTIONS_DIR = 'predictions'
+MODEL_NAME = 'resnet152'
+MODEL_PATH = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/'+MODEL_NAME+'.h5'
+PRECISION = 8 #FP32, FP16, INT8
 
 fibha_images = {}
 with open('predictions_cpu.json') as json_file:
@@ -45,11 +42,6 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-MODEL_NAME = 'resnet152'
-
-MODEL_PATH = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/'+MODEL_NAME+'.h5'
-PRECISION = 8 #FP32, FP16, INT8
-
 if MODEL_NAME == 'resnet50':
     model = model = models.ResNet50()
 elif MODEL_NAME == 'resnet152':
@@ -68,6 +60,8 @@ elif MODEL_NAME == 'mob_v2_0_25':
     model = models.MobileNetV2(alpha=0.35)
 elif MODEL_NAME == 'eff_b0':
     model = models.EfficientNetB0()
+elif MODEL_NAME == 'dense121':
+    model = models.DenseNet121()
 elif MODEL_NAME == 'nas':
     model = models.NASNetMobile()
 elif MODEL_NAME == 'mnas':

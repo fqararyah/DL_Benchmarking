@@ -2,7 +2,7 @@ from fcntl import F_SETFL
 from models_archs import utils
 import analysis_utils
 
-MODEL_NAME = 'mob_v1'  # uniform_mobilenetv2_75
+MODEL_NAME = 'resnet50'  # uniform_mobilenetv2_75
 
 utils.set_globals(MODEL_NAME, MODEL_NAME)
 
@@ -91,13 +91,14 @@ weight_sizes = get_weights_sizes(model_dag)
 #     print(weigh_size)
 
 print('weights:', sum(weight_sizes)/1000000)
-print('weights up to:', sum(weight_sizes[:13])/1000000)
+print('weights up to:', weight_sizes[:6])
+print('weights up to:', sum(weight_sizes[:13])/1024)
 
 layers_num_of_ops = utils.get_layers_op_counts(model_dag)
 dw_layers_num_of_ops = utils.get_dw_laye_op_counts(model_dag)
 
 sum_ops = sum(layers_num_of_ops)
-sesl_ops = sum(layers_num_of_ops[0:6])
+sesl_ops = sum(layers_num_of_ops[0:7])
 
 sum_dw_ops = sum(dw_layers_num_of_ops)
 print('GOPs:', sum_ops/1000000000)
@@ -114,7 +115,7 @@ print('seml / all: ', sum_seml_ops / sum_ops)
 print('sesl / all: ', sesl_ops / sum_ops)
 print('sesl / seml: ', sesl_ops / sum_seml_ops)
 
-print([layers_num_of_ops[i] / sum_ops for i in range(len(layers_num_of_ops))])
+#print([layers_num_of_ops[i] / sum_ops for i in range(len(layers_num_of_ops))])
 # for i in range(len(layers_num_of_ops)):
 #     print(layers_num_of_ops[i] / (fms_sizes[i] + weight_sizes[i]))
 # print ops
@@ -128,5 +129,5 @@ print([layers_num_of_ops[i] / sum_ops for i in range(len(layers_num_of_ops))])
 
 layers_overheads = get_layers_overheads(model_dag, layers_num_of_ops, 8, 8, 8)
 
-print([layers_overheads[i] / layers_num_of_ops[i] for i in range(len(layers_num_of_ops))])
+#print([layers_overheads[i] / layers_num_of_ops[i] for i in range(len(layers_num_of_ops))])
 print('all overhead:', sum(layers_overheads) / sum_ops)
