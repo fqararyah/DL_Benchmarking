@@ -23,3 +23,6 @@ tflite_scripts_imgnt_accuracy_and_weight_extraction/**/*.txt
 *.jou
 *.str
 *.cache
+
+# Track all files in lab2, including files in normally ignored directories.
+!/lab2/**
