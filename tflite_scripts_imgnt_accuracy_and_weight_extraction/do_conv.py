@@ -3,12 +3,15 @@ import numpy as np
 from models_archs import utils
 
 
-utils.NET_PREFIX = 'resnet50'
+utils.NET_PREFIX = 'mob_v2'
 utils.set_globals(utils.NET_PREFIX, utils.NET_PREFIX)
 
 model_dag = utils.read_model_dag()
 
-layer_index = 7
+layer_index = 28
+col = 0
+row = 0
+filter = 0
 
 layer_specs = model_dag[layer_index]
 
@@ -146,7 +149,8 @@ def dw_conv():
 res = 0
 if layer_type == 'pw':
     for k in range(layers_weights_shape[1]):
-        res += ifms[k][111][1] * weights[0][k].astype(np.int32)
+        res += ifms[k][row][col] * weights[filter][k].astype(np.int32)
+        print(ifms[k][0][0], weights[0][k])
 elif layer_type == 'dw':
     print(weights[125,:,:])
     print(ifms[125,18:21, 40: 43])
@@ -160,6 +164,7 @@ else:
                 res += ifms[k][l][m] * weights[0][k][l][m].astype(np.int32)
                 if l == 0 and m == 0:
                     print(ifms[k][l][m], '*', weights[0][k][l][m])
+
 print('res:', res)
 
 

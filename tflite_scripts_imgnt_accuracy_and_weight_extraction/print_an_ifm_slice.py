@@ -19,10 +19,11 @@ if(len(sys.argv) > 1):
 if(len(sys.argv) > 2):
     slice_index = int(sys.argv[2])
 if(len(sys.argv) > 3):
-    from_scratch = True
+    slice_direction = int(sys.argv[3])
 if(len(sys.argv) > 4):
-    slice_direction = int(sys.argv[4])
+    from_scratch = True
 
+print(from_scratch)
 
 model_dag = utils.read_model_dag()
 layer_ifms_shape = model_dag[to_print_layer_index]['ifms_shape']

@@ -14,11 +14,17 @@ from MnasNet_models.MnasNet_models import Build_MnasNet
 import time
 import pathlib
 import sys
+from tensorflow.keras.applications import (
+    VGG16, VGG19, ResNet50, ResNet101, ResNet152, ResNet50V2, ResNet101V2, ResNet152V2,
+    InceptionV3, Xception, MobileNet, MobileNetV2, DenseNet121, DenseNet169, DenseNet201,
+    NASNetMobile, NASNetLarge, EfficientNetB0, EfficientNetB1, EfficientNetB2,
+    EfficientNetB3, EfficientNetB4, EfficientNetB5, EfficientNetB6, EfficientNetB7
+)
 
 RESIZED_DATA_PATH = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized_1000'
 DATA_PATH = '/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012'
 PREDICTIONS_DIR = 'predictions'
-MODEL_NAME = 'resnet152'
+MODEL_NAME = 'efficientnetb7'
 MODEL_PATH = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/embdl/'+MODEL_NAME+'.h5'
 PRECISION = 8 #FP32, FP16, INT8
 
@@ -42,54 +48,35 @@ def locate_images(path):
 
 test_images = locate_images(DATA_PATH)
 
-if MODEL_NAME == 'resnet50':
-    model = model = models.ResNet50()
-elif MODEL_NAME == 'resnet152':
-    model = model = models.ResNet152()
-elif MODEL_NAME == 'mob_v1':
-    model = models.MobileNet()
-elif MODEL_NAME == 'mob_v1_0_5':
-    model = models.MobileNet(alpha=0.5)
-elif MODEL_NAME == 'mob_v2':
-    model = models.MobileNetV2()
-elif MODEL_NAME == 'mob_v2_0_5':
-    model = models.MobileNetV2(alpha=0.5)
-elif MODEL_NAME == 'mob_v2_0_75':
-    model = models.MobileNetV2(alpha=0.75)
-elif MODEL_NAME == 'mob_v2_0_25':
-    model = models.MobileNetV2(alpha=0.35)
-elif MODEL_NAME == 'eff_b0':
-    model = models.EfficientNetB0()
-elif MODEL_NAME == 'dense121':
-    model = models.DenseNet121()
-elif MODEL_NAME == 'nas':
-    model = models.NASNetMobile()
-elif MODEL_NAME == 'mnas':
-    model = Build_MnasNet('b1')
-elif MODEL_NAME == 'prox':
-    model = Build_MnasNet('prox')
-elif MODEL_NAME == 'mprox':
-    model = Build_MnasNet('mprox')
-elif MODEL_NAME == 'gprox_3':
-    model = Build_MnasNet('gprox_3')
-elif MODEL_NAME in ['eff_b0_ns_ns', 'eff_b0_no_sig', 'eff_b0_ns']:
-    model = tf.keras.models.load_model(MODEL_PATH)
-elif MODEL_NAME == 'inc_v3':
-    model = models.InceptionV3()
-elif MODEL_NAME == 'Xce':
-    model = models.Xception()
-elif MODEL_NAME == 'xce_r':
-    model = models.Xception(input_shape=(224, 224, 3), weights=None)
-elif MODEL_NAME == 'vgg16':
-    model = models.VGG16()
-elif MODEL_NAME == 'vgg19':
-    model = models.VGG19()
-elif MODEL_NAME == 'resnet101':
-    model = models.ResNet101()
-elif MODEL_NAME == 'squ':
-    model = tf.keras.models.load_model('./squ_inout')
-else:
-    model = tf.keras.models.load_model(MODEL_PATH)
+model_map = {
+    "vgg16": VGG16,
+    "vgg19": VGG19,
+    "resnet50": ResNet50,
+    "resnet101": ResNet101,
+    "resnet152": ResNet152,
+    "resnet50v2": ResNet50V2,
+    "resnet101v2": ResNet101V2,
+    "resnet152v2": ResNet152V2,
+    "inceptionv3": InceptionV3,
+    "xception": Xception,
+    "mobilenet": MobileNet,
+    "mobilenetv2": MobileNetV2,
+    "densenet121": DenseNet121,
+    "densenet169": DenseNet169,
+    "densenet201": DenseNet201,
+    "nasnetmobile": NASNetMobile,
+    "nasnetlarge": NASNetLarge,
+    "efficientnetb0": EfficientNetB0,
+    "efficientnetb1": EfficientNetB1,
+    "efficientnetb2": EfficientNetB2,
+    "efficientnetb3": EfficientNetB3,
+    "efficientnetb4": EfficientNetB4,
+    "efficientnetb5": EfficientNetB5,
+    "efficientnetb6": EfficientNetB6,
+    "efficientnetb7": EfficientNetB7,
+}
+
+model = model_map[MODEL_NAME](weights=None)
 
 # print(model.summary())
 # exit()
@@ -152,7 +139,7 @@ if PRECISION == 8:
 prediction_dict_list = []
 
 # limit = len(test_images)
-limit = 100
+limit = 10
 i = -1
 processed = 0
 while i < limit:
