@@ -12,6 +12,7 @@ variables
 *.txt
 */*.txt
 !commands.txt
+!arb/**
 **/weights
 **/fms
 **/scratch_out
