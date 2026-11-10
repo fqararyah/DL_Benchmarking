@@ -1,0 +1,152 @@
+# =====================================================================
+#  LAB 2 - DVFS, Governors & the Energy-Performance Pareto
+#  All the commands of the lab document, in the same order.
+#  Copy them from here (not from the PDF). Lines starting with # are comments.
+#  set_governor.sh and set_freq.sh need sudo; the other scripts do not.
+# =====================================================================
+
+
+# ---------------------------------------------------------------------
+# PREPARATION - check that the software is installed
+# ---------------------------------------------------------------------
+python3 -c "import matplotlib, numpy; print('python libraries OK')"
+gcc --version
+vcgencmd measure_temp
+
+
+# ---------------------------------------------------------------------
+# TASK 1 - Warm-up: governors, frequencies and the roofline
+# ---------------------------------------------------------------------
+cd /home/dat278/labs/lab2
+./status.sh
+
+sudo ./set_governor.sh performance
+sudo ./set_governor.sh powersave
+sudo ./set_governor.sh ondemand
+
+# Roofline at the minimum frequency
+cd /home/dat278/labs/lab2
+sudo ./set_freq.sh 1500
+cd lab1/roofline_emp
+./run_peak_flops.sh
+./run_stream_bench.sh
+cd ../comp-b_vs_mem-b
+./run_kernels.sh
+cd ..
+# Update both files with the values you just measured (as in Lab 1)
+nano inp/hw_specs.json
+nano inp/kernel_specs.json
+python3 draw_roofline.py 1500      # plot: lab1/out/roofline_1500.png
+
+# Roofline at the maximum frequency
+cd /home/dat278/labs/lab2
+sudo ./set_freq.sh 2400
+cd lab1/roofline_emp
+./run_peak_flops.sh
+./run_stream_bench.sh
+cd ../comp-b_vs_mem-b
+./run_kernels.sh
+cd ..
+# Update both files with the values you just measured (as in Lab 1)
+nano inp/hw_specs.json
+nano inp/kernel_specs.json
+python3 draw_roofline.py 2400      # plot: lab1/out/roofline_2400.png
+
+
+# ---------------------------------------------------------------------
+# TASK 2 - External vs. internal power (idle, 10 seconds)
+# ---------------------------------------------------------------------
+cd /home/dat278/labs/lab2
+./utils/power_wrapper.sh sleep 10
+
+
+# ---------------------------------------------------------------------
+# TASK 3 - Measure the existing modes (every setting twice)
+# ---------------------------------------------------------------------
+# Turn off the GUI (mandatory for Tasks 3 and 4). If you see only a blinking dash, press
+# Ctrl+Alt+F2 (or F3). Log in as dat278 and TYPE the commands below (copying is not possible there).
+sudo systemctl isolate multi-user.target
+cd /home/dat278/labs/lab2
+
+# Performance mode
+sudo ./set_governor.sh performance
+./run.sh matmul
+./run.sh matmul
+./run.sh triad
+./run.sh triad
+
+# Battery saver mode
+sudo ./set_governor.sh powersave
+./run.sh matmul
+./run.sh matmul
+./run.sh triad
+./run.sh triad
+
+# Built-in dynamic governors
+sudo ./set_governor.sh ondemand
+./run.sh matmul
+./run.sh matmul
+./run.sh triad
+./run.sh triad
+sudo ./set_governor.sh schedutil
+./run.sh matmul
+./run.sh matmul
+./run.sh triad
+./run.sh triad
+
+# Look at your measurements (one row per run)
+cat data/results.csv
+
+
+# ---------------------------------------------------------------------
+# TASK 4 - Build the Pareto curves (same points for every group, twice each)
+# ---------------------------------------------------------------------
+sudo ./set_freq.sh 1800
+./run.sh matmul
+./run.sh matmul
+./run.sh triad
+./run.sh triad
+sudo ./set_freq.sh 2000
+./run.sh matmul
+./run.sh matmul
+./run.sh triad
+./run.sh triad
+sudo ./set_freq.sh 2200
+./run.sh matmul
+./run.sh matmul
+./run.sh triad
+./run.sh triad
+
+# Check: removes disturbed runs and prints the commands to repeat them.
+# Repeat those commands and run the check again until it prints "All measurements OK".
+python3 check_results.py
+
+# Back to the default governor and GUI on again
+sudo ./set_governor.sh ondemand
+sudo systemctl isolate graphical.target
+
+# Pareto curves (in a new terminal: cd /home/dat278/labs/lab2)
+python3 plot_pareto.py matmul
+python3 plot_pareto.py triad
+
+
+# ---------------------------------------------------------------------
+# TASK 5 - Design the Balanced mode (no commands: choose on the Pareto plots of Task 4)
+# ---------------------------------------------------------------------
+
+
+# ---------------------------------------------------------------------
+# TASK 6 - Battery (no commands: use the table printed by plot_pareto.py)
+# ---------------------------------------------------------------------
+# Battery: 10000 mAh x 5 V = 50 Wh = 180000 J
+#   hours of battery = 180000 / (average power in W * 3600)
+#   runs per charge  = 180000 / (energy per run in J)
+
+
+# ---------------------------------------------------------------------
+# USEFUL
+# ---------------------------------------------------------------------
+./status.sh                      # what is the Pi set to right now?
+cat data/results.csv             # all your runs
+cat data/removed.csv             # runs removed by check_results.py
+nano data/results.csv            # delete a bad (throttled) row
