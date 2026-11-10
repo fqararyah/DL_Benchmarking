@@ -14,7 +14,9 @@ cd "$(dirname "$0")"          # so the relative paths below work from any folder
 
 POLICY=/sys/devices/system/cpu/cpufreq/policy0
 RESULTS=data/results.csv
-TEMP_LIMIT=55                 # C: if the CPU is hotter than this, wait before running
+TEMP_LIMIT=55                 # C: a run only starts when the CPU is at or below this
+PASS_TIME=30                  # s: length of one cooling pass (temperature checked every 5 s)
+PASSES=2                      # number of cooling passes before giving up
 
 # ---- 1. Which kernel? ---------------------------------------------------------
 case "$1" in
@@ -34,20 +36,44 @@ else
 fi
 
 # ---- 3. Wait until the CPU has cooled down -------------------------------------
+# Up to PASSES passes of PASS_TIME seconds. The run starts as soon as the CPU is
+# cool enough. If it is still too hot after the last pass, something keeps the CPU
+# warm (programs in the background, GUI, fan): stop and tell the user.
 get_temp() { vcgencmd measure_temp | tr -dc '0-9.'; }   # "temp=52.1'C" -> 52.1
+too_hot()  { (( $(get_temp | cut -d. -f1) > TEMP_LIMIT )); }
 
-TEMP_START=$(get_temp)
-while (( ${TEMP_START%.*} > TEMP_LIMIT )); do
-  echo "CPU at ${TEMP_START} C (limit ${TEMP_LIMIT} C) - cooling down..."
-  sleep 5
-  TEMP_START=$(get_temp)
+for (( pass = 1; pass <= PASSES; pass++ )); do
+  waited=0
+  while too_hot && (( waited < PASS_TIME )); do
+    echo "CPU at $(get_temp) C (limit ${TEMP_LIMIT} C) - cooling down: pass $pass of $PASSES, ${waited}/${PASS_TIME} s"
+    sleep 5
+    waited=$(( waited + 5 ))
+  done
+  too_hot || break
 done
 
+if too_hot; then
+  echo "ERROR: the CPU is still at $(get_temp) C after $(( PASSES * PASS_TIME )) s (limit ${TEMP_LIMIT} C)."
+  echo "Nothing was run or saved. Close all other programs (VS Code, browser, ...),"
+  echo "make sure the GUI is off, check the fan with ./status.sh, or reboot."
+  echo "Then run the same command again."
+  exit 1
+fi
+TEMP_START=$(get_temp)
+
 # ---- 4. Run the kernel and measure time, power and energy ----------------------
-echo "=== Running $1 | setting: $SETTING | start temp: ${TEMP_START} C ==="
+# Run number = runs of this kernel + setting already in results.csv, plus this one
+PREVIOUS_RUNS=0
+if [[ -f "$RESULTS" ]]; then
+  PREVIOUS_RUNS=$(grep -c "^$1,$SETTING," "$RESULTS")
+fi
+RUN_NUMBER=$(( PREVIOUS_RUNS + 1 ))
+
+echo "=== Running $1 (run $RUN_NUMBER for this setting) | setting: $SETTING | start temp: ${TEMP_START} C ==="
 THROTTLED_BEFORE=$(vcgencmd get_throttled | cut -d= -f2)
 
-OUTPUT=$(./utils/power_wrapper.sh $KERNEL | tee /dev/stderr)   # tee: also show it on screen
+OUTPUT=$(./utils/power_wrapper.sh $KERNEL)
+echo "$OUTPUT"                # show the kernel output and the measurements
 
 TIME_S=$(echo "$OUTPUT"  | grep EXEC_TIME_S | cut -d= -f2)
 POWER_W=$(echo "$OUTPUT" | grep AVG_POWER_W | cut -d= -f2)
@@ -74,6 +100,7 @@ echo "$1,$SETTING,$TIME_S,$POWER_W,$ENERGY_J,$TEMP_START,$TEMP_END,$THROTTLED" >
 echo "-------------------------------------------"
 echo " Kernel   : $1"
 echo " Setting  : $SETTING"
+echo " Run      : $RUN_NUMBER for this setting (every setting needs 2 good runs)"
 echo " Time     : $TIME_S s"
 echo " Power    : $POWER_W W (average)"
 echo " Energy   : $ENERGY_J J"

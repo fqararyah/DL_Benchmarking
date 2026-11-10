@@ -15,13 +15,7 @@ else
 fi
 
 # Compile with optimizations and NO vectorization
-gcc $FLAGS $SRC -o $EXE
-
-# Check compilation
-if [ ! -f "$EXE" ]; then
-    echo "Compilation failed!"
-    exit 1
-fi
+gcc $FLAGS "$SRC" -o "$EXE" || exit 1
 
 # Run the executable
 echo "Running scalar roof benchmark..."

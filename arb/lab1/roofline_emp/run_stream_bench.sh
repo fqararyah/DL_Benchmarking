@@ -11,10 +11,10 @@ echo "Building STREAM benchmark..."
 ARCH=$(uname -m)
   if [ "$ARCH" = "x86_64" ]; then
       # x86_64 architecture
-      gcc -O3 -fopenmp -DSTREAM_ARRAY_SIZE=100000000 -DNTIMES=10 "$STREAM_SRC" -o "$STREAM_EXE"
+      gcc -O3 -fopenmp -DSTREAM_ARRAY_SIZE=100000000 -DNTIMES=10 "$STREAM_SRC" -o "$STREAM_EXE" || exit 1
   else
       # ARM architecture
-      gcc -O3 -mcpu=cortex-a76 -ffp-contract=fast -fopenmp -fno-tree-vectorize -ftree-slp-vectorize "$STREAM_SRC" -o "$STREAM_EXE"
+      gcc -O3 -mcpu=cortex-a76 -ffp-contract=fast -fopenmp -fno-tree-vectorize -ftree-slp-vectorize "$STREAM_SRC" -o "$STREAM_EXE" || exit 1
 
   fi
 

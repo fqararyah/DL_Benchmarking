@@ -2,20 +2,30 @@ import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime
 import json
+import argparse
 from pathlib import Path
+
+parser = argparse.ArgumentParser(description="Draw a roofline plot from the input specifications.")
+parser.add_argument("name", nargs="?", help="optional name for the output files (default: timestamp)")
+args = parser.parse_args()
+if args.name is not None and (not args.name.strip() or args.name in {".", ".."} or "/" in args.name or "\\" in args.name):
+    parser.error("name must be a nonempty filename without path separators")
 
 # Bandwidth is in GB/s; performance is in GFLOP/s and intensity in FLOPs/byte.
 script_dir = Path(__file__).resolve().parent
 with (script_dir / "inp" / "hw_specs.json").open() as config_file:
-    hw_specs = json.load(config_file)
+    hw_specs = json.loads(config_file.read().strip() or "{}")
 with (script_dir / "inp" / "kernel_specs.json").open() as config_file:
-    kernels = json.load(config_file)
+    kernels = json.loads(config_file.read().strip() or "{}")
+if not hw_specs:
+    print("No hardware specifications to draw.")
+    raise SystemExit(0)
 bandwidth = hw_specs["bandwidth_gb_s"]
 peak_flops = hw_specs["peak_gflops"]
-timestamp = datetime.now().strftime("%d_%H_%M")
+output_name = args.name if args.name is not None else datetime.now().strftime("%d_%H_%M")
 output_dir = script_dir / "out"
 output_dir.mkdir(exist_ok=True)
-output_file = output_dir / f"roofline_{timestamp}.png"
+output_file = output_dir / f"roofline_{output_name}.png"
 
 # -------------------------------
 # Compute intersection
@@ -89,7 +99,7 @@ plt.tight_layout()
 plt.savefig(output_file, dpi=300)
 plt.close()
 
-report_file = output_dir / f"roofline_{timestamp}.json"
+report_file = output_dir / f"roofline_{output_name}.json"
 with report_file.open("w") as report:
     json.dump({"ratio_to_roof": roofline_efficiency_percent}, report, indent=2)
     report.write("\n")
