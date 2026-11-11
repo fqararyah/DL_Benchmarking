@@ -13,6 +13,9 @@ python3 -c "import matplotlib, numpy; print('python libraries OK')"
 gcc --version
 vcgencmd measure_temp
 
+# If a command says "Permission denied", make all lab scripts executable:
+bash /home/dat278/labs/lab2/make_executable.sh
+
 
 # ---------------------------------------------------------------------
 # TASK 1 - Warm-up: governors, frequencies and the roofline
@@ -61,7 +64,7 @@ cd /home/dat278/labs/lab2
 
 
 # ---------------------------------------------------------------------
-# TASK 3 - Measure the existing modes (every setting twice)
+# TASK 3 - Measure the existing modes
 # ---------------------------------------------------------------------
 # Turn off the GUI (mandatory for Tasks 3 and 4). If you see only a blinking dash, press
 # Ctrl+Alt+F2 (or F3). Log in as dat278 and TYPE the commands below (copying is not possible there).
@@ -71,27 +74,19 @@ cd /home/dat278/labs/lab2
 # Performance mode
 sudo ./set_governor.sh performance
 ./run.sh matmul
-./run.sh matmul
-./run.sh triad
 ./run.sh triad
 
 # Battery saver mode
 sudo ./set_governor.sh powersave
 ./run.sh matmul
-./run.sh matmul
-./run.sh triad
 ./run.sh triad
 
 # Built-in dynamic governors
 sudo ./set_governor.sh ondemand
 ./run.sh matmul
-./run.sh matmul
-./run.sh triad
 ./run.sh triad
 sudo ./set_governor.sh schedutil
 ./run.sh matmul
-./run.sh matmul
-./run.sh triad
 ./run.sh triad
 
 # Look at your measurements (one row per run)
@@ -99,27 +94,17 @@ cat data/results.csv
 
 
 # ---------------------------------------------------------------------
-# TASK 4 - Build the Pareto curves (same points for every group, twice each)
+# TASK 4 - Build the Pareto curves (same points for every group)
 # ---------------------------------------------------------------------
 sudo ./set_freq.sh 1800
 ./run.sh matmul
-./run.sh matmul
-./run.sh triad
 ./run.sh triad
 sudo ./set_freq.sh 2000
 ./run.sh matmul
-./run.sh matmul
-./run.sh triad
 ./run.sh triad
 sudo ./set_freq.sh 2200
 ./run.sh matmul
-./run.sh matmul
 ./run.sh triad
-./run.sh triad
-
-# Check: removes disturbed runs and prints the commands to repeat them.
-# Repeat those commands and run the check again until it prints "All measurements OK".
-python3 check_results.py
 
 # Back to the default governor and GUI on again
 sudo ./set_governor.sh ondemand
@@ -148,5 +133,4 @@ python3 plot_pareto.py triad
 # ---------------------------------------------------------------------
 ./status.sh                      # what is the Pi set to right now?
 cat data/results.csv             # all your runs
-cat data/removed.csv             # runs removed by check_results.py
 nano data/results.csv            # delete a bad (throttled) row

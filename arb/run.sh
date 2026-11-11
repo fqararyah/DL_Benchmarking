@@ -14,7 +14,7 @@ cd "$(dirname "$0")"          # so the relative paths below work from any folder
 
 POLICY=/sys/devices/system/cpu/cpufreq/policy0
 RESULTS=data/results.csv
-TEMP_LIMIT=55                 # C: a run only starts when the CPU is at or below this
+TEMP_LIMIT=60                 # C: a run only starts when the CPU is at or below this
 PASS_TIME=30                  # s: length of one cooling pass (temperature checked every 5 s)
 PASSES=2                      # number of cooling passes before giving up
 
@@ -100,7 +100,7 @@ echo "$1,$SETTING,$TIME_S,$POWER_W,$ENERGY_J,$TEMP_START,$TEMP_END,$THROTTLED" >
 echo "-------------------------------------------"
 echo " Kernel   : $1"
 echo " Setting  : $SETTING"
-echo " Run      : $RUN_NUMBER for this setting (every setting needs 2 good runs)"
+echo " Run      : $RUN_NUMBER for this setting (one good run per setting is enough)"
 echo " Time     : $TIME_S s"
 echo " Power    : $POWER_W W (average)"
 echo " Energy   : $ENERGY_J J"
@@ -109,5 +109,5 @@ echo " Throttled: $THROTTLED"
 echo " Saved to : $RESULTS"
 echo "-------------------------------------------"
 if [[ "$THROTTLED" == "yes" ]]; then
-  echo "WARNING: the CPU throttled during this run. check_results.py will remove it."
+  echo "WARNING: the CPU throttled during this run. It is ignored in the plots: run the same command again."
 fi
